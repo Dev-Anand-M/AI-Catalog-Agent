@@ -76,6 +76,12 @@ export default async function handler(req, res) {
   try {
     const action = req.query.action;
     
+    // Check if DATABASE_URL is set
+    if (!process.env.DATABASE_URL) {
+      console.error('DATABASE_URL not set');
+      return res.status(500).json({ error: 'Database not configured' });
+    }
+    
     if (req.method === 'POST') {
       if (action === 'signup') return await handleSignup(req, res);
       if (action === 'login') return await handleLogin(req, res);
@@ -84,7 +90,7 @@ export default async function handler(req, res) {
     
     res.status(405).json({ error: 'Method not allowed' });
   } catch (error) {
-    console.error('Auth error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Auth error:', error.message, error.stack);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
   }
 }
