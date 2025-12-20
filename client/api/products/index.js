@@ -1,42 +1,43 @@
-import { db } from '../_lib/db.js';
-import { requireAuth } from '../_lib/auth.js';
+import { PrismaClient } from '@prisma/client';
+import { getUserIdFromRequest } from '../_lib/auth.js';
 
-async function handler(req, res) {
-  if (req.method === 'GET') {
-    // List user's products
-    const products = db.findProductsByUserId(req.userId);
-    return res.json(products);
-  }
+const prisma = new PrismaClient();
 
-  if (req.method === 'POST') {
-    // Create product
-    const { name, description, category, price, language, imageUrl } = req.body;
+export default async function handler(req, res) {
+  try {
+    const userId = getUserIdFromRequest(req);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
-    const errors = {};
-    if (!name?.trim()) errors.name = 'Name is required';
-    if (!description?.trim()) errors.description = 'Description is required';
-    if (!category?.trim()) errors.category = 'Category is required';
-    if (price === undefined || price <= 0) errors.price = 'Price must be greater than 0';
-    if (!language?.trim()) errors.language = 'Language is required';
-
-    if (Object.keys(errors).length > 0) {
-      return res.status(400).json({ error: 'Validation failed', details: errors });
+    if (req.method === 'GET') {
+      const products = await prisma.product.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' }
+      });
+      return res.json(products);
     }
 
-    const product = db.createProduct({
-      userId: req.userId,
-      name: name.trim(),
-      description: description.trim(),
-      category: category.trim(),
-      price: parseFloat(price),
-      language: language.trim(),
-      imageUrl: imageUrl || null
-    });
+    if (req.method === 'POST') {
+      const { name, description, category, price, language, imageUrl } = req.body;
+      
+      if (!name) return res.status(400).json({ error: 'Name is required' });
 
-    return res.status(201).json(product);
+      const product = await prisma.product.create({
+        data: {
+          userId,
+          name,
+          description: description || '',
+          category: category || 'Other',
+          price: parseFloat(price) || 0,
+          language: language || 'en',
+          imageUrl: imageUrl || null
+        }
+      });
+      return res.status(201).json(product);
+    }
+
+    res.status(405).json({ error: 'Method not allowed' });
+  } catch (error) {
+    console.error('Products error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
-
-  res.status(405).json({ error: 'Method not allowed' });
 }
-
-export default requireAuth(handler);

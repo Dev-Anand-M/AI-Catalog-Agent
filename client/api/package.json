@@ -2,7 +2,7 @@
   "name": "api",
   "type": "module",
   "dependencies": {
-    "bcryptjs": "^2.4.3",
+    "@prisma/client": "^5.7.0",
     "jsonwebtoken": "^9.0.2"
   }
 }

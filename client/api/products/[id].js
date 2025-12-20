@@ -1,53 +1,56 @@
-import { db } from '../_lib/db.js';
-import { requireAuth } from '../_lib/auth.js';
+import { PrismaClient } from '@prisma/client';
+import { getUserIdFromRequest } from '../_lib/auth.js';
 
-async function handler(req, res) {
-  const id = parseInt(req.query.id);
+const prisma = new PrismaClient();
 
-  if (req.method === 'GET') {
-    const product = db.findProductById(id, req.userId);
-    if (!product) {
-      return res.status(404).json({ error: 'Product not found' });
+export default async function handler(req, res) {
+  try {
+    const userId = getUserIdFromRequest(req);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { id } = req.query;
+    const productId = parseInt(id);
+
+    if (req.method === 'GET') {
+      const product = await prisma.product.findFirst({
+        where: { id: productId, userId }
+      });
+      if (!product) return res.status(404).json({ error: 'Product not found' });
+      return res.json(product);
     }
-    return res.json(product);
+
+    if (req.method === 'PUT') {
+      const { name, description, category, price, language, imageUrl } = req.body;
+      
+      const product = await prisma.product.updateMany({
+        where: { id: productId, userId },
+        data: {
+          name,
+          description,
+          category,
+          price: parseFloat(price) || 0,
+          language,
+          imageUrl
+        }
+      });
+      
+      if (product.count === 0) return res.status(404).json({ error: 'Product not found' });
+      
+      const updated = await prisma.product.findUnique({ where: { id: productId } });
+      return res.json(updated);
+    }
+
+    if (req.method === 'DELETE') {
+      const result = await prisma.product.deleteMany({
+        where: { id: productId, userId }
+      });
+      if (result.count === 0) return res.status(404).json({ error: 'Product not found' });
+      return res.json({ success: true });
+    }
+
+    res.status(405).json({ error: 'Method not allowed' });
+  } catch (error) {
+    console.error('Product error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
-
-  if (req.method === 'PUT') {
-    const { name, description, category, price, language, imageUrl } = req.body;
-
-    const errors = {};
-    if (name !== undefined && !name.trim()) errors.name = 'Name cannot be empty';
-    if (description !== undefined && !description.trim()) errors.description = 'Description cannot be empty';
-    if (price !== undefined && price <= 0) errors.price = 'Price must be greater than 0';
-
-    if (Object.keys(errors).length > 0) {
-      return res.status(400).json({ error: 'Validation failed', details: errors });
-    }
-
-    const product = db.updateProduct(id, req.userId, {
-      ...(name && { name: name.trim() }),
-      ...(description && { description: description.trim() }),
-      ...(category && { category: category.trim() }),
-      ...(price && { price: parseFloat(price) }),
-      ...(language && { language: language.trim() }),
-      ...(imageUrl !== undefined && { imageUrl })
-    });
-
-    if (!product) {
-      return res.status(404).json({ error: 'Product not found' });
-    }
-    return res.json(product);
-  }
-
-  if (req.method === 'DELETE') {
-    const deleted = db.deleteProduct(id, req.userId);
-    if (!deleted) {
-      return res.status(404).json({ error: 'Product not found' });
-    }
-    return res.json({ message: 'Product deleted successfully' });
-  }
-
-  res.status(405).json({ error: 'Method not allowed' });
 }
-
-export default requireAuth(handler);
