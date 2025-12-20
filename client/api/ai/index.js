@@ -39,38 +39,62 @@ async function handleGenerateProduct(req, res) {
   const name = productName || promptText;
   if (!name) return res.status(400).json({ error: 'Product name or promptText required' });
 
-  const langInstructions = {
-    en: 'Respond in English.',
-    hi: 'Respond in Hindi. The input may be in Hindi.',
-    ta: 'Respond in Tamil. The input may be in Tamil (தமிழ்).',
-    te: 'Respond in Telugu. The input may be in Telugu.',
-    kn: 'Respond in Kannada. The input may be in Kannada.',
-    ml: 'Respond in Malayalam. The input may be in Malayalam.'
+  const langNames = {
+    en: 'English', hi: 'Hindi', ta: 'Tamil', te: 'Telugu', kn: 'Kannada', ml: 'Malayalam', bn: 'Bengali'
   };
 
-  const systemPrompt = `Generate product details for Indian retail. ${langInstructions[language] || langInstructions.en}
-The user may provide product name in any Indian language - understand it and generate appropriate details.
-Return JSON only with description in the same language as requested:
-{"name":"","description":"","category":"Grocery|Clothing|Handicraft|Electronics|Other","price":0,"unit":"piece|kg|liter|pack","suggestedPrice":0}`;
+  const systemPrompt = `You are a product catalog assistant for Indian retail stores.
+The user will give you a product name which may be in ${langNames[language] || 'any Indian language'} (like Tamil தமிழ், Hindi हिंदी, etc).
+Your task: Identify the product, then generate details in ${langNames[language] || 'English'}.
+
+IMPORTANT: 
+- Understand the product even if written in Tamil/Hindi/Telugu script
+- For example: "உளுத்தம் பருப்பு" = Urad Dal, "அரிசி" = Rice, "பருப்பு" = Dal/Lentils
+- Generate a helpful description about the product (2-3 sentences)
+- Set appropriate category and typical Indian retail price
+
+Return ONLY valid JSON (no other text):
+{"name":"product name","description":"2-3 sentence description","category":"Grocery","price":100,"unit":"kg","suggestedPrice":100}
+
+Categories: Grocery, Clothing, Handicraft, Electronics, Other`;
   
-  const aiResponse = await callPerplexity(systemPrompt, `Product: ${name}`, 300);
+  const aiResponse = await callPerplexity(systemPrompt, `Generate product details for: ${name}`, 400);
   if (aiResponse) {
     try {
       const match = aiResponse.match(/\{[\s\S]*\}/);
       if (match) {
         const parsed = JSON.parse(match[0]);
-        return res.json({
-          name: parsed.name || name,
-          description: parsed.description || '',
-          category: parsed.category || 'Other',
-          price: parsed.price || 0,
-          suggestedPrice: parsed.suggestedPrice || parsed.price || 0,
-          unit: parsed.unit || 'piece'
-        });
+        if (parsed.description && parsed.description.length > 5) {
+          return res.json({
+            name: parsed.name || name,
+            description: parsed.description,
+            category: parsed.category || 'Grocery',
+            price: parsed.price || 0,
+            suggestedPrice: parsed.suggestedPrice || parsed.price || 0,
+            unit: parsed.unit || 'kg'
+          });
+        }
       }
-    } catch {}
+    } catch (e) {
+      console.error('JSON parse error:', e.message);
+    }
   }
-  res.json({ name, description: '', category: 'Other', price: 0, suggestedPrice: 0, unit: 'piece' });
+  
+  // Fallback with basic description for common grocery items
+  const fallbackDesc = language === 'ta' 
+    ? 'தரமான இந்திய தயாரிப்பு. புதிய மற்றும் சுத்தமான பொருள்.'
+    : language === 'hi'
+    ? 'उच्च गुणवत्ता वाला भारतीय उत्पाद। ताजा और शुद्ध।'
+    : 'Quality Indian product. Fresh and pure.';
+    
+  res.json({ 
+    name, 
+    description: fallbackDesc, 
+    category: 'Grocery', 
+    price: 0, 
+    suggestedPrice: 0, 
+    unit: 'kg' 
+  });
 }
 
 async function handleParseVoice(req, res) {
