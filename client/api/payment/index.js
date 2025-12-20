@@ -13,19 +13,20 @@ export default async function handler(req, res) {
       `;
       
       if (result.length === 0) {
-        return res.json({ upiData: [], bankAccount: null, qrCodeUrl: null });
+        return res.json({ upiData: [], bankAccount: null, qrCodeUrl: null, phoneNumber: null });
       }
       
       const settings = result[0];
       return res.json({
         upiData: settings.upiData ? JSON.parse(settings.upiData) : [],
         bankAccount: settings.bankAccount ? JSON.parse(settings.bankAccount) : null,
-        qrCodeUrl: settings.qrCodeUrl
+        qrCodeUrl: settings.qrCodeUrl,
+        phoneNumber: settings.phoneNumber || null
       });
     }
 
     if (req.method === 'PUT') {
-      const { upiData, bankAccount, qrCodeUrl } = req.body;
+      const { upiData, bankAccount, qrCodeUrl, phoneNumber } = req.body;
       
       const existing = await sql`SELECT id FROM "PaymentSettings" WHERE "userId" = ${userId}`;
       
@@ -35,20 +36,22 @@ export default async function handler(req, res) {
           SET "upiData" = ${JSON.stringify(upiData || [])}, 
               "bankAccount" = ${bankAccount ? JSON.stringify(bankAccount) : null},
               "qrCodeUrl" = ${qrCodeUrl || null},
+              "phoneNumber" = ${phoneNumber || null},
               "updatedAt" = NOW()
           WHERE "userId" = ${userId}
         `;
       } else {
         await sql`
-          INSERT INTO "PaymentSettings" ("userId", "upiData", "bankAccount", "qrCodeUrl", "createdAt", "updatedAt")
-          VALUES (${userId}, ${JSON.stringify(upiData || [])}, ${bankAccount ? JSON.stringify(bankAccount) : null}, ${qrCodeUrl || null}, NOW(), NOW())
+          INSERT INTO "PaymentSettings" ("userId", "upiData", "bankAccount", "qrCodeUrl", "phoneNumber", "createdAt", "updatedAt")
+          VALUES (${userId}, ${JSON.stringify(upiData || [])}, ${bankAccount ? JSON.stringify(bankAccount) : null}, ${qrCodeUrl || null}, ${phoneNumber || null}, NOW(), NOW())
         `;
       }
       
       return res.json({
         upiData: upiData || [],
         bankAccount: bankAccount || null,
-        qrCodeUrl: qrCodeUrl || null
+        qrCodeUrl: qrCodeUrl || null,
+        phoneNumber: phoneNumber || null
       });
     }
 

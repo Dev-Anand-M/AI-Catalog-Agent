@@ -39,7 +39,8 @@ export function PublicCatalog() {
         payment: data.paymentSettings ? {
           upi: data.paymentSettings.upiData || [],
           bank: data.paymentSettings.bankAccount || null,
-          qr: data.paymentSettings.qrCodeUrl || null
+          qr: data.paymentSettings.qrCodeUrl || null,
+          phoneNumber: data.paymentSettings.phoneNumber || null
         } : null
       });
     } catch (err) {
@@ -70,7 +71,12 @@ export function PublicCatalog() {
 
   const handleContactSeller = (product) => {
     const message = `Hi ${catalog.seller.name}! I'm interested in:\n\n📦 ${product.name}\n💰 Price: ₹${product.price}\n\nIs this available?`;
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    const phoneNumber = catalog.payment?.phoneNumber;
+    
+    // If phone number exists, use it; otherwise open WhatsApp without number
+    const whatsappUrl = phoneNumber 
+      ? `https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`
+      : `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 

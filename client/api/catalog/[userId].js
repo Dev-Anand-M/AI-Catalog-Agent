@@ -32,7 +32,8 @@ export default async function handler(req, res) {
       paymentSettings: payment ? {
         upiData: payment.upiData ? JSON.parse(payment.upiData) : [],
         bankAccount: payment.bankAccount ? JSON.parse(payment.bankAccount) : null,
-        qrCodeUrl: payment.qrCodeUrl
+        qrCodeUrl: payment.qrCodeUrl,
+        phoneNumber: payment.phoneNumber || null
       } : null
     });
   } catch (error) {

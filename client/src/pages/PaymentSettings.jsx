@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Building2, Smartphone, QrCode, CheckCircle, Plus, Trash2 } from 'lucide-react';
+import { Building2, Smartphone, QrCode, CheckCircle, Plus, Trash2, Phone } from 'lucide-react';
 import { Button, Input, Alert, Card, CardBody } from '../components/ui';
 import { Container } from '../components/layout';
 import { useLanguage } from '../context/LanguageContext';
@@ -12,6 +12,7 @@ export function PaymentSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [paymentMethods, setPaymentMethods] = useState({
     upi: [{ id: 1, upiId: '', name: '' }],
     bank: { accountName: '', accountNumber: '', ifsc: '', bankName: '' },
@@ -36,6 +37,7 @@ export function PaymentSettings() {
         bank: data.bankAccount || { accountName: '', accountNumber: '', ifsc: '', bankName: '' },
         qr: data.qrCodeUrl || null
       });
+      setPhoneNumber(data.phoneNumber || '');
     } catch (e) {
       console.error('Failed to load payment settings:', e);
       // Use defaults if API fails
@@ -92,7 +94,8 @@ export function PaymentSettings() {
       await paymentApi.save({
         upiData: paymentMethods.upi,
         bankAccount: paymentMethods.bank,
-        qrCodeUrl: paymentMethods.qr
+        qrCodeUrl: paymentMethods.qr,
+        phoneNumber: phoneNumber
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
@@ -133,6 +136,28 @@ export function PaymentSettings() {
             </div>
           ) : (
             <>
+            {/* WhatsApp Phone Number */}
+            <Card className="mb-6">
+              <CardBody>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                    <Phone className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">{t('whatsapp_number') || 'WhatsApp Number'}</h3>
+                    <p className="text-sm text-gray-500">{t('whatsapp_number_desc') || 'Customers will contact you on this number'}</p>
+                  </div>
+                </div>
+                <Input
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value.replace(/[^0-9+]/g, ''))}
+                  placeholder="+91 9876543210"
+                  type="tel"
+                />
+                <p className="text-xs text-gray-500 mt-2">{t('whatsapp_format') || 'Include country code (e.g., +91 for India)'}</p>
+              </CardBody>
+            </Card>
+
             {/* Tabs */}
           <div className="flex gap-2 mb-6">
             {tabs.map((tab) => {
