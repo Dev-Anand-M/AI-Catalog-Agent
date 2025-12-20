@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Store, Package, Share2, Smartphone, QrCode } from 'lucide-react';
+import { Store, Package, Share2, Smartphone, QrCode, X, MessageCircle } from 'lucide-react';
 import { catalogApi } from '../api/client';
 import { Container } from '../components/layout';
 import { Card, CardBody, Alert, Button } from '../components/ui';
@@ -19,6 +19,7 @@ export function PublicCatalog() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   useEffect(() => {
     loadCatalog();
@@ -63,6 +64,20 @@ export function PublicCatalog() {
     } catch (err) {
       console.error('Share failed:', err);
     }
+  };
+
+  const handleContactSeller = (product) => {
+    const message = `Hi ${catalog.seller.name}! I'm interested in:\n\n📦 ${product.name}\n💰 Price: ₹${product.price}\n\nIs this available?`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
+  const openProductDetail = (product) => {
+    setSelectedProduct(product);
+  };
+
+  const closeProductDetail = () => {
+    setSelectedProduct(null);
   };
 
   if (loading) {
@@ -114,7 +129,11 @@ export function PublicCatalog() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {catalog.products.map(product => (
-              <Card key={product.id} className="hover:shadow-lg transition-shadow">
+              <Card 
+                key={product.id} 
+                className="hover:shadow-lg transition-shadow cursor-pointer"
+                onClick={() => openProductDetail(product)}
+              >
                 <CardBody className="p-4">
                   {product.imageUrl && (
                     <img 
@@ -132,9 +151,80 @@ export function PublicCatalog() {
                     <span className="text-xl font-bold text-primary-600">₹{product.price}</span>
                     <span className="text-xs bg-gray-100 px-2 py-1 rounded">{product.category}</span>
                   </div>
+                  <p className="text-xs text-primary-500 mt-2 text-center">Tap to view details</p>
                 </CardBody>
               </Card>
             ))}
+          </div>
+        )}
+
+        {/* Product Detail Modal */}
+        {selectedProduct && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={closeProductDetail}>
+            <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+              {/* Modal Header */}
+              <div className="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between rounded-t-2xl">
+                <h2 className="text-lg font-semibold text-gray-900">Product Details</h2>
+                <button onClick={closeProductDetail} className="p-2 hover:bg-gray-100 rounded-full">
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+              
+              {/* Modal Content */}
+              <div className="p-4">
+                {selectedProduct.imageUrl && (
+                  <img 
+                    src={selectedProduct.imageUrl} 
+                    alt={selectedProduct.name}
+                    className="w-full h-64 object-cover rounded-xl mb-4"
+                  />
+                )}
+                
+                <div className="flex items-start justify-between mb-3">
+                  <h3 className="text-2xl font-bold text-gray-900">{selectedProduct.name}</h3>
+                  <span className="text-3xl">{CATEGORY_ICONS[selectedProduct.category] || '📦'}</span>
+                </div>
+                
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-3xl font-bold text-primary-600">₹{selectedProduct.price}</span>
+                  <span className="px-3 py-1 bg-primary-100 text-primary-700 text-sm rounded-full">
+                    {selectedProduct.category}
+                  </span>
+                </div>
+                
+                <div className="mb-6">
+                  <h4 className="text-sm font-medium text-gray-500 mb-2">Description</h4>
+                  <p className="text-gray-700 leading-relaxed">{selectedProduct.description}</p>
+                </div>
+                
+                {/* Seller Info */}
+                <div className="bg-gray-50 rounded-xl p-4 mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center">
+                      <Store className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Sold by</p>
+                      <p className="font-semibold text-gray-900">{catalog.seller.name}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Contact Button */}
+                <Button 
+                  variant="primary" 
+                  className="w-full py-4 text-lg bg-green-500 hover:bg-green-600"
+                  onClick={() => handleContactSeller(selectedProduct)}
+                >
+                  <MessageCircle className="w-5 h-5 mr-2" />
+                  Contact Seller on WhatsApp
+                </Button>
+                
+                <p className="text-xs text-gray-500 text-center mt-3">
+                  Opens WhatsApp with a pre-filled message
+                </p>
+              </div>
+            </div>
           </div>
         )}
 
