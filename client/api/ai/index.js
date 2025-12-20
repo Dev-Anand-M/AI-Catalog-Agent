@@ -35,20 +35,31 @@ async function callPerplexity(systemPrompt, userPrompt, maxTokens = 200) {
 }
 
 async function handleGenerateProduct(req, res) {
-  const { productName, language = 'en' } = req.body;
-  if (!productName) return res.status(400).json({ error: 'Product name required' });
+  const { productName, promptText, language = 'en' } = req.body;
+  const name = productName || promptText;
+  if (!name) return res.status(400).json({ error: 'Product name or promptText required' });
 
   const systemPrompt = `Generate product details for Indian retail. Return JSON only:
-{"name":"","description":"","category":"Grocery|Clothing|Handicraft|Electronics|Other","price":0,"unit":"piece|kg|liter|pack"}`;
+{"name":"","description":"","category":"Grocery|Clothing|Handicraft|Electronics|Other","price":0,"unit":"piece|kg|liter|pack","suggestedPrice":0}`;
   
-  const aiResponse = await callPerplexity(systemPrompt, `Product: ${productName}`, 300);
+  const aiResponse = await callPerplexity(systemPrompt, `Product: ${name}`, 300);
   if (aiResponse) {
     try {
       const match = aiResponse.match(/\{[\s\S]*\}/);
-      if (match) return res.json(JSON.parse(match[0]));
+      if (match) {
+        const parsed = JSON.parse(match[0]);
+        return res.json({
+          name: parsed.name || name,
+          description: parsed.description || '',
+          category: parsed.category || 'Other',
+          price: parsed.price || 0,
+          suggestedPrice: parsed.suggestedPrice || parsed.price || 0,
+          unit: parsed.unit || 'piece'
+        });
+      }
     } catch {}
   }
-  res.json({ name: productName, description: '', category: 'Other', price: 0, unit: 'piece' });
+  res.json({ name, description: '', category: 'Other', price: 0, suggestedPrice: 0, unit: 'piece' });
 }
 
 async function handleParseVoice(req, res) {
