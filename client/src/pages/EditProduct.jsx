@@ -110,37 +110,102 @@ export function EditProduct() {
     recognition.continuous = false;
     recognition.interimResults = false;
 
+    // Multi-language listening feedback
+    const listeningFeedback = {
+      en: '🎤 Listening... Say "update price to 500", "save", or "cancel"',
+      hi: '🎤 सुन रहे हैं... "कीमत 500 करो", "सेव करो", या "रद्द करो" बोलें',
+      ta: '🎤 கேட்கிறது... "விலை 500 செய்", "சேமி", அல்லது "ரத்து" சொல்லுங்கள்',
+      te: '🎤 వింటోంది... "ధర 500 చేయి", "సేవ్ చేయి", లేదా "రద్దు చేయి" చెప్పండి',
+      kn: '🎤 ಕೇಳುತ್ತಿದೆ... "ಬೆಲೆ 500 ಮಾಡು", "ಸೇವ್ ಮಾಡು", ಅಥವಾ "ರದ್ದು ಮಾಡು" ಹೇಳಿ',
+      bn: '🎤 শুনছে... "দাম 500 করো", "সেভ করো", বা "বাতিল করো" বলুন'
+    };
+
     recognition.onstart = () => {
       setIsListening(true);
-      setVoiceFeedback('🎤 Listening... Say "update price to 500" or "change category to clothing"');
+      setVoiceFeedback(listeningFeedback[language] || listeningFeedback.en);
     };
 
     recognition.onresult = async (event) => {
       const transcript = event.results[0][0].transcript;
       const lowerTranscript = transcript.toLowerCase();
-      setVoiceFeedback(`Heard: "${transcript}" - Processing...`);
+      
+      // Multi-language "Heard" feedback
+      const heardFeedback = {
+        en: `Heard: "${transcript}" - Processing...`,
+        hi: `सुना: "${transcript}" - प्रोसेस हो रहा है...`,
+        ta: `கேட்டது: "${transcript}" - செயலாக்குகிறது...`,
+        te: `విన్నది: "${transcript}" - ప్రాసెస్ చేస్తోంది...`,
+        kn: `ಕೇಳಿದ್ದು: "${transcript}" - ಪ್ರಕ್ರಿಯೆಗೊಳಿಸುತ್ತಿದೆ...`,
+        bn: `শুনেছি: "${transcript}" - প্রসেস করছে...`
+      };
+      setVoiceFeedback(heardFeedback[language] || heardFeedback.en);
 
-      // Check for "save" or "save changes" command
-      if (lowerTranscript.includes('save') || lowerTranscript.includes('done') || lowerTranscript.includes('finish')) {
-        setVoiceFeedback('💾 Saving changes...');
+      // Multi-language save commands
+      const saveCommands = [
+        // English
+        'save', 'done', 'finish', 'submit', 'confirm',
+        // Hindi + Hinglish
+        'सेव', 'सहेजो', 'बचाओ', 'save karo', 'save kar', 'ho gaya', 'khatam', 'theek hai',
+        // Tamil + Tanglish
+        'சேமி', 'சேமிக்க', 'save pannu', 'save podu', 'mudinjadhu', 'seri',
+        // Telugu + Tenglish
+        'సేవ్', 'భద్రపరచు', 'save cheyyi', 'save cheyyandi', 'ayyindi', 'sare',
+        // Kannada + Kanglish
+        'ಸೇವ್', 'ಉಳಿಸು', 'save maadu', 'aaytu', 'sari',
+        // Bengali + Benglish
+        'সেভ', 'সংরক্ষণ', 'save koro', 'hoye gelo', 'thik ache'
+      ];
+
+      // Multi-language cancel commands
+      const cancelCommands = [
+        // English
+        'cancel', 'go back', 'back', 'exit', 'close',
+        // Hindi + Hinglish
+        'रद्द', 'वापस', 'cancel karo', 'wapas jao', 'peeche', 'band karo',
+        // Tamil + Tanglish
+        'ரத்து', 'திரும்பு', 'cancel pannu', 'thirumbu', 'back po',
+        // Telugu + Tenglish
+        'రద్దు', 'వెనక్కి', 'cancel cheyyi', 'venakki', 'back vellu',
+        // Kannada + Kanglish
+        'ರದ್ದು', 'ಹಿಂದೆ', 'cancel maadu', 'hinde hogu', 'back hogu',
+        // Bengali + Benglish
+        'বাতিল', 'ফিরে যাও', 'cancel koro', 'pechone jao', 'back jao'
+      ];
+
+      // Multi-language feedback messages
+      const feedbackMessages = {
+        en: { saving: '💾 Saving changes...', saved: '✅ Saved! Redirecting...', saveFailed: '❌ Save failed. Please try again.', goingBack: '↩️ Going back...' },
+        hi: { saving: '💾 सहेज रहे हैं...', saved: '✅ सहेज लिया! जा रहे हैं...', saveFailed: '❌ सहेजने में विफल। पुनः प्रयास करें।', goingBack: '↩️ वापस जा रहे हैं...' },
+        ta: { saving: '💾 சேமிக்கிறது...', saved: '✅ சேமிக்கப்பட்டது! திரும்புகிறது...', saveFailed: '❌ சேமிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.', goingBack: '↩️ திரும்புகிறது...' },
+        te: { saving: '💾 సేవ్ చేస్తోంది...', saved: '✅ సేవ్ అయింది! వెళ్తోంది...', saveFailed: '❌ సేవ్ విఫలమైంది. మళ్ళీ ప్రయత్నించండి.', goingBack: '↩️ వెనక్కి వెళ్తోంది...' },
+        kn: { saving: '💾 ಉಳಿಸುತ್ತಿದೆ...', saved: '✅ ಉಳಿಸಲಾಗಿದೆ! ಹೋಗುತ್ತಿದೆ...', saveFailed: '❌ ಉಳಿಸಲು ವಿಫಲವಾಗಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.', goingBack: '↩️ ಹಿಂದೆ ಹೋಗುತ್ತಿದೆ...' },
+        bn: { saving: '💾 সংরক্ষণ করছে...', saved: '✅ সংরক্ষিত! যাচ্ছে...', saveFailed: '❌ সংরক্ষণ ব্যর্থ। আবার চেষ্টা করুন।', goingBack: '↩️ ফিরে যাচ্ছে...' }
+      };
+      const msgs = feedbackMessages[language] || feedbackMessages.en;
+
+      // Check for save command in any language
+      const isSaveCommand = saveCommands.some(cmd => lowerTranscript.includes(cmd.toLowerCase()));
+      if (isSaveCommand) {
+        setVoiceFeedback(msgs.saving);
         setLoading(true);
         try {
           const productData = { ...formData, price: parseFloat(formData.price) };
           await productsApi.update(id, productData);
-          setVoiceFeedback('✅ Saved! Redirecting...');
+          setVoiceFeedback(msgs.saved);
           setTimeout(() => navigate('/dashboard'), 500);
           return;
         } catch (err) {
           setLoading(false);
-          setVoiceFeedback('❌ Save failed. Please try again.');
+          setVoiceFeedback(msgs.saveFailed);
           setError('Failed to save. Please try again.');
           return;
         }
       }
 
-      // Check for "cancel" or "go back" command
-      if (lowerTranscript.includes('cancel') || lowerTranscript.includes('go back') || lowerTranscript.includes('back')) {
-        setVoiceFeedback('↩️ Going back...');
+      // Check for cancel command in any language
+      const isCancelCommand = cancelCommands.some(cmd => lowerTranscript.includes(cmd.toLowerCase()));
+      if (isCancelCommand) {
+        setVoiceFeedback(msgs.goingBack);
         setTimeout(() => navigate('/dashboard'), 300);
         return;
       }
@@ -161,21 +226,60 @@ export function EditProduct() {
           };
           
           setFormData(updatedData);
-          setSuccess(`✅ Updated ${field} to "${value}". Say "save" to save changes.`);
-          setVoiceFeedback(`✅ ${field} = "${value}". Say "save" to save.`);
+          
+          // Multi-language success feedback
+          const successFeedback = {
+            en: { updated: `✅ Updated ${field} to "${value}". Say "save" to save.`, short: `✅ ${field} = "${value}". Say "save".` },
+            hi: { updated: `✅ ${field} को "${value}" में बदला। "सेव करो" बोलें।`, short: `✅ ${field} = "${value}". "सेव करो" बोलें।` },
+            ta: { updated: `✅ ${field} "${value}" ஆக மாற்றப்பட்டது. "சேமி" சொல்லுங்கள்.`, short: `✅ ${field} = "${value}". "சேமி" சொல்லுங்கள்.` },
+            te: { updated: `✅ ${field} "${value}" కి మార్చబడింది. "సేవ్ చేయి" చెప్పండి.`, short: `✅ ${field} = "${value}". "సేవ్ చేయి" చెప్పండి.` },
+            kn: { updated: `✅ ${field} "${value}" ಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ. "ಸೇವ್ ಮಾಡು" ಹೇಳಿ.`, short: `✅ ${field} = "${value}". "ಸೇವ್ ಮಾಡು" ಹೇಳಿ.` },
+            bn: { updated: `✅ ${field} "${value}" এ পরিবর্তন হয়েছে। "সেভ করো" বলুন।`, short: `✅ ${field} = "${value}". "সেভ করো" বলুন।` }
+          };
+          const successMsgs = successFeedback[language] || successFeedback.en;
+          
+          setSuccess(successMsgs.updated);
+          setVoiceFeedback(successMsgs.short);
         } else {
-          setVoiceFeedback('Could not understand. Try: "update price to 500", "save", or "cancel"');
+          // Multi-language "not understood" feedback
+          const notUnderstoodFeedback = {
+            en: 'Could not understand. Try: "update price to 500", "save", or "cancel"',
+            hi: 'समझ नहीं आया। कोशिश करें: "कीमत 500 करो", "सेव करो", या "रद्द करो"',
+            ta: 'புரியவில்லை. முயற்சிக்கவும்: "விலை 500 செய்", "சேமி", அல்லது "ரத்து"',
+            te: 'అర్థం కాలేదు. ప్రయత్నించండి: "ధర 500 చేయి", "సేవ్ చేయి", లేదా "రద్దు చేయి"',
+            kn: 'ಅರ್ಥವಾಗಲಿಲ್ಲ. ಪ್ರಯತ್ನಿಸಿ: "ಬೆಲೆ 500 ಮಾಡು", "ಸೇವ್ ಮಾಡು", ಅಥವಾ "ರದ್ದು ಮಾಡು"',
+            bn: 'বুঝতে পারিনি। চেষ্টা করুন: "দাম 500 করো", "সেভ করো", বা "বাতিল করো"'
+          };
+          setVoiceFeedback(notUnderstoodFeedback[language] || notUnderstoodFeedback.en);
         }
       } catch (err) {
         console.error('Voice update error:', err);
-        setVoiceFeedback('Failed to process voice command. Please try again.');
+        // Multi-language error feedback
+        const errorFeedback = {
+          en: 'Failed to process voice command. Please try again.',
+          hi: 'वॉइस कमांड प्रोसेस करने में विफल। पुनः प्रयास करें।',
+          ta: 'குரல் கட்டளையை செயலாக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',
+          te: 'వాయిస్ కమాండ్ ప్రాసెస్ చేయడం విఫలమైంది. మళ్ళీ ప్రయత్నించండి.',
+          kn: 'ವಾಯ್ಸ್ ಕಮಾಂಡ್ ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲು ವಿಫಲವಾಗಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+          bn: 'ভয়েস কমান্ড প্রসেস করতে ব্যর্থ। আবার চেষ্টা করুন।'
+        };
+        setVoiceFeedback(errorFeedback[language] || errorFeedback.en);
       }
     };
 
     recognition.onerror = (event) => {
       console.error('Speech recognition error:', event.error);
       setIsListening(false);
-      setVoiceFeedback('Voice recognition error. Please try again.');
+      // Multi-language recognition error feedback
+      const recognitionErrorFeedback = {
+        en: 'Voice recognition error. Please try again.',
+        hi: 'वॉइस पहचान त्रुटि। पुनः प्रयास करें।',
+        ta: 'குரல் அங்கீகார பிழை. மீண்டும் முயற்சிக்கவும்.',
+        te: 'వాయిస్ గుర్తింపు లోపం. మళ్ళీ ప్రయత్నించండి.',
+        kn: 'ವಾಯ್ಸ್ ಗುರುತಿಸುವಿಕೆ ದೋಷ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+        bn: 'ভয়েস রিকগনিশন ত্রুটি। আবার চেষ্টা করুন।'
+      };
+      setVoiceFeedback(recognitionErrorFeedback[language] || recognitionErrorFeedback.en);
     };
 
     recognition.onend = () => {
@@ -185,7 +289,16 @@ export function EditProduct() {
     try {
       recognition.start();
     } catch (err) {
-      setVoiceFeedback('Could not start voice recognition.');
+      // Multi-language start error feedback
+      const startErrorFeedback = {
+        en: 'Could not start voice recognition.',
+        hi: 'वॉइस पहचान शुरू नहीं हो सका।',
+        ta: 'குரல் அங்கீகாரத்தை தொடங்க முடியவில்லை.',
+        te: 'వాయిస్ గుర్తింపు ప్రారంభించలేకపోయింది.',
+        kn: 'ವಾಯ್ಸ್ ಗುರುತಿಸುವಿಕೆ ಪ್ರಾರಂಭಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.',
+        bn: 'ভয়েস রিকগনিশন শুরু করা যায়নি।'
+      };
+      setVoiceFeedback(startErrorFeedback[language] || startErrorFeedback.en);
     }
   }, [isVoiceSupported, isListening, language, formData, id]);
 
