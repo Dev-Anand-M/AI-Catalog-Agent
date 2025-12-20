@@ -101,7 +101,48 @@ async function handleParseVoice(req, res) {
   const { transcript, currentProduct } = req.body;
   if (!transcript) return res.status(400).json({ error: 'Transcript required' });
 
+  const text = transcript.toLowerCase();
+  
+  // Check for save commands FIRST - before sending to AI
+  const saveCommands = [
+    'save pannu', 'save podu', 'save karo', 'save kar', 'save cheyyi', 'save cheyyandi', 'save maadu', 'save koro',
+    'ho gaya', 'hoye gelo', 'thik ache', 'theek hai', 'mudinjadhu', 'ayyindi', 'aaytu',
+    'save', 'done', 'finish', 'submit', 'confirm',
+    'सेव', 'सहेजो', 'बचाओ', 'khatam',
+    'சேமி', 'சேமிக்க', 'seri', 'seyvi',
+    'సేవ్', 'భద్రపరచు', 'sare',
+    'ಸೇವ್', 'ಉಳಿಸು', 'sari', 'ulisu',
+    'সেভ', 'সংরক্ষণ'
+  ];
+  
+  // Check for cancel commands FIRST - before sending to AI
+  const cancelCommands = [
+    'cancel pannu', 'cancel karo', 'cancel cheyyi', 'cancel maadu', 'cancel koro',
+    'go back', 'wapas jao', 'back po', 'back vellu', 'back hogu', 'back jao',
+    'hinde hogu', 'pechone jao', 'thirumbu', 'venakki',
+    'cancel', 'back', 'exit', 'close',
+    'रद्द', 'वापस', 'peeche', 'band karo',
+    'ரத்து', 'திரும்பு', 'radhu', 'thirimbu',
+    'రద్దు', 'వెనక్కి', 'raddu',
+    'ರದ್ದು', 'ಹಿಂದೆ', 'raddu', 'hinde',
+    'বাতিল', 'ফিরে যাও', 'batil', 'fire jao'
+  ];
+  
+  // Check cancel first (longer phrases checked first due to array order)
+  const isCancelCommand = cancelCommands.some(cmd => text.includes(cmd.toLowerCase()));
+  if (isCancelCommand) {
+    return res.json({ transcript, action: 'cancel', field: null, value: null, confidence: 1.0, source: 'local' });
+  }
+  
+  // Check save
+  const isSaveCommand = saveCommands.some(cmd => text.includes(cmd.toLowerCase()));
+  if (isSaveCommand) {
+    return res.json({ transcript, action: 'save', field: null, value: null, confidence: 1.0, source: 'local' });
+  }
+
   const systemPrompt = `Parse voice command to update product. Current: ${JSON.stringify(currentProduct || {})}
+IMPORTANT: Only return update actions for actual field updates like price, name, description, category.
+Do NOT interpret "save", "cancel", "back", "done" as field updates.
 Return JSON: {"action":"update","field":"name/description/category/price","value":"new value","confidence":0.0-1.0}`;
   
   const aiResponse = await callPerplexity(systemPrompt, `Parse: "${transcript}"`, 100);
@@ -110,13 +151,21 @@ Return JSON: {"action":"update","field":"name/description/category/price","value
       const match = aiResponse.match(/\{[\s\S]*\}/);
       if (match) {
         const parsed = JSON.parse(match[0]);
+        // Double-check AI didn't interpret save/cancel as field update
+        if (parsed.value && typeof parsed.value === 'string') {
+          const valueCheck = parsed.value.toLowerCase();
+          if (cancelCommands.some(cmd => valueCheck.includes(cmd.toLowerCase())) ||
+              saveCommands.some(cmd => valueCheck.includes(cmd.toLowerCase()))) {
+            // AI incorrectly interpreted save/cancel as a value - reject it
+            return res.json({ transcript, action: 'unknown', field: null, value: null, confidence: 0.3, source: 'local' });
+          }
+        }
         return res.json({ transcript, ...parsed, source: 'perplexity' });
       }
     } catch {}
   }
   
   // Fallback
-  const text = transcript.toLowerCase();
   let result = { action: 'unknown', field: null, value: null, confidence: 0.3 };
   const priceMatch = text.match(/price\s*(?:to|=|:)?\s*(\d+)/i);
   if (priceMatch) result = { action: 'update', field: 'price', value: parseInt(priceMatch[1]), confidence: 0.8 };

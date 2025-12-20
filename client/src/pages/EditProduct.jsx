@@ -226,6 +226,31 @@ export function EditProduct() {
 
         const { action, field, value, confidence } = response.data;
 
+        // Handle save action from API
+        if (action === 'save') {
+          setVoiceFeedback(msgs.saving);
+          setLoading(true);
+          try {
+            const productData = { ...formData, price: parseFloat(formData.price) };
+            await productsApi.update(id, productData);
+            setVoiceFeedback(msgs.saved);
+            setTimeout(() => navigate('/dashboard'), 500);
+            return;
+          } catch (err) {
+            setLoading(false);
+            setVoiceFeedback(msgs.saveFailed);
+            setError('Failed to save. Please try again.');
+            return;
+          }
+        }
+
+        // Handle cancel action from API
+        if (action === 'cancel') {
+          setVoiceFeedback(msgs.goingBack);
+          setTimeout(() => navigate('/dashboard'), 300);
+          return;
+        }
+
         if (action === 'update' && field && value !== null && confidence > 0.5) {
           const updatedData = {
             ...formData,
@@ -247,7 +272,7 @@ export function EditProduct() {
           
           setSuccess(successMsgs.updated);
           setVoiceFeedback(successMsgs.short);
-        } else {
+        } else if (action !== 'save' && action !== 'cancel') {
           // Multi-language "not understood" feedback
           const notUnderstoodFeedback = {
             en: 'Could not understand. Try: "update price to 500", "save", or "cancel"',
