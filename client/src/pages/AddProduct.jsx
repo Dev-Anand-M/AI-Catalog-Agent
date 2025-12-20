@@ -96,8 +96,7 @@ export function AddProduct() {
       
       const response = await aiApi.generateProduct({
         promptText,
-        language: 'English',
-        spokenLanguage: langCodeMap[formData.language] || 'en'
+        language: langCodeMap[formData.language] || 'en'
       });
       
       setFormData(prev => ({

@@ -39,7 +39,18 @@ async function handleGenerateProduct(req, res) {
   const name = productName || promptText;
   if (!name) return res.status(400).json({ error: 'Product name or promptText required' });
 
-  const systemPrompt = `Generate product details for Indian retail. Return JSON only:
+  const langInstructions = {
+    en: 'Respond in English.',
+    hi: 'Respond in Hindi. The input may be in Hindi.',
+    ta: 'Respond in Tamil. The input may be in Tamil (தமிழ்).',
+    te: 'Respond in Telugu. The input may be in Telugu.',
+    kn: 'Respond in Kannada. The input may be in Kannada.',
+    ml: 'Respond in Malayalam. The input may be in Malayalam.'
+  };
+
+  const systemPrompt = `Generate product details for Indian retail. ${langInstructions[language] || langInstructions.en}
+The user may provide product name in any Indian language - understand it and generate appropriate details.
+Return JSON only with description in the same language as requested:
 {"name":"","description":"","category":"Grocery|Clothing|Handicraft|Electronics|Other","price":0,"unit":"piece|kg|liter|pack","suggestedPrice":0}`;
   
   const aiResponse = await callPerplexity(systemPrompt, `Product: ${name}`, 300);
