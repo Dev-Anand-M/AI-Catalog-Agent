@@ -26,7 +26,16 @@ export function PaymentSettings() {
   const loadPaymentSettings = async () => {
     try {
       const response = await paymentApi.get();
-      setPaymentMethods(response.data);
+      const data = response.data;
+      
+      // Map API response to component state format
+      setPaymentMethods({
+        upi: data.upiData && data.upiData.length > 0 
+          ? data.upiData 
+          : [{ id: 1, upiId: '', name: '' }],
+        bank: data.bankAccount || { accountName: '', accountNumber: '', ifsc: '', bankName: '' },
+        qr: data.qrCodeUrl || null
+      });
     } catch (e) {
       console.error('Failed to load payment settings:', e);
       // Use defaults if API fails
@@ -134,7 +143,12 @@ export function PaymentSettings() {
     setSaving(true);
     setError('');
     try {
-      await paymentApi.save(paymentMethods);
+      // Map component state to API format
+      await paymentApi.save({
+        upiData: paymentMethods.upi,
+        bankAccount: paymentMethods.bank,
+        qrCodeUrl: paymentMethods.qr
+      });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (e) {
