@@ -27,7 +27,18 @@ export function PublicCatalog() {
   const loadCatalog = async () => {
     try {
       const response = await catalogApi.get(userId);
-      setCatalog(response.data);
+      const data = response.data;
+      
+      // Map API response to component format
+      setCatalog({
+        seller: data.user,
+        products: data.products || [],
+        payment: data.paymentSettings ? {
+          upi: data.paymentSettings.upiData || [],
+          bank: data.paymentSettings.bankAccount || null,
+          qr: data.paymentSettings.qrCodeUrl || null
+        } : null
+      });
     } catch (err) {
       setError(err.response?.data?.error || 'Catalog not found');
     } finally {
