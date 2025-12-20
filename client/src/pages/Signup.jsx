@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { authApi } from '../api/client';
 import { Button, Input, Alert } from '../components/ui';
 import { Container } from '../components/layout';
@@ -8,6 +9,7 @@ import { Container } from '../components/layout';
 export function Signup() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
@@ -43,7 +45,7 @@ export function Signup() {
       } else if (err.response?.data?.error) {
         setError(err.response.data.error);
       } else {
-        setError('Something went wrong. Please try again.');
+        setError(t('something_wrong'));
       }
     } finally {
       setLoading(false);
@@ -55,8 +57,8 @@ export function Signup() {
       <Container>
         <div className="max-w-md mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Create Account</h1>
-            <p className="text-gray-600 mt-2">Start building your digital catalog</p>
+            <h1 className="text-3xl font-bold text-gray-900">{t('signup_title')}</h1>
+            <p className="text-gray-600 mt-2">{t('signup_subtitle')}</p>
           </div>
 
           <div className="bg-white rounded-xl shadow-md p-8">
@@ -66,44 +68,44 @@ export function Signup() {
 
             <form onSubmit={handleSubmit}>
               <Input
-                label="Full Name"
+                label={t('full_name')}
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                placeholder="Enter your name"
+                placeholder={t('enter_name')}
                 error={fieldErrors.name}
                 required
               />
 
               <Input
-                label="Email"
+                label={t('email')}
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="Enter your email"
+                placeholder={t('enter_email')}
                 error={fieldErrors.email}
                 required
               />
 
               <Input
-                label="Password"
+                label={t('password')}
                 type="password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="At least 8 characters"
+                placeholder={t('password_min')}
                 error={fieldErrors.password}
                 required
               />
 
               <Input
-                label="Confirm Password"
+                label={t('confirm_password')}
                 type="password"
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                placeholder="Confirm your password"
+                placeholder={t('confirm_password_placeholder')}
                 error={fieldErrors.confirmPassword}
                 required
               />
@@ -114,14 +116,14 @@ export function Signup() {
                 disabled={loading}
                 className="w-full mt-4"
               >
-                {loading ? 'Creating Account...' : 'Sign Up'}
+                {loading ? t('creating_account') : t('signup_btn')}
               </Button>
             </form>
 
             <p className="text-center text-gray-600 mt-6">
-              Already have an account?{' '}
+              {t('have_account')}{' '}
               <Link to="/login" className="text-primary-600 hover:text-primary-700 font-medium">
-                Login
+                {t('login_btn')}
               </Link>
             </p>
           </div>

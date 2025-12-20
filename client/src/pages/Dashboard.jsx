@@ -25,14 +25,14 @@ export function Dashboard() {
       const response = await productsApi.list();
       setProducts(response.data);
     } catch (err) {
-      setError('Failed to load products. Please try again.');
+      setError(t('failed_load'));
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this product?')) {
+    if (!window.confirm(t('delete_confirm'))) {
       return;
     }
     
@@ -41,7 +41,7 @@ export function Dashboard() {
       await productsApi.delete(id);
       setProducts(products.filter(p => p.id !== id));
     } catch (err) {
-      setError('Failed to delete product. Please try again.');
+      setError(t('failed_delete'));
     } finally {
       setDeleteId(null);
     }
@@ -52,8 +52,8 @@ export function Dashboard() {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: 'My Product Catalog',
-          text: 'Check out my product catalog!',
+          title: t('my_catalog_title'),
+          text: t('share_catalog_text'),
           url: catalogUrl
         });
       } else {
@@ -85,12 +85,12 @@ export function Dashboard() {
           <div className="flex flex-wrap gap-3">
             <Button variant="outline" onClick={handleShareCatalog}>
               <LinkIcon className="w-4 h-4 mr-2" />
-              {copied ? 'Link Copied!' : 'Share Catalog'}
+              {copied ? t('link_copied') : t('share_catalog')}
             </Button>
             <Link to="/payment">
               <Button variant="outline">
                 <CreditCard className="w-4 h-4 mr-2" />
-                Payment
+                {t('payment')}
               </Button>
             </Link>
             <Link to="/export">

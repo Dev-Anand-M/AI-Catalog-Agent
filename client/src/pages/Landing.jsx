@@ -27,7 +27,7 @@ export function Landing() {
             
             {/* Language Selection */}
             <div className="mb-8">
-              <p className="text-primary-200 text-sm mb-3">Choose your language / अपनी भाषा चुनें</p>
+              <p className="text-primary-200 text-sm mb-3">{t('choose_language')} / अपनी भाषा चुनें</p>
               <div className="flex justify-center">
                 <LanguageSelector variant="buttons" />
               </div>
@@ -51,19 +51,19 @@ export function Landing() {
             <div className="mt-12 flex flex-wrap justify-center gap-6 text-primary-100">
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-5 h-5" />
-                <span>Free to Use</span>
+                <span>{t('free_to_use')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-5 h-5" />
-                <span>6 Indian Languages</span>
+                <span>{t('indian_languages')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-5 h-5" />
-                <span>AI-Powered</span>
+                <span>{t('ai_powered')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Eye className="w-5 h-5" />
-                <span>Accessibility Ready</span>
+                <span>{t('accessibility_ready')}</span>
               </div>
             </div>
           </div>
@@ -79,8 +79,8 @@ export function Landing() {
                 <Volume2 className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="font-semibold text-gray-900">Voice Commands Enabled</p>
-                <p className="text-sm text-gray-600">Say "Help" to learn voice commands • Accessible for visually impaired users</p>
+                <p className="font-semibold text-gray-900">{t('voice_commands_enabled')}</p>
+                <p className="text-sm text-gray-600">{t('voice_commands_help')}</p>
               </div>
             </div>
           </div>
@@ -92,10 +92,10 @@ export function Landing() {
         <Container>
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Powerful Features for Small Businesses
+              {t('powerful_features')}
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Everything you need to create professional product catalogs without any technical knowledge
+              {t('features_subtitle')}
             </p>
           </div>
           

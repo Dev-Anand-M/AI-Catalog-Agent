@@ -40,7 +40,7 @@ export function Login() {
       if (err.response?.data?.error) {
         setError(err.response.data.error);
       } else {
-        setError('Something went wrong. Please try again.');
+        setError(t('something_wrong'));
       }
     } finally {
       setLoading(false);
@@ -53,7 +53,7 @@ export function Login() {
         <div className="max-w-md mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900">{t('login_title')}</h1>
-            <p className="text-gray-600 mt-2">Login to manage your catalog</p>
+            <p className="text-gray-600 mt-2">{t('login_subtitle')}</p>
           </div>
 
           <div className="bg-white rounded-xl shadow-md p-8">
@@ -68,7 +68,7 @@ export function Login() {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="Enter your email"
+                placeholder={t('enter_email')}
                 required
               />
 
@@ -78,7 +78,7 @@ export function Login() {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="Enter your password"
+                placeholder={t('enter_password')}
                 required
               />
 
@@ -88,7 +88,7 @@ export function Login() {
                 disabled={loading}
                 className="w-full mt-4"
               >
-                {loading ? 'Logging in...' : t('login_btn')}
+                {loading ? t('logging_in') : t('login_btn')}
               </Button>
             </form>
 
