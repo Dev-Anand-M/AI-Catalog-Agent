@@ -101,30 +101,57 @@ async function handleParseVoice(req, res) {
   const { transcript, currentProduct } = req.body;
   if (!transcript) return res.status(400).json({ error: 'Transcript required' });
 
-  const text = transcript.toLowerCase();
+  // Normalize text: lowercase, remove punctuation, trim
+  const text = transcript.toLowerCase().replace(/[.,!?।।]/g, '').trim();
   
   // Check for save commands FIRST - before sending to AI
+  // Include Tamil script versions (கேன்சல் பண்ணு, சேவ் பண்ணு, etc.)
   const saveCommands = [
+    // Tamil script versions (speech recognition outputs these)
+    'சேவ் பண்ணு', 'சேவ் பண்ணுங்க', 'சேவ் செய்', 'சேவ் போடு',
+    'சேமி பண்ணு', 'சேமி செய்', 'சேமிக்க', 'சேமி',
+    'முடிஞ்சது', 'ஓகே', 'சரி', 'செய்து முடி',
+    // Hindi script versions
+    'सेव करो', 'सेव कर', 'सेव कर दो', 'बचाओ', 'सहेजो',
+    'हो गया', 'ठीक है', 'खतम', 'पूरा हो गया',
+    // Telugu script versions
+    'సేవ్ చేయి', 'సేవ్ చేయండి', 'భద్రపరచు', 'అయింది', 'సరే',
+    // Kannada script versions
+    'ಸೇವ್ ಮಾಡು', 'ಸೇವ್ ಮಾಡಿ', 'ಉಳಿಸು', 'ಆಯ್ತು', 'ಸರಿ',
+    // Bengali script versions
+    'সেভ করো', 'সেভ কর', 'সংরক্ষণ করো', 'হয়ে গেলো', 'ঠিক আছে',
+    // Romanized versions
     'save pannu', 'save podu', 'save karo', 'save kar', 'save cheyyi', 'save cheyyandi', 'save maadu', 'save koro',
     'ho gaya', 'hoye gelo', 'thik ache', 'theek hai', 'mudinjadhu', 'ayyindi', 'aaytu',
-    'save', 'done', 'finish', 'submit', 'confirm',
-    'सेव', 'सहेजो', 'बचाओ', 'khatam',
-    'சேமி', 'சேமிக்க', 'seri', 'seyvi',
-    'సేవ్', 'భద్రపరచు', 'sare',
-    'ಸೇವ್', 'ಉಳಿಸು', 'sari', 'ulisu',
-    'সেভ', 'সংরক্ষণ'
+    'save', 'done', 'finish', 'submit', 'confirm', 'ok', 'okay',
+    'khatam', 'seri', 'seyvi', 'sare', 'sari', 'ulisu'
   ];
   
   // Check for cancel commands FIRST - before sending to AI
+  // Include Tamil script versions - NOTE: "cancel" sounds like "cancer" (கேன்சர்) in Tamil!
   const cancelCommands = [
-    'cancel pannu', 'cancel karo', 'cancel cheyyi', 'cancel maadu', 'cancel koro',
+    // Tamil script versions (speech recognition outputs these)
+    // "cancel" is heard as "cancer" (கேன்சர்) by Tamil speech recognition!
+    'கேன்சர் பண்ணு', 'கேன்சர் பண்ணுங்க', 'கேன்சர் செய்', 'கேன்சர்',
+    'கேன்சல் பண்ணு', 'கேன்சல் பண்ணுங்க', 'கேன்சல் செய்', 'கேன்சல்',
+    'ரத்து பண்ணு', 'ரத்து செய்', 'திரும்பு', 'பேக் போ', 'வேண்டாம்',
+    // Hindi script versions
+    'कैंसल करो', 'कैंसल कर', 'रद्द करो', 'वापस जाओ', 'पीछे', 'बंद करो', 'नहीं चाहिए',
+    // Telugu script versions
+    'క్యాన్సల్ చేయి', 'క్యాన్సల్ చేయండి', 'రద్దు చేయి', 'వెనక్కి', 'వద్దు',
+    // Kannada script versions
+    'ಕ್ಯಾನ್ಸಲ್ ಮಾಡು', 'ಕ್ಯಾನ್ಸಲ್ ಮಾಡಿ', 'ರದ್ದು ಮಾಡು', 'ಹಿಂದೆ ಹೋಗು', 'ಬೇಡ',
+    // Bengali script versions
+    'ক্যান্সেল করো', 'ক্যান্সেল কর', 'বাতিল করো', 'ফিরে যাও', 'পেছনে যাও', 'লাগবে না',
+    // Romanized versions
+    'cancel pannu', 'cancer pannu', 'cancel karo', 'cancel cheyyi', 'cancel maadu', 'cancel koro',
     'go back', 'wapas jao', 'back po', 'back vellu', 'back hogu', 'back jao',
     'hinde hogu', 'pechone jao', 'thirumbu', 'venakki',
-    'cancel', 'back', 'exit', 'close',
+    'cancel', 'cancer', 'back', 'exit', 'close', 'no', 'nahi', 'venda', 'vaddu', 'beda', 'lagbe na',
     'रद्द', 'वापस', 'peeche', 'band karo',
     'ரத்து', 'திரும்பு', 'radhu', 'thirimbu',
     'రద్దు', 'వెనక్కి', 'raddu',
-    'ರದ್ದು', 'ಹಿಂದೆ', 'raddu', 'hinde',
+    'ರದ್ದು', 'ಹಿಂದೆ', 'hinde',
     'বাতিল', 'ফিরে যাও', 'batil', 'fire jao'
   ];
   
