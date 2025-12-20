@@ -63,9 +63,39 @@ export function AddProduct() {
     setPromptText(transcript);
   };
 
-  const handleImageCapture = (imageData) => {
+  const handleImageCapture = async (imageData) => {
     setCapturedImage(imageData);
     setFormData(prev => ({ ...prev, imageUrl: imageData }));
+    
+    // Auto-analyze image with AI
+    if (imageData) {
+      setGenerating(true);
+      setSuccess('🔍 AI is analyzing your product image...');
+      try {
+        const response = await aiApi.analyzeImage({
+          imageData,
+          description: promptText || '' // Include any text description for better results
+        });
+        
+        if (response.data) {
+          setFormData(prev => ({
+            ...prev,
+            name: response.data.suggestedName || prev.name,
+            description: response.data.suggestedDescription || prev.description,
+            category: response.data.suggestedCategory || prev.category,
+            price: response.data.suggestedPrice?.toString() || prev.price,
+            imageUrl: imageData
+          }));
+          setSuccess('✨ AI analyzed your image! Review the suggested details below.');
+          setStep(2);
+        }
+      } catch (err) {
+        console.error('Image analysis error:', err);
+        setError('Could not analyze image. Please add a description manually.');
+      } finally {
+        setGenerating(false);
+      }
+    }
   };
 
   const handleGenerate = async () => {

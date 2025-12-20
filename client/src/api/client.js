@@ -57,6 +57,7 @@ export const aiApi = {
   generateProduct: (data) => api.post('/ai/generate-product', data),
   translate: (data) => api.post('/ai/translate', data),
   analyzeImage: (data) => api.post('/ai/analyze-image', data),
+  parseVoiceUpdate: (data) => api.post('/ai/parse-voice-update', data),
   readPage: (data) => api.post('/ai/read-page', data),
   enhanceDescription: (data) => api.post('/ai/enhance-description', data),
   interpretCommand: (data) => api.post('/ai/interpret-command', data),
