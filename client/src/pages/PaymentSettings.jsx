@@ -148,12 +148,23 @@ export function PaymentSettings() {
                     <p className="text-sm text-gray-500">{t('whatsapp_number_desc') || 'Customers will contact you on this number'}</p>
                   </div>
                 </div>
-                <Input
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value.replace(/[^0-9+]/g, ''))}
-                  placeholder="+91 9876543210"
-                  type="tel"
-                />
+                <div className="flex gap-2">
+                  <Input
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value.replace(/[^0-9+]/g, ''))}
+                    placeholder="+91 9876543210"
+                    type="tel"
+                    className="flex-1"
+                  />
+                  <Button 
+                    variant="primary" 
+                    onClick={handleSave} 
+                    disabled={saving}
+                    className="bg-green-500 hover:bg-green-600 px-4"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                  </Button>
+                </div>
                 <p className="text-xs text-gray-500 mt-2">{t('whatsapp_format') || 'Include country code (e.g., +91 for India)'}</p>
               </CardBody>
             </Card>
