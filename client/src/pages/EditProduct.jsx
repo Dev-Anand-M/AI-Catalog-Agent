@@ -140,36 +140,43 @@ export function EditProduct() {
       };
       setVoiceFeedback(heardFeedback[language] || heardFeedback.en);
 
-      // Multi-language save commands
+      // Multi-language save commands - check longer phrases first
       const saveCommands = [
+        // Longer phrases first (to match before shorter ones)
+        'save pannu', 'save podu', 'save karo', 'save kar', 'save cheyyi', 'save cheyyandi', 'save maadu', 'save koro',
+        'ho gaya', 'hoye gelo', 'thik ache', 'theek hai', 'mudinjadhu', 'ayyindi', 'aaytu',
         // English
         'save', 'done', 'finish', 'submit', 'confirm',
         // Hindi + Hinglish
-        'सेव', 'सहेजो', 'बचाओ', 'save karo', 'save kar', 'ho gaya', 'khatam', 'theek hai',
+        'सेव', 'सहेजो', 'बचाओ', 'khatam',
         // Tamil + Tanglish
-        'சேமி', 'சேமிக்க', 'save pannu', 'save podu', 'mudinjadhu', 'seri',
+        'சேமி', 'சேமிக்க', 'seri', 'seyvi',
         // Telugu + Tenglish
-        'సేవ్', 'భద్రపరచు', 'save cheyyi', 'save cheyyandi', 'ayyindi', 'sare',
+        'సేవ్', 'భద్రపరచు', 'sare',
         // Kannada + Kanglish
-        'ಸೇವ್', 'ಉಳಿಸು', 'save maadu', 'aaytu', 'sari',
+        'ಸೇವ್', 'ಉಳಿಸು', 'sari', 'ulisu',
         // Bengali + Benglish
-        'সেভ', 'সংরক্ষণ', 'save koro', 'hoye gelo', 'thik ache'
+        'সেভ', 'সংরক্ষণ'
       ];
 
-      // Multi-language cancel commands
+      // Multi-language cancel commands - check longer phrases first
       const cancelCommands = [
+        // Longer phrases first (to match before shorter ones)
+        'cancel pannu', 'cancel karo', 'cancel cheyyi', 'cancel maadu', 'cancel koro',
+        'go back', 'wapas jao', 'back po', 'back vellu', 'back hogu', 'back jao',
+        'hinde hogu', 'pechone jao', 'thirumbu', 'venakki',
         // English
-        'cancel', 'go back', 'back', 'exit', 'close',
+        'cancel', 'back', 'exit', 'close',
         // Hindi + Hinglish
-        'रद्द', 'वापस', 'cancel karo', 'wapas jao', 'peeche', 'band karo',
+        'रद्द', 'वापस', 'peeche', 'band karo',
         // Tamil + Tanglish
-        'ரத்து', 'திரும்பு', 'cancel pannu', 'thirumbu', 'back po',
+        'ரத்து', 'திரும்பு', 'radhu', 'thirimbu',
         // Telugu + Tenglish
-        'రద్దు', 'వెనక్కి', 'cancel cheyyi', 'venakki', 'back vellu',
+        'రద్దు', 'వెనక్కి', 'raddu',
         // Kannada + Kanglish
-        'ರದ್ದು', 'ಹಿಂದೆ', 'cancel maadu', 'hinde hogu', 'back hogu',
+        'ರದ್ದು', 'ಹಿಂದೆ', 'raddu', 'hinde',
         // Bengali + Benglish
-        'বাতিল', 'ফিরে যাও', 'cancel koro', 'pechone jao', 'back jao'
+        'বাতিল', 'ফিরে যাও', 'batil', 'fire jao'
       ];
 
       // Multi-language feedback messages
