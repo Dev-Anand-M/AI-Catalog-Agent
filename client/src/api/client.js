@@ -36,11 +36,11 @@ api.interceptors.response.use(
   }
 );
 
-// Auth API
+// Auth API - consolidated endpoint
 export const authApi = {
-  signup: (data) => api.post('/auth/signup', data),
-  login: (data) => api.post('/auth/login', data),
-  me: () => api.get('/auth/me')
+  signup: (data) => api.post('/auth?action=signup', data),
+  login: (data) => api.post('/auth?action=login', data),
+  me: () => api.get('/auth?action=me')
 };
 
 // Products API
@@ -68,16 +68,16 @@ export const paymentApi = {
   save: (data) => api.put('/payment', data)
 };
 
-// AI API
+// AI API - consolidated endpoint
 export const aiApi = {
-  generateProduct: (data) => api.post('/ai/generate-product', data),
-  translate: (data) => api.post('/ai/translate', data),
-  analyzeImage: (data) => api.post('/ai/analyze-image', data),
-  parseVoiceUpdate: (data) => api.post('/ai/parse-voice-update', data),
-  readPage: (data) => api.post('/ai/read-page', data),
-  enhanceDescription: (data) => api.post('/ai/enhance-description', data),
-  interpretCommand: (data) => api.post('/ai/interpret-command', data),
-  chat: (data) => api.post('/ai/chat', data)
+  generateProduct: (data) => api.post('/ai?action=generate-product', data),
+  translate: (data) => api.post('/ai?action=translate', data),
+  analyzeImage: (data) => api.post('/ai?action=analyze-image', data),
+  parseVoiceUpdate: (data) => api.post('/ai?action=parse-voice-update', data),
+  readPage: (data) => api.post('/ai?action=read-page', data),
+  enhanceDescription: (data) => api.post('/ai?action=enhance-description', data),
+  interpretCommand: (data) => api.post('/ai?action=interpret-command', data),
+  chat: (data) => api.post('/ai?action=chat', data)
 };
 
 export default api;
