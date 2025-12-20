@@ -31,12 +31,14 @@ export function Navbar() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
             <LanguageSelector />
-            <Link 
-              to="/demo" 
-              className="text-gray-600 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
-            >
-              {t('nav_demo')}
-            </Link>
+            {!user && (
+              <Link 
+                to="/demo" 
+                className="text-gray-600 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
+              >
+                {t('nav_demo')}
+              </Link>
+            )}
             {user ? (
               <>
                 <Link 
@@ -80,13 +82,15 @@ export function Navbar() {
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-gray-100">
           <div className="px-4 py-3 space-y-3">
-            <Link 
-              to="/demo" 
-              className="block text-gray-600 hover:text-primary-600 py-2"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {t('nav_demo')}
-            </Link>
+            {!user && (
+              <Link 
+                to="/demo" 
+                className="block text-gray-600 hover:text-primary-600 py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {t('nav_demo')}
+              </Link>
+            )}
             {user ? (
               <>
                 <Link 

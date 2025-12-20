@@ -1,4 +1,4 @@
-import { Store } from 'lucide-react';
+import { Store, Mail, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export function Footer() {
@@ -13,7 +13,7 @@ export function Footer() {
             </div>
             <p className="text-sm text-gray-400">
               Helping small retailers and artisans create digital product catalogs 
-              in their local language.
+              in their local language using AI and voice.
             </p>
           </div>
           
@@ -39,21 +39,25 @@ export function Footer() {
           </div>
           
           <div>
-            <h3 className="text-white font-semibold mb-4">Support</h3>
+            <h3 className="text-white font-semibold mb-4">Contact Us</h3>
             <ul className="space-y-2">
               <li>
-                <span className="text-sm text-gray-400">
-                  Email: support@digitalcatalog.com
-                </span>
+                <a 
+                  href="mailto:p3ace.2" 
+                  className="text-sm hover:text-primary-400 transition-colors flex items-center gap-2"
+                >
+                  <Mail className="w-4 h-4" />
+                  p3ace.2.life@gmail.com
+                </a>
               </li>
             </ul>
           </div>
         </div>
         
         <div className="border-t border-gray-800 mt-8 pt-8 text-center">
-          <p className="text-sm text-gray-500">
-            © {new Date().getFullYear()} Digital Catalog Agent. 
-            This is a prototype application for demonstration purposes.
+          <p className="text-sm text-gray-400 flex items-center justify-center gap-1">
+            Made with <Heart className="w-4 h-4 text-red-500 fill-red-500" /> by 
+            <span className="text-white font-medium">Dev Anand, Hemanth & Dhanushree</span>
           </p>
         </div>
       </div>

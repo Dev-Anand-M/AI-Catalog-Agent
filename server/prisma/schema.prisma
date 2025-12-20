@@ -3,17 +3,19 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id           Int       @id @default(autoincrement())
-  name         String
-  email        String    @unique
-  passwordHash String
-  createdAt    DateTime  @default(now())
-  products     Product[]
+  id              Int              @id @default(autoincrement())
+  name            String
+  email           String           @unique
+  passwordHash    String
+  createdAt       DateTime         @default(now())
+  products        Product[]
+  paymentSettings PaymentSettings?
 }
 
 model Product {
@@ -27,4 +29,15 @@ model Product {
   language    String
   imageUrl    String?
   createdAt   DateTime @default(now())
+}
+
+model PaymentSettings {
+  id            Int      @id @default(autoincrement())
+  userId        Int      @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  upiData       String?  // JSON string for UPI array
+  bankAccount   String?  // JSON string for bank details
+  qrCodeUrl     String?  // Base64 or URL for QR code
+  updatedAt     DateTime @updatedAt
+  createdAt     DateTime @default(now())
 }

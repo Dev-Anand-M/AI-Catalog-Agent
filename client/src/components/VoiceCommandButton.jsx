@@ -102,10 +102,10 @@ export function VoiceCommandButton() {
           <div className="space-y-1 text-sm text-gray-600">
             <p>• "Dashboard" or "Show my products"</p>
             <p>• "Add product" or "Create new"</p>
+            <p>• <strong>"Open [product name]"</strong> - opens that product</p>
             <p>• "Export" or "Publish catalog"</p>
             <p>• "Payment" or "Bank details"</p>
             <p>• "Read page" or "What is this"</p>
-            <p>• "Help"</p>
           </div>
           
           <p className="text-xs text-gray-400 mt-3">

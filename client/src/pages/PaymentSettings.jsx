@@ -1,18 +1,39 @@
-import { useState } from 'react';
-import { CreditCard, Building2, Smartphone, QrCode, CheckCircle, Plus, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Building2, Smartphone, QrCode, CheckCircle, Plus, Trash2 } from 'lucide-react';
 import { Button, Input, Alert, Card, CardBody } from '../components/ui';
 import { Container } from '../components/layout';
 import { useLanguage } from '../context/LanguageContext';
+import { paymentApi } from '../api/client';
 
 export function PaymentSettings() {
   const { t, language } = useLanguage();
   const [activeTab, setActiveTab] = useState('upi');
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
   const [paymentMethods, setPaymentMethods] = useState({
     upi: [{ id: 1, upiId: '', name: '' }],
     bank: { accountName: '', accountNumber: '', ifsc: '', bankName: '' },
     qr: null
   });
+
+  // Load saved payment methods from server
+  useEffect(() => {
+    loadPaymentSettings();
+  }, []);
+
+  const loadPaymentSettings = async () => {
+    try {
+      const response = await paymentApi.get();
+      setPaymentMethods(response.data);
+    } catch (e) {
+      console.error('Failed to load payment settings:', e);
+      // Use defaults if API fails
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const labels = {
     en: {
@@ -109,11 +130,19 @@ export function PaymentSettings() {
     }
   };
 
-  const handleSave = () => {
-    // In production, save to backend
-    localStorage.setItem('paymentMethods', JSON.stringify(paymentMethods));
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+  const handleSave = async () => {
+    setSaving(true);
+    setError('');
+    try {
+      await paymentApi.save(paymentMethods);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (e) {
+      console.error('Failed to save payment settings:', e);
+      setError('Failed to save payment settings. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const tabs = [
@@ -134,8 +163,18 @@ export function PaymentSettings() {
           {saved && (
             <Alert type="success" message={l.saved} className="mb-6" />
           )}
+          
+          {error && (
+            <Alert type="error" message={error} className="mb-6" onClose={() => setError('')} />
+          )}
 
-          {/* Tabs */}
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
+            </div>
+          ) : (
+            <>
+            {/* Tabs */}
           <div className="flex gap-2 mb-6">
             {tabs.map((tab) => {
               const Icon = tab.icon;
@@ -281,11 +320,13 @@ export function PaymentSettings() {
 
           {/* Save Button */}
           <div className="mt-6">
-            <Button variant="primary" className="w-full" onClick={handleSave}>
+            <Button variant="primary" className="w-full" onClick={handleSave} disabled={saving}>
               <CheckCircle className="w-5 h-5 mr-2" />
-              {l.save}
+              {saving ? 'Saving...' : l.save}
             </Button>
           </div>
+          </>
+          )}
         </div>
       </Container>
     </div>

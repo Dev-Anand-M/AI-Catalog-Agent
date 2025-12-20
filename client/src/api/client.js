@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = '/api';
+// Use environment variable for API URL, fallback to /api for both local and Vercel
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -22,7 +23,11 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Only redirect on 401 for protected routes, not for login/signup
+    const isAuthRoute = error.config?.url?.includes('/auth/login') || 
+                        error.config?.url?.includes('/auth/signup');
+    
+    if (error.response?.status === 401 && !isAuthRoute) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
@@ -50,6 +55,17 @@ export const productsApi = {
 // Demo API
 export const demoApi = {
   getProducts: () => api.get('/demo/products')
+};
+
+// Public Catalog API (shareable links - no auth required)
+export const catalogApi = {
+  get: (userId) => api.get(`/catalog/${userId}`)
+};
+
+// Payment API
+export const paymentApi = {
+  get: () => api.get('/payment'),
+  save: (data) => api.put('/payment', data)
 };
 
 // AI API

@@ -237,7 +237,8 @@ router.post('/translate', async (req, res) => {
   }
 });
 
-// POST /api/ai/analyze-image - Real AI image analysis
+// POST /api/ai/analyze-image - AI product generation from description
+// Note: Perplexity doesn't support vision, so we use text description
 router.post('/analyze-image', async (req, res) => {
   try {
     const { imageData, description = '' } = req.body;
@@ -246,50 +247,66 @@ router.post('/analyze-image', async (req, res) => {
       return res.status(400).json({ error: 'Image data required' });
     }
 
-    // Try Perplexity API with image description
-    if (hasApiKey()) {
-      const systemPrompt = `You are an AI that analyzes product images for Indian sellers.
-Based on the image description provided, generate a complete product listing.
+    // If no description provided, ask user to add one
+    if (!description || description.trim() === '') {
+      return res.json({
+        suggestedName: '',
+        suggestedCategory: 'Other',
+        suggestedDescription: '',
+        suggestedPrice: 0,
+        confidence: 0,
+        source: 'needs-description',
+        message: 'Please describe your product (e.g., "red silk saree" or "handmade clay pot")'
+      });
+    }
 
-Respond ONLY with valid JSON:
-{"name":"Product name","description":"2-3 sentence professional description","category":"Grocery/Clothing/Handicraft/Electronics/Other","suggestedPrice":number,"keywords":["keyword1","keyword2"]}
+    // Use Perplexity to generate product details from description
+    if (hasApiKey()) {
+      const systemPrompt = `You are an AI helping Indian sellers create professional product listings.
+Based on the product description, generate a complete e-commerce listing.
+
+Respond ONLY with valid JSON (no other text, no markdown):
+{"name":"Professional product name","description":"2-3 sentence compelling e-commerce description","category":"Grocery/Clothing/Handicraft/Electronics/Other","suggestedPrice":number,"keywords":["keyword1","keyword2","keyword3"]}
 
 Rules:
-- Name should be clear, professional product name
-- Description should be compelling e-commerce description
-- Price in INR (Indian Rupees) - estimate based on typical Indian market prices
-- Category must be one of: Grocery, Clothing, Handicraft, Electronics, Other`;
+- Name: Clear, professional product name (capitalize properly)
+- Description: Compelling 2-3 sentence e-commerce description highlighting features and benefits
+- Category: Must be exactly one of: Grocery, Clothing, Handicraft, Electronics, Other
+- Price: Realistic price in INR (Indian Rupees) based on typical Indian market
+- Keywords: 3-5 relevant search keywords`;
 
-      // For now, we describe the image context. In production, use a vision API
-      const imageContext = description || 'a product photo uploaded by an Indian seller';
-      const userPrompt = `Analyze this product image and create a listing. Image shows: ${imageContext}. 
-If no description provided, make reasonable assumptions for a typical Indian retail product.`;
+      const userPrompt = `Create a professional product listing for an Indian seller. 
+Product description: "${description}"
+
+Generate name, description, category, price in INR, and keywords.`;
 
       const aiResponse = await callPerplexity(systemPrompt, userPrompt, 500);
       
       if (aiResponse) {
         try {
+          // Try to extract JSON from response
           const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
             const parsed = JSON.parse(jsonMatch[0]);
             return res.json({
-              suggestedName: parsed.name || 'Product',
-              suggestedDescription: parsed.description || 'Quality product',
+              suggestedName: parsed.name || description.split(' ').slice(0, 4).join(' '),
+              suggestedDescription: parsed.description || `Quality ${description}. Perfect for your needs.`,
               suggestedCategory: parsed.category || detectCategory(description),
               suggestedPrice: parsed.suggestedPrice || 500,
               keywords: parsed.keywords || [],
-              confidence: 0.85,
+              confidence: 0.9,
               source: 'perplexity'
             });
           }
         } catch (e) {
-          console.error('Image analysis JSON parse error:', e.message);
+          console.error('JSON parse error:', e.message);
+          // If JSON parsing fails, try to extract useful info from text response
         }
       }
     }
 
-    // Fallback - use description if provided
-    const category = description ? detectCategory(description) : 'Other';
+    // Fallback - generate locally from description
+    const category = detectCategory(description);
     const priceRanges = {
       Grocery: { min: 50, max: 500 },
       Clothing: { min: 500, max: 3000 },
@@ -300,17 +317,22 @@ If no description provided, make reasonable assumptions for a typical Indian ret
     const range = priceRanges[category] || priceRanges.Other;
     const price = Math.floor(Math.random() * (range.max - range.min) + range.min);
     
+    // Create a proper name from description
+    const words = description.trim().split(/\s+/);
+    const name = words.slice(0, 4).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+    
     res.json({
-      suggestedName: description ? description.split(' ').slice(0, 4).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : 'Product',
+      suggestedName: name,
       suggestedCategory: category,
-      suggestedDescription: description ? `Quality ${description}. Perfect for your needs.` : 'Quality product at best price.',
+      suggestedDescription: `Premium quality ${description.toLowerCase()}. Excellent craftsmanship and great value for money. Perfect for your needs.`,
       suggestedPrice: price,
-      confidence: 0.6,
+      keywords: words.slice(0, 5),
+      confidence: 0.7,
       source: 'local'
     });
   } catch (error) {
     console.error('Image analysis error:', error);
-    res.status(500).json({ error: 'Image analysis failed.' });
+    res.status(500).json({ error: 'Failed to generate product details.' });
   }
 });
 

@@ -1,18 +1,26 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Store, Package } from 'lucide-react';
 import { demoApi } from '../api/client';
 import { Button, Alert, Card, CardBody } from '../components/ui';
 import { Container } from '../components/layout';
+import { useAuth } from '../context/AuthContext';
 
 export function Demo() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
+    // Redirect logged-in users to dashboard
+    if (user) {
+      navigate('/dashboard');
+      return;
+    }
     fetchDemoProducts();
-  }, []);
+  }, [user, navigate]);
 
   const fetchDemoProducts = async () => {
     try {
@@ -24,6 +32,11 @@ export function Demo() {
       setLoading(false);
     }
   };
+
+  // Don't render if user is logged in (will redirect)
+  if (user) {
+    return null;
+  }
 
   if (loading) {
     return (

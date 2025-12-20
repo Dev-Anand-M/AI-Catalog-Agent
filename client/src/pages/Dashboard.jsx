@@ -1,17 +1,20 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Upload, Pencil, Trash2, Share2, CreditCard } from 'lucide-react';
+import { Plus, Upload, Pencil, Trash2, Share2, CreditCard, Link as LinkIcon } from 'lucide-react';
 import { productsApi } from '../api/client';
 import { Button, Alert, Card, CardBody } from '../components/ui';
 import { Container } from '../components/layout';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 
 export function Dashboard() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [deleteId, setDeleteId] = useState(null);
+  const [copied, setCopied] = useState(false);
   const { t } = useLanguage();
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchProducts();
@@ -44,6 +47,25 @@ export function Dashboard() {
     }
   };
 
+  const handleShareCatalog = async () => {
+    const catalogUrl = `${window.location.origin}/catalog/${user?.id}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'My Product Catalog',
+          text: 'Check out my product catalog!',
+          url: catalogUrl
+        });
+      } else {
+        await navigator.clipboard.writeText(catalogUrl);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch (err) {
+      console.error('Share failed:', err);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -61,6 +83,10 @@ export function Dashboard() {
             <p className="text-gray-600 mt-1">{products.length} {t('products_count')}</p>
           </div>
           <div className="flex flex-wrap gap-3">
+            <Button variant="outline" onClick={handleShareCatalog}>
+              <LinkIcon className="w-4 h-4 mr-2" />
+              {copied ? 'Link Copied!' : 'Share Catalog'}
+            </Button>
             <Link to="/payment">
               <Button variant="outline">
                 <CreditCard className="w-4 h-4 mr-2" />

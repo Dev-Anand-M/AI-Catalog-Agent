@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -17,13 +17,13 @@ export function Login() {
     email: '',
     password: ''
   });
+  const errorKey = useRef(0);
 
   const from = location.state?.from?.pathname || '/dashboard';
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    setError('');
   };
 
   const handleSubmit = async (e) => {
@@ -36,6 +36,7 @@ export function Login() {
       login(response.data.token, response.data.user);
       navigate(from, { replace: true });
     } catch (err) {
+      errorKey.current += 1;
       if (err.response?.data?.error) {
         setError(err.response.data.error);
       } else {
@@ -57,7 +58,7 @@ export function Login() {
 
           <div className="bg-white rounded-xl shadow-md p-8">
             {error && (
-              <Alert type="error" message={error} className="mb-6" />
+              <Alert key={errorKey.current} type="error" message={error} className="mb-6" />
             )}
 
             <form onSubmit={handleSubmit}>

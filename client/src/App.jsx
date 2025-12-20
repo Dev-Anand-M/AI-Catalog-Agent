@@ -13,6 +13,7 @@ import { EditProduct } from './pages/EditProduct';
 import { Demo } from './pages/Demo';
 import { ExportCatalog } from './pages/ExportCatalog';
 import { PaymentSettings } from './pages/PaymentSettings';
+import { PublicCatalog } from './pages/PublicCatalog';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/demo" element={<Demo />} />
+            <Route path="/catalog/:userId" element={<PublicCatalog />} />
             <Route 
               path="/dashboard" 
               element={

@@ -85,6 +85,21 @@ export function EditProduct() {
     }
   };
 
+  // Auto-save product to database
+  const saveProduct = async (updatedData) => {
+    try {
+      const productData = {
+        ...updatedData,
+        price: parseFloat(updatedData.price)
+      };
+      await productsApi.update(id, productData);
+      return true;
+    } catch (err) {
+      console.error('Auto-save error:', err);
+      return false;
+    }
+  };
+
   // Voice command to update product fields
   const handleVoiceUpdate = useCallback(async () => {
     if (!isVoiceSupported || isListening) return;
@@ -102,7 +117,33 @@ export function EditProduct() {
 
     recognition.onresult = async (event) => {
       const transcript = event.results[0][0].transcript;
+      const lowerTranscript = transcript.toLowerCase();
       setVoiceFeedback(`Heard: "${transcript}" - Processing...`);
+
+      // Check for "save" or "save changes" command
+      if (lowerTranscript.includes('save') || lowerTranscript.includes('done') || lowerTranscript.includes('finish')) {
+        setVoiceFeedback('💾 Saving changes...');
+        setLoading(true);
+        try {
+          const productData = { ...formData, price: parseFloat(formData.price) };
+          await productsApi.update(id, productData);
+          setVoiceFeedback('✅ Saved! Redirecting...');
+          setTimeout(() => navigate('/dashboard'), 500);
+          return;
+        } catch (err) {
+          setLoading(false);
+          setVoiceFeedback('❌ Save failed. Please try again.');
+          setError('Failed to save. Please try again.');
+          return;
+        }
+      }
+
+      // Check for "cancel" or "go back" command
+      if (lowerTranscript.includes('cancel') || lowerTranscript.includes('go back') || lowerTranscript.includes('back')) {
+        setVoiceFeedback('↩️ Going back...');
+        setTimeout(() => navigate('/dashboard'), 300);
+        return;
+      }
 
       try {
         const response = await aiApi.parseVoiceUpdate({
@@ -114,14 +155,16 @@ export function EditProduct() {
         const { action, field, value, confidence } = response.data;
 
         if (action === 'update' && field && value !== null && confidence > 0.5) {
-          setFormData(prev => ({
-            ...prev,
+          const updatedData = {
+            ...formData,
             [field]: field === 'price' ? value.toString() : value
-          }));
-          setSuccess(`✅ Updated ${field} to "${value}"`);
-          setVoiceFeedback(`Updated ${field} to "${value}"`);
+          };
+          
+          setFormData(updatedData);
+          setSuccess(`✅ Updated ${field} to "${value}". Say "save" to save changes.`);
+          setVoiceFeedback(`✅ ${field} = "${value}". Say "save" to save.`);
         } else {
-          setVoiceFeedback('Could not understand. Try: "update price to 500" or "change category to clothing"');
+          setVoiceFeedback('Could not understand. Try: "update price to 500", "save", or "cancel"');
         }
       } catch (err) {
         console.error('Voice update error:', err);
@@ -144,7 +187,7 @@ export function EditProduct() {
     } catch (err) {
       setVoiceFeedback('Could not start voice recognition.');
     }
-  }, [isVoiceSupported, isListening, language, formData]);
+  }, [isVoiceSupported, isListening, language, formData, id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -229,6 +272,8 @@ export function EditProduct() {
                 <li>• "Update price to 500" or "Price 200 rupees karo"</li>
                 <li>• "Change category to clothing"</li>
                 <li>• "Name badlo Silk Saree"</li>
+                <li>• <strong>"Save"</strong> or <strong>"Save changes"</strong> - saves and goes to dashboard</li>
+                <li>• <strong>"Cancel"</strong> or <strong>"Go back"</strong> - goes back without saving</li>
               </ul>
             </div>
 

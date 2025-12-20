@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { aiApi } from '../api/client';
+import { aiApi, productsApi } from '../api/client';
 
 // Command patterns - includes pure languages + mixed (Hinglish, Tanglish, etc.)
 const commands = {
@@ -111,6 +111,16 @@ const commands = {
     'পড়ো', 'page poro', 'eta ki', 'bolo'
   ],
 };
+
+// Patterns for "open product" command
+const openProductPatterns = [
+  'open', 'edit', 'show', 'view', 'go to',
+  'खोलो', 'kholo', 'dikhao', 'edit karo',
+  'திற', 'thira', 'kaatu', 'edit pannu',
+  'తెరవండి', 'teravandi', 'chupinchu', 'edit cheyyi',
+  'ತೆರೆ', 'tere', 'togo', 'edit maadu',
+  'খোলো', 'kholo', 'dekhao', 'edit koro'
+];
 
 // Question patterns - includes mixed language
 const questionPatterns = [
@@ -240,6 +250,58 @@ export function useVoiceCommands() {
     return null;
   }, []);
 
+  // Check if user wants to open a specific product
+  const checkOpenProduct = useCallback((text) => {
+    const lowerText = text.toLowerCase();
+    for (const pattern of openProductPatterns) {
+      if (lowerText.includes(pattern.toLowerCase())) {
+        // Extract product name after the pattern
+        const idx = lowerText.indexOf(pattern.toLowerCase());
+        const afterPattern = text.substring(idx + pattern.length).trim();
+        if (afterPattern.length > 2) {
+          return afterPattern;
+        }
+      }
+    }
+    return null;
+  }, []);
+
+  // Find product by name (fuzzy match)
+  const findProductByName = useCallback(async (searchName) => {
+    try {
+      const response = await productsApi.list();
+      const products = response.data;
+      const searchLower = searchName.toLowerCase();
+      
+      // Try exact match first
+      let match = products.find(p => p.name.toLowerCase() === searchLower);
+      
+      // Try partial match
+      if (!match) {
+        match = products.find(p => p.name.toLowerCase().includes(searchLower));
+      }
+      
+      // Try if search term is in product name
+      if (!match) {
+        match = products.find(p => searchLower.includes(p.name.toLowerCase()));
+      }
+      
+      // Try word-by-word match
+      if (!match) {
+        const searchWords = searchLower.split(/\s+/);
+        match = products.find(p => {
+          const nameWords = p.name.toLowerCase().split(/\s+/);
+          return searchWords.some(sw => nameWords.some(nw => nw.includes(sw) || sw.includes(nw)));
+        });
+      }
+      
+      return match;
+    } catch (e) {
+      console.error('Error finding product:', e);
+      return null;
+    }
+  }, []);
+
   const askAI = useCallback(async (question) => {
     const msgs = responses[language] || responses.en;
     setFeedback(msgs.thinking);
@@ -296,6 +358,24 @@ export function useVoiceCommands() {
     r.onresult = async (e) => {
       const t = e.results[0][0].transcript;
       setLastCommand(t);
+      
+      // Check if user wants to open a specific product
+      const productName = checkOpenProduct(t);
+      if (productName && user) {
+        setFeedback(`🔍 Searching for "${productName}"...`);
+        const product = await findProductByName(productName);
+        if (product) {
+          speak(`Opening ${product.name}`);
+          setFeedback(`✅ Opening ${product.name}`);
+          setTimeout(() => navigate(`/products/${product.id}/edit`), 300);
+          return;
+        } else {
+          speak(`Could not find product ${productName}`);
+          setFeedback(`❌ Product "${productName}" not found`);
+          return;
+        }
+      }
+      
       if (isQuestion(t)) { await askAI(t); return; }
       let action = matchCommand(t);
       if (!action) {
