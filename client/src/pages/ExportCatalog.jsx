@@ -17,6 +17,7 @@ import { productsApi } from '../api/client';
 import { Button, Alert, Card, CardBody } from '../components/ui';
 import { Container } from '../components/layout';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 
 const PLATFORMS = [
   {
@@ -69,6 +70,7 @@ const PLATFORMS = [
 export function ExportCatalog() {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(null);
@@ -79,9 +81,11 @@ export function ExportCatalog() {
 
   useEffect(() => {
     fetchProducts();
-    // Generate a mock shareable link
-    setShareLink(`${window.location.origin}/catalog/demo-${Date.now().toString(36)}`);
-  }, []);
+    // Generate shareable link using actual user ID
+    if (user?.id) {
+      setShareLink(`${window.location.origin}/catalog/${user.id}`);
+    }
+  }, [user]);
 
   const fetchProducts = async () => {
     try {
