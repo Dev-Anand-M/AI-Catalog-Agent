@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+
+# Environment files (SECRETS - NEVER COMMIT)
+.env
+.env.local
+.env.*
+server/.env
+client/.env
+
+# Database
+*.db
+*.db-journal
+server/prisma/*.db
+server/prisma/*.db-journal
+
+# Build outputs
+dist/
+build/
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads
+server/uploads/*
+!server/uploads/.gitkeep
+
+# Vercel
+.vercel
