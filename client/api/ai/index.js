@@ -26,7 +26,11 @@ async function callPerplexity(systemPrompt, userPrompt, maxTokens = 200) {
     });
     if (!response.ok) return null;
     const data = await response.json();
-    return data.choices?.[0]?.message?.content?.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+    let content = data.choices?.[0]?.message?.content || '';
+    // Remove think tags and citation references like [1], [2], etc.
+    content = content.replace(/<think>[\s\S]*?<\/think>/gi, '');
+    content = content.replace(/\[\d+\]/g, '');
+    return content.trim();
   } catch { return null; }
 }
 
