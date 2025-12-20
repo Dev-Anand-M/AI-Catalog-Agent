@@ -287,7 +287,7 @@ export function ExportCatalog() {
 
               {/* Platform Export Options */}
               <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                Export to Seller Platforms
+                {t('export_platforms_title')}
               </h2>
               
               <div className="grid gap-4 mb-8">
@@ -354,27 +354,27 @@ export function ExportCatalog() {
               {/* Instructions */}
               <Card className="bg-gray-100 border-0">
                 <CardBody>
-                  <h3 className="font-semibold text-gray-900 mb-3">How to Upload to Seller Platforms</h3>
+                  <h3 className="font-semibold text-gray-900 mb-3">{t('how_to_upload')}</h3>
                   <ol className="space-y-2 text-sm text-gray-600">
                     <li className="flex gap-2">
                       <span className="font-bold text-primary-600">1.</span>
-                      Export your catalog in the platform-specific format
+                      {t('step1_export')}
                     </li>
                     <li className="flex gap-2">
                       <span className="font-bold text-primary-600">2.</span>
-                      Log in to your seller account on the platform
+                      {t('step2_login')}
                     </li>
                     <li className="flex gap-2">
                       <span className="font-bold text-primary-600">3.</span>
-                      Go to "Bulk Upload" or "Import Products" section
+                      {t('step3_bulk')}
                     </li>
                     <li className="flex gap-2">
                       <span className="font-bold text-primary-600">4.</span>
-                      Upload the exported file and review your listings
+                      {t('step4_upload')}
                     </li>
                   </ol>
                   <p className="text-xs text-gray-500 mt-4">
-                    💡 Pro tip: In future versions, we'll support direct API integration for one-click publishing!
+                    {t('pro_tip')}
                   </p>
                 </CardBody>
               </Card>

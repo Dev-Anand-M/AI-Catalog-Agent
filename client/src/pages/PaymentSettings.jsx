@@ -6,7 +6,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { paymentApi } from '../api/client';
 
 export function PaymentSettings() {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('upi');
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -44,62 +44,7 @@ export function PaymentSettings() {
     }
   };
 
-  const labels = {
-    en: {
-      title: 'Payment Settings',
-      subtitle: 'Add your payment details to receive payments from customers',
-      upi: 'UPI',
-      bank: 'Bank Account',
-      qr: 'QR Code',
-      upiId: 'UPI ID',
-      upiName: 'Name on UPI',
-      addUpi: 'Add Another UPI',
-      accountName: 'Account Holder Name',
-      accountNumber: 'Account Number',
-      ifsc: 'IFSC Code',
-      bankName: 'Bank Name',
-      uploadQr: 'Upload QR Code',
-      save: 'Save Payment Details',
-      saved: 'Payment details saved successfully!',
-      remove: 'Remove',
-      placeholder: {
-        upiId: 'yourname@upi',
-        upiName: 'Your Name',
-        accountName: 'Account Holder Name',
-        accountNumber: '1234567890',
-        ifsc: 'SBIN0001234',
-        bankName: 'State Bank of India'
-      }
-    },
-    hi: {
-      title: 'भुगतान सेटिंग्स',
-      subtitle: 'ग्राहकों से भुगतान प्राप्त करने के लिए अपना भुगतान विवरण जोड़ें',
-      upi: 'यूपीआई',
-      bank: 'बैंक खाता',
-      qr: 'क्यूआर कोड',
-      upiId: 'यूपीआई आईडी',
-      upiName: 'यूपीआई पर नाम',
-      addUpi: 'एक और यूपीआई जोड़ें',
-      accountName: 'खाताधारक का नाम',
-      accountNumber: 'खाता संख्या',
-      ifsc: 'आईएफएससी कोड',
-      bankName: 'बैंक का नाम',
-      uploadQr: 'क्यूआर कोड अपलोड करें',
-      save: 'भुगतान विवरण सहेजें',
-      saved: 'भुगतान विवरण सफलतापूर्वक सहेजा गया!',
-      remove: 'हटाएं',
-      placeholder: {
-        upiId: 'yourname@upi',
-        upiName: 'आपका नाम',
-        accountName: 'खाताधारक का नाम',
-        accountNumber: '1234567890',
-        ifsc: 'SBIN0001234',
-        bankName: 'भारतीय स्टेट बैंक'
-      }
-    }
-  };
 
-  const l = labels[language] || labels.en;
 
   const handleUpiChange = (index, field, value) => {
     const newUpi = [...paymentMethods.upi];
@@ -160,9 +105,9 @@ export function PaymentSettings() {
   };
 
   const tabs = [
-    { id: 'upi', label: l.upi, icon: Smartphone },
-    { id: 'bank', label: l.bank, icon: Building2 },
-    { id: 'qr', label: l.qr, icon: QrCode },
+    { id: 'upi', label: t('upi'), icon: Smartphone },
+    { id: 'bank', label: t('bank_account'), icon: Building2 },
+    { id: 'qr', label: t('qr_code'), icon: QrCode },
   ];
 
   return (
@@ -170,12 +115,12 @@ export function PaymentSettings() {
       <Container>
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">{l.title}</h1>
-            <p className="text-gray-600">{l.subtitle}</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('payment_title')}</h1>
+            <p className="text-gray-600">{t('payment_subtitle')}</p>
           </div>
 
           {saved && (
-            <Alert type="success" message={l.saved} className="mb-6" />
+            <Alert type="success" message={t('payment_saved')} className="mb-6" />
           )}
           
           {error && (
@@ -224,22 +169,22 @@ export function PaymentSettings() {
                             className="text-red-500 hover:text-red-600 text-sm flex items-center gap-1"
                           >
                             <Trash2 className="w-4 h-4" />
-                            {l.remove}
+                            {t('remove')}
                           </button>
                         )}
                       </div>
                       <div className="grid gap-4">
                         <Input
-                          label={l.upiId}
+                          label={t('upi_id')}
                           value={upi.upiId}
                           onChange={(e) => handleUpiChange(index, 'upiId', e.target.value)}
-                          placeholder={l.placeholder.upiId}
+                          placeholder="yourname@upi"
                         />
                         <Input
-                          label={l.upiName}
+                          label={t('upi_name')}
                           value={upi.name}
                           onChange={(e) => handleUpiChange(index, 'name', e.target.value)}
-                          placeholder={l.placeholder.upiName}
+                          placeholder={t('enter_product_name')}
                         />
                       </div>
                     </div>
@@ -250,7 +195,7 @@ export function PaymentSettings() {
                     className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-primary-500 hover:text-primary-500 flex items-center justify-center gap-2 transition-colors"
                   >
                     <Plus className="w-5 h-5" />
-                    {l.addUpi}
+                    {t('add_upi')}
                   </button>
                 </div>
               </CardBody>
@@ -263,29 +208,29 @@ export function PaymentSettings() {
               <CardBody>
                 <div className="space-y-4">
                   <Input
-                    label={l.accountName}
+                    label={t('account_name')}
                     value={paymentMethods.bank.accountName}
                     onChange={(e) => handleBankChange('accountName', e.target.value)}
-                    placeholder={l.placeholder.accountName}
+                    placeholder={t('account_name')}
                   />
                   <Input
-                    label={l.accountNumber}
+                    label={t('account_number')}
                     value={paymentMethods.bank.accountNumber}
                     onChange={(e) => handleBankChange('accountNumber', e.target.value)}
-                    placeholder={l.placeholder.accountNumber}
+                    placeholder="1234567890"
                   />
                   <div className="grid grid-cols-2 gap-4">
                     <Input
-                      label={l.ifsc}
+                      label={t('ifsc_code')}
                       value={paymentMethods.bank.ifsc}
                       onChange={(e) => handleBankChange('ifsc', e.target.value.toUpperCase())}
-                      placeholder={l.placeholder.ifsc}
+                      placeholder="SBIN0001234"
                     />
                     <Input
-                      label={l.bankName}
+                      label={t('bank_name')}
                       value={paymentMethods.bank.bankName}
                       onChange={(e) => handleBankChange('bankName', e.target.value)}
-                      placeholder={l.placeholder.bankName}
+                      placeholder={t('bank_name')}
                     />
                   </div>
                 </div>
@@ -309,14 +254,14 @@ export function PaymentSettings() {
                         onClick={() => setPaymentMethods({ ...paymentMethods, qr: null })}
                         className="text-red-500 hover:text-red-600 text-sm"
                       >
-                        {l.remove}
+                        {t('remove')}
                       </button>
                     </div>
                   ) : (
                     <label className="block cursor-pointer">
                       <div className="py-12 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 transition-colors">
                         <QrCode className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                        <p className="text-gray-500">{l.uploadQr}</p>
+                        <p className="text-gray-500">{t('upload_qr')}</p>
                         <p className="text-sm text-gray-400 mt-1">PNG, JPG up to 5MB</p>
                       </div>
                       <input
@@ -336,7 +281,7 @@ export function PaymentSettings() {
           <div className="mt-6">
             <Button variant="primary" className="w-full" onClick={handleSave} disabled={saving}>
               <CheckCircle className="w-5 h-5 mr-2" />
-              {saving ? 'Saving...' : l.save}
+              {saving ? t('saving_text') : t('save_payment')}
             </Button>
           </div>
           </>

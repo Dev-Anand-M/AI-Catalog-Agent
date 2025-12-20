@@ -33,7 +33,7 @@ const speechLangCodes = {
 export function EditProduct() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState('');
@@ -229,7 +229,7 @@ export function EditProduct() {
       <Container>
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Edit Product</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{t('edit_product')}</h1>
             
             {/* Voice Update Button */}
             {isVoiceSupported && (
@@ -243,7 +243,7 @@ export function EditProduct() {
                 }`}
               >
                 {isListening ? <Mic className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-                {isListening ? 'Listening...' : '🎤 Voice Update'}
+                {isListening ? t('listening_text') : `🎤 ${t('voice_update')}`}
               </button>
             )}
           </div>
@@ -266,37 +266,37 @@ export function EditProduct() {
           <div className="bg-white rounded-xl shadow-md p-8">
             {/* Voice Command Help */}
             <div className="mb-6 p-4 bg-gradient-to-r from-primary-50 to-accent-50 rounded-lg border border-primary-100">
-              <h3 className="font-semibold text-gray-800 mb-2">🎤 Voice Commands</h3>
-              <p className="text-sm text-gray-600 mb-2">Click "Voice Update" and say:</p>
+              <h3 className="font-semibold text-gray-800 mb-2">🎤 {t('voice_commands')}</h3>
+              <p className="text-sm text-gray-600 mb-2">{t('voice_commands_desc')}</p>
               <ul className="text-sm text-gray-600 space-y-1">
-                <li>• "Update price to 500" or "Price 200 rupees karo"</li>
-                <li>• "Change category to clothing"</li>
-                <li>• "Name badlo Silk Saree"</li>
-                <li>• <strong>"Save"</strong> or <strong>"Save changes"</strong> - saves and goes to dashboard</li>
-                <li>• <strong>"Cancel"</strong> or <strong>"Go back"</strong> - goes back without saving</li>
+                <li>• {t('voice_example_price')}</li>
+                <li>• {t('voice_example_category')}</li>
+                <li>• {t('voice_example_name')}</li>
+                <li>• <strong>{t('voice_example_save')}</strong></li>
+                <li>• <strong>{t('voice_example_cancel')}</strong></li>
               </ul>
             </div>
 
             <form onSubmit={handleSubmit}>
               <Input
-                label="Product Name"
+                label={t('product_name')}
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                placeholder="Enter product name"
+                placeholder={t('enter_product_name')}
                 error={fieldErrors.name}
                 required
               />
 
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description <span className="text-red-500">*</span>
+                  {t('description')} <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
-                  placeholder="Describe your product"
+                  placeholder={t('describe_your_product')}
                   required
                   rows={4}
                   className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
@@ -310,18 +310,18 @@ export function EditProduct() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select
-                  label="Category"
+                  label={t('category')}
                   name="category"
                   value={formData.category}
                   onChange={handleChange}
                   options={CATEGORIES}
-                  placeholder="Select category"
+                  placeholder={t('select_category')}
                   error={fieldErrors.category}
                   required
                 />
 
                 <Select
-                  label="Language"
+                  label={t('language')}
                   name="language"
                   value={formData.language}
                   onChange={handleChange}
@@ -332,12 +332,12 @@ export function EditProduct() {
               </div>
 
               <Input
-                label="Price (₹)"
+                label={`${t('price')} (₹)`}
                 type="number"
                 name="price"
                 value={formData.price}
                 onChange={handleChange}
-                placeholder="Enter price"
+                placeholder={t('enter_price')}
                 error={fieldErrors.price}
                 required
               />
@@ -348,7 +348,7 @@ export function EditProduct() {
                   variant="outline"
                   onClick={() => navigate('/dashboard')}
                 >
-                  Cancel
+                  {t('cancel')}
                 </Button>
                 <Button
                   type="submit"
@@ -356,7 +356,7 @@ export function EditProduct() {
                   disabled={loading}
                   className="flex-1"
                 >
-                  {loading ? 'Saving...' : 'Save Changes'}
+                  {loading ? t('saving_text') : t('save_changes')}
                 </Button>
               </div>
             </form>

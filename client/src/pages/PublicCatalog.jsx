@@ -4,6 +4,7 @@ import { Store, Package, Share2, Smartphone, QrCode, X, MessageCircle } from 'lu
 import { catalogApi } from '../api/client';
 import { Container } from '../components/layout';
 import { Card, CardBody, Alert, Button } from '../components/ui';
+import { useLanguage } from '../context/LanguageContext';
 
 const CATEGORY_ICONS = {
   Grocery: '🛒',
@@ -15,6 +16,7 @@ const CATEGORY_ICONS = {
 
 export function PublicCatalog() {
   const { userId } = useParams();
+  const { t } = useLanguage();
   const [catalog, setCatalog] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -94,7 +96,7 @@ export function PublicCatalog() {
         <Container>
           <div className="text-center">
             <Package className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Catalog Not Found</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('catalog_not_found')}</h1>
             <p className="text-gray-600">{error}</p>
           </div>
         </Container>
@@ -110,11 +112,11 @@ export function PublicCatalog() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
             <Store className="w-8 h-8 text-primary-600" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">{catalog.seller.name}'s Catalog</h1>
-          <p className="text-gray-600 mb-4">{catalog.products.length} products available</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{catalog.seller.name}</h1>
+          <p className="text-gray-600 mb-4">{catalog.products.length} {t('products_available')}</p>
           <Button variant="outline" size="sm" onClick={handleShare}>
             <Share2 className="w-4 h-4 mr-2" />
-            {copied ? 'Link Copied!' : 'Share Catalog'}
+            {copied ? t('link_copied') : t('share_catalog')}
           </Button>
         </div>
 
@@ -123,7 +125,7 @@ export function PublicCatalog() {
           <Card>
             <CardBody className="text-center py-12">
               <Package className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-600">No products in this catalog yet.</p>
+              <p className="text-gray-600">{t('no_products_catalog')}</p>
             </CardBody>
           </Card>
         ) : (
@@ -151,7 +153,7 @@ export function PublicCatalog() {
                     <span className="text-xl font-bold text-primary-600">₹{product.price}</span>
                     <span className="text-xs bg-gray-100 px-2 py-1 rounded">{product.category}</span>
                   </div>
-                  <p className="text-xs text-primary-500 mt-2 text-center">Tap to view details</p>
+                  <p className="text-xs text-primary-500 mt-2 text-center">{t('tap_view_details')}</p>
                 </CardBody>
               </Card>
             ))}
@@ -164,7 +166,7 @@ export function PublicCatalog() {
             <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
               {/* Modal Header */}
               <div className="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between rounded-t-2xl">
-                <h2 className="text-lg font-semibold text-gray-900">Product Details</h2>
+                <h2 className="text-lg font-semibold text-gray-900">{t('product_details')}</h2>
                 <button onClick={closeProductDetail} className="p-2 hover:bg-gray-100 rounded-full">
                   <X className="w-5 h-5 text-gray-500" />
                 </button>
@@ -193,7 +195,7 @@ export function PublicCatalog() {
                 </div>
                 
                 <div className="mb-6">
-                  <h4 className="text-sm font-medium text-gray-500 mb-2">Description</h4>
+                  <h4 className="text-sm font-medium text-gray-500 mb-2">{t('description')}</h4>
                   <p className="text-gray-700 leading-relaxed">{selectedProduct.description}</p>
                 </div>
                 
@@ -204,7 +206,7 @@ export function PublicCatalog() {
                       <Store className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Sold by</p>
+                      <p className="text-sm text-gray-500">{t('sold_by')}</p>
                       <p className="font-semibold text-gray-900">{catalog.seller.name}</p>
                     </div>
                   </div>
@@ -217,11 +219,11 @@ export function PublicCatalog() {
                   onClick={() => handleContactSeller(selectedProduct)}
                 >
                   <MessageCircle className="w-5 h-5 mr-2" />
-                  Contact Seller on WhatsApp
+                  {t('contact_whatsapp')}
                 </Button>
                 
                 <p className="text-xs text-gray-500 text-center mt-3">
-                  Opens WhatsApp with a pre-filled message
+                  {t('whatsapp_note')}
                 </p>
               </div>
             </div>
@@ -232,13 +234,13 @@ export function PublicCatalog() {
         {catalog.payment && (catalog.payment.upi?.length > 0 || catalog.payment.qr) && (
           <Card className="mt-8">
             <CardBody className="p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 text-center">💳 Payment Options</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 text-center">💳 {t('payment_options')}</h2>
               <div className="flex flex-col md:flex-row gap-6 justify-center items-center">
                 {/* UPI IDs */}
                 {catalog.payment.upi?.length > 0 && (
                   <div className="text-center">
                     <Smartphone className="w-8 h-8 mx-auto text-primary-500 mb-2" />
-                    <p className="text-sm text-gray-500 mb-2">Pay via UPI</p>
+                    <p className="text-sm text-gray-500 mb-2">{t('pay_via_upi')}</p>
                     {catalog.payment.upi.map((upi, idx) => (
                       <div key={idx} className="bg-primary-50 px-4 py-2 rounded-lg mb-2">
                         <p className="font-mono font-semibold text-primary-700">{upi.upiId}</p>
@@ -252,7 +254,7 @@ export function PublicCatalog() {
                 {catalog.payment.qr && (
                   <div className="text-center">
                     <QrCode className="w-8 h-8 mx-auto text-primary-500 mb-2" />
-                    <p className="text-sm text-gray-500 mb-2">Scan to Pay</p>
+                    <p className="text-sm text-gray-500 mb-2">{t('scan_to_pay')}</p>
                     <img 
                       src={catalog.payment.qr} 
                       alt="Payment QR Code" 
@@ -267,8 +269,8 @@ export function PublicCatalog() {
 
         {/* Footer */}
         <div className="mt-12 text-center text-sm text-gray-500">
-          <p>Powered by Digital Catalog Agent</p>
-          <p className="mt-1">Create your own catalog at <a href="/" className="text-primary-600 hover:underline">digitalcatalog.app</a></p>
+          <p>{t('powered_by')}</p>
+          <p className="mt-1">{t('create_own_catalog')} <a href="/" className="text-primary-600 hover:underline">digitalcatalog.app</a></p>
         </div>
       </Container>
     </div>

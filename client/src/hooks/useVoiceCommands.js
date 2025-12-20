@@ -307,7 +307,14 @@ export function useVoiceCommands() {
     setFeedback(msgs.thinking);
     try {
       const pageName = location.pathname.split('/').pop() || 'home';
-      const res = await aiApi.chat({ message: question, context: pageName, language });
+      // Get page content for context
+      const pageContent = document.body.innerText.substring(0, 1500);
+      const res = await aiApi.chat({ 
+        message: question, 
+        context: pageName, 
+        pageContent: pageContent,
+        language 
+      });
       speak(res.data.response);
       setFeedback(res.data.response);
     } catch (e) {

@@ -5,6 +5,7 @@ import { productsApi, aiApi } from '../api/client';
 import { Button, Input, Select, Alert, Card, CardBody } from '../components/ui';
 import { Container } from '../components/layout';
 import { VoiceInput } from '../components/VoiceInput';
+import { useLanguage } from '../context/LanguageContext';
 
 const CATEGORIES = [
   { value: 'Grocery', label: '🛒 Grocery' },
@@ -30,6 +31,7 @@ const INPUT_MODES = {
 
 export function AddProduct() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState('');
@@ -80,7 +82,7 @@ export function AddProduct() {
 
   const handleGenerate = async () => {
     if (!promptText.trim()) {
-      setError('Please describe your product first using voice or text');
+      setError(t('please_describe'));
       return;
     }
 
@@ -108,10 +110,10 @@ export function AddProduct() {
         language: 'English'
       }));
       
-      setSuccess('✨ AI generated product listing! Review and edit below.');
+      setSuccess(t('ai_generated_success'));
       setStep(2);
     } catch (err) {
-      setError('Failed to generate product details. Please try again.');
+      setError(t('failed_generate'));
     } finally {
       setGenerating(false);
     }
@@ -149,19 +151,19 @@ export function AddProduct() {
       <Container>
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Add New Product</h1>
-            <p className="text-gray-600">Use voice or text to create your product listing</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('add_new_product')}</h1>
+            <p className="text-gray-600">{t('use_voice_text')}</p>
           </div>
 
           <div className="flex items-center justify-center mb-8">
             <div className={`flex items-center ${step >= 1 ? 'text-primary-600' : 'text-gray-400'}`}>
               <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${step >= 1 ? 'bg-primary-500 text-white' : 'bg-gray-200'}`}>1</div>
-              <span className="ml-2 font-medium">Describe</span>
+              <span className="ml-2 font-medium">{t('step_describe')}</span>
             </div>
             <ArrowRight className="w-6 h-6 mx-4 text-gray-300" />
             <div className={`flex items-center ${step >= 2 ? 'text-primary-600' : 'text-gray-400'}`}>
               <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${step >= 2 ? 'bg-primary-500 text-white' : 'bg-gray-200'}`}>2</div>
-              <span className="ml-2 font-medium">Review & Save</span>
+              <span className="ml-2 font-medium">{t('step_review')}</span>
             </div>
           </div>
 
@@ -173,7 +175,7 @@ export function AddProduct() {
               <CardBody className="p-6">
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <Languages className="w-4 h-4 inline mr-2" />Select Your Language
+                    <Languages className="w-4 h-4 inline mr-2" />{t('select_language')}
                   </label>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                     {LANGUAGES.map(lang => (
@@ -192,7 +194,7 @@ export function AddProduct() {
                 </div>
 
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">How would you like to describe your product?</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('describe_method')}</label>
                   <div className="flex gap-2">
                     <button
                       type="button"
@@ -202,8 +204,8 @@ export function AddProduct() {
                       }`}
                     >
                       <Mic className={`w-8 h-8 ${inputMode === INPUT_MODES.VOICE ? 'text-primary-500' : 'text-gray-400'}`} />
-                      <span className="font-medium">Voice</span>
-                      <span className="text-xs text-gray-500">Speak to describe</span>
+                      <span className="font-medium">{t('voice')}</span>
+                      <span className="text-xs text-gray-500">{t('speak_to_describe')}</span>
                     </button>
                     <button
                       type="button"
@@ -213,8 +215,8 @@ export function AddProduct() {
                       }`}
                     >
                       <Wand2 className={`w-8 h-8 ${inputMode === INPUT_MODES.TEXT ? 'text-primary-500' : 'text-gray-400'}`} />
-                      <span className="font-medium">Text</span>
-                      <span className="text-xs text-gray-500">Type description</span>
+                      <span className="font-medium">{t('text')}</span>
+                      <span className="text-xs text-gray-500">{t('type_description')}</span>
                     </button>
                   </div>
                 </div>
@@ -227,17 +229,17 @@ export function AddProduct() {
 
                 {inputMode === INPUT_MODES.TEXT && (
                   <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Describe your product</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t('describe_product')}</label>
                     <textarea
                       value={promptText}
                       onChange={(e) => setPromptText(e.target.value)}
-                      placeholder='E.g., "Handmade cotton saree with traditional block print design from Rajasthan..."'
+                      placeholder={t('describe_placeholder')}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 min-h-[120px]"
                     />
                     
                     {/* Product Image Upload */}
                     <div className="mt-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">📷 Add Product Image (optional)</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">📷 {t('add_product_image')}</label>
                       {productImage ? (
                         <div className="relative inline-block">
                           <img src={productImage} alt="Product" className="w-32 h-32 object-cover rounded-lg border" />
@@ -254,7 +256,7 @@ export function AddProduct() {
                           <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                           <div className="text-center">
                             <Upload className="w-6 h-6 mx-auto text-gray-400" />
-                            <span className="text-xs text-gray-500 mt-1">Upload</span>
+                            <span className="text-xs text-gray-500 mt-1">{t('upload')}</span>
                           </div>
                         </label>
                       )}
@@ -264,7 +266,7 @@ export function AddProduct() {
 
                 <Button type="button" variant="accent" onClick={handleGenerate} disabled={generating || !promptText.trim()} className="w-full py-4 text-lg">
                   <Sparkles className="w-5 h-5 mr-2" />
-                  {generating ? 'AI is generating...' : 'Generate Product Details with AI'}
+                  {generating ? t('ai_generating') : t('generate_with_ai')}
                 </Button>
               </CardBody>
             </Card>
@@ -274,28 +276,28 @@ export function AddProduct() {
             <Card>
               <CardBody className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900">Review & Edit Details</h2>
-                  <Button type="button" variant="outline" size="sm" onClick={() => setStep(1)}>← Back to Input</Button>
+                  <h2 className="text-xl font-semibold text-gray-900">{t('review_edit')}</h2>
+                  <Button type="button" variant="outline" size="sm" onClick={() => setStep(1)}>{t('back_to_input')}</Button>
                 </div>
 
                 <form onSubmit={handleSubmit}>
                   {/* Image Preview */}
                   {productImage && (
                     <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('product_image')}</label>
                       <img src={productImage} alt="Product" className="w-32 h-32 object-cover rounded-lg border" />
                     </div>
                   )}
 
-                  <Input label="Product Name" name="name" value={formData.name} onChange={handleChange} placeholder="Enter product name" error={fieldErrors.name} required />
+                  <Input label={t('product_name')} name="name" value={formData.name} onChange={handleChange} placeholder={t('enter_product_name')} error={fieldErrors.name} required />
 
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Description <span className="text-red-500">*</span></label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('description')} <span className="text-red-500">*</span></label>
                     <textarea
                       name="description"
                       value={formData.description}
                       onChange={handleChange}
-                      placeholder="Describe your product"
+                      placeholder={t('describe_your_product')}
                       required
                       rows={4}
                       className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${fieldErrors.description ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
@@ -304,16 +306,16 @@ export function AddProduct() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Select label="Category" name="category" value={formData.category} onChange={handleChange} options={CATEGORIES} placeholder="Select category" error={fieldErrors.category} required />
-                    <Select label="Language" name="language" value={formData.language} onChange={handleChange} options={LANGUAGES} error={fieldErrors.language} required />
+                    <Select label={t('category')} name="category" value={formData.category} onChange={handleChange} options={CATEGORIES} placeholder={t('select_category')} error={fieldErrors.category} required />
+                    <Select label={t('language')} name="language" value={formData.language} onChange={handleChange} options={LANGUAGES} error={fieldErrors.language} required />
                   </div>
 
-                  <Input label="Price (₹)" type="number" name="price" value={formData.price} onChange={handleChange} placeholder="Enter price" error={fieldErrors.price} required />
+                  <Input label={`${t('price')} (₹)`} type="number" name="price" value={formData.price} onChange={handleChange} placeholder={t('enter_price')} error={fieldErrors.price} required />
 
                   <div className="flex gap-4 mt-6">
-                    <Button type="button" variant="outline" onClick={() => navigate('/dashboard')}>Cancel</Button>
+                    <Button type="button" variant="outline" onClick={() => navigate('/dashboard')}>{t('cancel')}</Button>
                     <Button type="submit" variant="primary" disabled={loading} className="flex-1">
-                      {loading ? 'Adding Product...' : '✓ Add Product to Catalog'}
+                      {loading ? t('adding_product') : t('add_to_catalog')}
                     </Button>
                   </div>
                 </form>
@@ -322,8 +324,8 @@ export function AddProduct() {
           )}
 
           <div className="mt-8 text-center text-sm text-gray-500">
-            <p>💡 Tip: Describe your product in detail for better AI-generated listings</p>
-            <p className="mt-1">Supports voice input in Hindi, Tamil, Telugu, Kannada, and Bengali</p>
+            <p>{t('tip_describe')}</p>
+            <p className="mt-1">{t('supports_voice')}</p>
           </div>
         </div>
       </Container>

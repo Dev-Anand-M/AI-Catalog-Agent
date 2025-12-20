@@ -141,21 +141,149 @@ Return JSON: {"action":"actionName","confidence":0.0-1.0}`;
 }
 
 async function handleChat(req, res) {
-  const { message, context = '' } = req.body;
+  const { message, context = '', pageContent = '' } = req.body;
   if (!message) return res.status(400).json({ error: 'Message required' });
 
-  const systemPrompt = `You are a helpful assistant for a digital product catalog app. Page: ${context}. Be brief.`;
-  const aiResponse = await callPerplexity(systemPrompt, message, 150);
-  res.json({ response: aiResponse || "I'm here to help with your catalog." });
+  // Comprehensive knowledge about the Digital Catalog app
+  const appKnowledge = `
+DIGITAL CATALOG AGENT - Complete App Knowledge:
+
+APP PURPOSE: Help small Indian retailers create digital product catalogs using voice/text in local languages (Hindi, Tamil, Telugu, Kannada, Bengali, English).
+
+PAGES & FEATURES:
+
+1. LANDING PAGE (/):
+   - Hero section explaining the app
+   - Language selector (6 Indian languages)
+   - Features: Voice Input, Photo Capture, AI Descriptions, Multi-Language, Mobile-First, Share Anywhere
+   - How it works: Choose Language → Describe Product → AI Generates → Share Catalog
+   - Call to action buttons: Get Started, Try Demo
+
+2. DASHBOARD (/dashboard):
+   - Shows all your products in a grid
+   - Each product card shows: name, description, price, category, edit/delete buttons
+   - "Add Product" button to create new products
+   - "Share Catalog" button to get shareable link
+   - "Publish to Platforms" button for export options
+   - "Payment Settings" to set up payment methods
+
+3. ADD PRODUCT (/products/new):
+   - Step 1: Choose language, then Voice or Text input
+   - Voice: Tap mic and speak product description
+   - Text: Type product description
+   - Can upload product image
+   - "Generate with AI" button creates product details
+   - Step 2: Review & edit generated name, description, category, price
+   - Save to add to catalog
+
+4. EDIT PRODUCT (/products/:id/edit):
+   - Same as add product but for existing products
+   - Voice commands: "update price to 500", "change category to clothing", "save", "cancel"
+   - Click "Voice Update" button to use voice commands
+
+5. PAYMENT SETTINGS (/payment):
+   - THREE payment options (you don't need all, pick what works for you):
+     a) UPI: Add UPI IDs like yourname@upi (can add multiple)
+     b) Bank Account: Account holder name, account number, IFSC code, bank name
+     c) QR Code: Upload your payment QR code image
+   - Customers see these on your public catalog
+   - You can use ANY combination - just UPI, just QR, or all three
+
+6. EXPORT/PUBLISH (/export):
+   - Shareable catalog link to share on WhatsApp, Facebook, etc.
+   - Export to platforms: Amazon, Flipkart, Google Merchant, WhatsApp Business
+   - Downloads CSV files for bulk upload to seller platforms
+
+7. PUBLIC CATALOG (/catalog/:userId):
+   - What customers see when they visit your catalog link
+   - Shows all your products with images, prices
+   - Click product to see details and "Contact Seller on WhatsApp" button
+   - Shows your payment options (UPI, QR code)
+
+8. LOGIN/SIGNUP:
+   - Create account with name, email, password
+   - Login to access your catalog
+
+VOICE COMMANDS (say these anytime):
+- "Go to dashboard" / "My catalog"
+- "Add product" / "New product"
+- "Export" / "Publish"
+- "Payment settings"
+- "Help" - explains voice commands
+- "Logout"
+
+ACCESSIBILITY:
+- Voice input for all major actions
+- Works in 6 Indian languages
+- Mobile-friendly design
+- Large touch targets
+
+IMPORTANT RULES FOR ASSISTANT:
+- ONLY answer questions about this Digital Catalog app
+- If asked about anything outside the app (like "president of India", weather, news, etc.), politely say: "I can only help with the Digital Catalog app. What would you like to know about creating your product catalog?"
+- Always provide helpful alternatives (e.g., if no bank account, suggest UPI or QR code)
+- Be an accessibility helper - describe what's on the current page when asked
+`;
+
+  const currentPageInfo = context ? `\nCURRENT PAGE: ${context}\nPAGE CONTENT: ${pageContent || 'Not provided'}` : '';
+
+  const systemPrompt = `You are the voice assistant for Digital Catalog Agent app. You help small Indian retailers create digital product catalogs.
+
+${appKnowledge}
+${currentPageInfo}
+
+RESPONSE RULES:
+1. ONLY answer questions about this app - refuse general knowledge questions politely
+2. If user asks "what's on this page" or "tell me about this page", describe the current page features in detail
+3. Always suggest alternatives (e.g., "You don't need a bank account - you can use UPI or upload a QR code instead")
+4. Keep responses conversational but complete - don't cut off mid-sentence
+5. If on Payment page and user says "I don't have bank account", explain UPI and QR options
+6. Speak in the user's language if they speak in Hindi/Tamil/etc.
+7. Be helpful and encouraging - many users are new to technology`;
+
+  const aiResponse = await callPerplexity(systemPrompt, message, 500);
+  
+  // Check if the response seems to be answering a general knowledge question
+  const generalTopics = ['president', 'prime minister', 'capital', 'weather', 'news', 'cricket', 'movie', 'song', 'recipe'];
+  const isGeneralQuestion = generalTopics.some(topic => message.toLowerCase().includes(topic));
+  
+  if (isGeneralQuestion) {
+    res.json({ response: "I can only help with the Digital Catalog app. Would you like to know how to add products, set up payments, or share your catalog?" });
+    return;
+  }
+  
+  res.json({ response: aiResponse || "I'm here to help with your Digital Catalog. You can ask me about adding products, setting up payments, sharing your catalog, or say 'help' for voice commands." });
 }
 
 async function handleReadPage(req, res) {
   const { pageContent, pageName = 'page' } = req.body;
   if (!pageContent) return res.status(400).json({ error: 'Page content required' });
 
-  const systemPrompt = `Summarize this page in 1-2 sentences for accessibility. Page: ${pageName}`;
-  const aiResponse = await callPerplexity(systemPrompt, pageContent.substring(0, 1500), 100);
-  res.json({ summary: aiResponse || `You are on the ${pageName} page.` });
+  // Detailed page descriptions for accessibility
+  const pageDescriptions = {
+    'landing': 'You are on the home page. This page explains Digital Catalog Agent - an app to help small retailers create digital product catalogs using voice in Indian languages. You can select your language at the top, then click Get Started to create an account, or Try Demo to see how it works.',
+    'dashboard': 'You are on your Dashboard. This shows all your products. You can click Add Product to create a new product, Share Catalog to get a link for customers, Publish to Platforms to export, or Payment Settings to set up how customers pay you. Each product has Edit and Delete buttons.',
+    'add-product': 'You are on the Add Product page. First select your language, then choose Voice or Text to describe your product. After describing, click Generate with AI to create product details. Then review the name, description, category and price before saving.',
+    'edit-product': 'You are on the Edit Product page. You can change the product name, description, category, or price. Use the Voice Update button to make changes by speaking, like "update price to 500" or "save" to save changes.',
+    'payment': 'You are on Payment Settings. You have 3 options: UPI - add your UPI ID like yourname@upi. Bank Account - add account details. QR Code - upload your payment QR image. You can use any combination. Customers will see these on your catalog.',
+    'export': 'You are on the Export page. Copy your shareable catalog link to share on WhatsApp or Facebook. You can also export your products to Amazon, Flipkart, Google Shopping, or WhatsApp Business by clicking the Export buttons.',
+    'login': 'You are on the Login page. Enter your email and password to access your catalog. If you do not have an account, click Sign Up.',
+    'signup': 'You are on the Sign Up page. Enter your name, email, and password to create an account. Password must be at least 8 characters.'
+  };
+
+  // Try to match page name
+  const pageKey = Object.keys(pageDescriptions).find(key => 
+    pageName.toLowerCase().includes(key) || pageContent.toLowerCase().includes(key)
+  );
+
+  if (pageKey) {
+    res.json({ summary: pageDescriptions[pageKey] });
+    return;
+  }
+
+  const systemPrompt = `You are an accessibility assistant for Digital Catalog Agent app. Describe this page clearly for someone who cannot see it. Mention all buttons, forms, and what actions they can take. Be thorough but conversational.`;
+  const aiResponse = await callPerplexity(systemPrompt, `Page: ${pageName}. Content: ${pageContent.substring(0, 2000)}`, 300);
+  res.json({ summary: aiResponse || `You are on the ${pageName} page. Ask me what you can do here.` });
 }
 
 export default async function handler(req, res) {
