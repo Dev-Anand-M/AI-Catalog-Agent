@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Mic, MicOff } from 'lucide-react';
+import { Mic, MicOff, Upload, X, Image } from 'lucide-react';
 import { productsApi, aiApi } from '../api/client';
 import { Button, Input, Select, Alert } from '../components/ui';
 import { Container } from '../components/layout';
@@ -51,6 +51,9 @@ export function EditProduct() {
     imageUrl: ''
   });
 
+  const [imagePreview, setImagePreview] = useState('');
+  const fileInputRef = useRef(null);
+
   const isVoiceSupported = typeof window !== 'undefined' && 
     ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
 
@@ -70,6 +73,9 @@ export function EditProduct() {
         language: product.language,
         imageUrl: product.imageUrl || ''
       });
+      if (product.imageUrl) {
+        setImagePreview(product.imageUrl);
+      }
     } catch (err) {
       setError('Failed to load product. Please try again.');
     } finally {
@@ -82,6 +88,33 @@ export function EditProduct() {
     setFormData(prev => ({ ...prev, [name]: value }));
     if (fieldErrors[name]) {
       setFieldErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  // Handle image upload
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image size should be less than 5MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = reader.result;
+        setImagePreview(base64);
+        setFormData(prev => ({ ...prev, imageUrl: base64 }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Remove image
+  const handleRemoveImage = () => {
+    setImagePreview('');
+    setFormData(prev => ({ ...prev, imageUrl: '' }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -451,6 +484,47 @@ export function EditProduct() {
                 {fieldErrors.description && (
                   <p className="mt-1 text-sm text-red-600">{fieldErrors.description}</p>
                 )}
+              </div>
+
+              {/* Product Image Upload */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('product_image')} ({t('optional') || 'Optional'})
+                </label>
+                
+                {imagePreview ? (
+                  <div className="relative inline-block">
+                    <img 
+                      src={imagePreview} 
+                      alt="Product preview" 
+                      className="w-32 h-32 object-cover rounded-lg border border-gray-300"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary-500 hover:bg-primary-50 transition-colors"
+                  >
+                    <Image className="w-8 h-8 text-gray-400 mb-1" />
+                    <span className="text-xs text-gray-500">{t('upload') || 'Upload'}</span>
+                  </div>
+                )}
+                
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+                <p className="text-xs text-gray-500 mt-1">Max 5MB • JPG, PNG</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
