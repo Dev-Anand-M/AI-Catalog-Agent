@@ -102,38 +102,38 @@ export function Landing() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             <FeatureCard
               icon={<Mic className="w-8 h-8" />}
-              title="Voice Input"
-              description="Simply speak to describe your products. Our AI understands Hindi, Tamil, Telugu, Kannada, Bengali, and English."
+              title={t('feature_voice_title')}
+              description={t('feature_voice_desc')}
               color="primary"
             />
             <FeatureCard
               icon={<Camera className="w-8 h-8" />}
-              title="Photo Capture"
-              description="Take a photo of your product and let AI generate the description automatically."
+              title={t('feature_photo_title')}
+              description={t('feature_photo_desc')}
               color="accent"
             />
             <FeatureCard
               icon={<Sparkles className="w-8 h-8" />}
-              title="AI Descriptions"
-              description="Get professional product descriptions, categories, and pricing suggestions instantly."
+              title={t('feature_ai_title')}
+              description={t('feature_ai_desc')}
               color="primary"
             />
             <FeatureCard
               icon={<Languages className="w-8 h-8" />}
-              title="Multi-Language"
-              description="Create catalogs in your local language. Auto-translate to reach more customers."
+              title={t('feature_multilang_title')}
+              description={t('feature_multilang_desc')}
               color="accent"
             />
             <FeatureCard
               icon={<Smartphone className="w-8 h-8" />}
-              title="Mobile-First"
-              description="Designed for smartphones. Easy to use even with basic phones and slow internet."
+              title={t('feature_mobile_title')}
+              description={t('feature_mobile_desc')}
               color="primary"
             />
             <FeatureCard
               icon={<Globe className="w-8 h-8" />}
-              title="Share Anywhere"
-              description="Share your catalog link on WhatsApp, Facebook, or any platform to reach customers."
+              title={t('feature_share_title')}
+              description={t('feature_share_desc')}
               color="accent"
             />
           </div>
@@ -145,31 +145,31 @@ export function Landing() {
         <Container>
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Challenges We Solve
+              {t('challenges_title')}
             </h2>
             <p className="text-xl text-gray-600">
-              Small businesses face real barriers to going digital
+              {t('challenges_subtitle')}
             </p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
             <ProblemCard
               icon={<Store className="w-10 h-10 text-red-500" />}
-              title="Low Digital Skills"
-              description="Many shopkeepers find technology confusing. Complex apps and forms are overwhelming."
-              solution="Our voice-first approach needs no typing or technical knowledge."
+              title={t('challenge_skills_title')}
+              description={t('challenge_skills_desc')}
+              solution={t('challenge_skills_solution')}
             />
             <ProblemCard
               icon={<Languages className="w-10 h-10 text-red-500" />}
-              title="Language Barriers"
-              description="Most digital tools are in English, excluding millions who prefer local languages."
-              solution="Full support for Hindi, Tamil, Telugu, Kannada, Bengali, and English."
+              title={t('challenge_language_title')}
+              description={t('challenge_language_desc')}
+              solution={t('challenge_language_solution')}
             />
             <ProblemCard
               icon={<Globe className="w-10 h-10 text-red-500" />}
-              title="No Online Presence"
-              description="Without a catalog, businesses miss opportunities to reach new customers online."
-              solution="Create shareable catalogs in minutes, not days."
+              title={t('challenge_presence_title')}
+              description={t('challenge_presence_desc')}
+              solution={t('challenge_presence_solution')}
             />
           </div>
         </Container>
@@ -180,33 +180,33 @@ export function Landing() {
         <Container>
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              How It Works
+              {t('how_it_works')}
             </h2>
             <p className="text-xl text-gray-600">
-              Create your first product listing in under 2 minutes
+              {t('how_it_works_subtitle')}
             </p>
           </div>
           
           <div className="grid md:grid-cols-4 gap-8">
             <StepCard
               number="1"
-              title="Choose Language"
-              description="Select your preferred language from 6 Indian languages"
+              title={t('step1_title')}
+              description={t('step1_desc')}
             />
             <StepCard
               number="2"
-              title="Describe Product"
-              description="Speak, type, or take a photo of your product"
+              title={t('step2_title')}
+              description={t('step2_desc')}
             />
             <StepCard
               number="3"
-              title="AI Generates"
-              description="AI creates professional name, description & category"
+              title={t('step3_title')}
+              description={t('step3_desc')}
             />
             <StepCard
               number="4"
-              title="Share Catalog"
-              description="Share your catalog link with customers"
+              title={t('step4_title')}
+              description={t('step4_desc')}
             />
           </div>
         </Container>
@@ -216,10 +216,10 @@ export function Landing() {
       <section className="py-16 bg-primary-600 text-white">
         <Container>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <StatCard number="6" label="Languages Supported" />
-            <StatCard number="3" label="Input Methods" />
-            <StatCard number="5" label="Product Categories" />
-            <StatCard number="∞" label="Products You Can Add" />
+            <StatCard number="6" label={t('stat_languages')} />
+            <StatCard number="3" label={t('stat_inputs')} />
+            <StatCard number="5" label={t('stat_categories')} />
+            <StatCard number="∞" label={t('stat_products')} />
           </div>
         </Container>
       </section>
@@ -229,22 +229,21 @@ export function Landing() {
         <Container>
           <div className="text-center text-white">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Ready to Digitize Your Business?
+              {t('cta_title')}
             </h2>
             <p className="text-xl text-accent-100 mb-8 max-w-2xl mx-auto">
-              Join thousands of small businesses already using Digital Catalog Agent. 
-              It's free, easy, and works in your language.
+              {t('cta_subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/signup">
                 <Button variant="secondary" size="lg">
-                  Create Your Catalog Now
+                  {t('cta_button')}
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
             </div>
             <p className="mt-6 text-accent-200 text-sm">
-              Supporting Digital India initiative • Made for Bharat 🇮🇳
+              {t('cta_footer')}
             </p>
           </div>
         </Container>
