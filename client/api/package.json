@@ -2,7 +2,7 @@
   "name": "api",
   "type": "module",
   "dependencies": {
-    "@prisma/client": "^5.7.0",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "postgres": "^3.4.3"
   }
 }

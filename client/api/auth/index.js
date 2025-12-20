@@ -1,9 +1,8 @@
-import { PrismaClient } from '@prisma/client';
+import { getDb } from '../_lib/db.js';
 import { generateToken, verifyToken, hashPassword, comparePassword } from '../_lib/auth.js';
 
-const prisma = new PrismaClient();
-
 async function handleSignup(req, res) {
+  const sql = getDb();
   const { name, email, password, confirmPassword } = req.body;
   
   const errors = {};
@@ -17,38 +16,35 @@ async function handleSignup(req, res) {
     return res.status(400).json({ error: 'Validation failed', details: errors });
   }
 
-  const existingUser = await prisma.user.findUnique({
-    where: { email: email.toLowerCase() }
-  });
-  
-  if (existingUser) {
+  const existing = await sql`SELECT id FROM "User" WHERE email = ${email.toLowerCase()}`;
+  if (existing.length > 0) {
     return res.status(400).json({ error: 'Validation failed', details: { email: 'Email is already registered' } });
   }
 
   const passwordHash = await hashPassword(password);
   
-  const user = await prisma.user.create({
-    data: {
-      name: name.trim(),
-      email: email.toLowerCase(),
-      passwordHash
-    }
-  });
-
+  const result = await sql`
+    INSERT INTO "User" (name, email, "passwordHash", "createdAt")
+    VALUES (${name.trim()}, ${email.toLowerCase()}, ${passwordHash}, NOW())
+    RETURNING id, name, email
+  `;
+  
+  const user = result[0];
   const token = generateToken(user);
   res.status(201).json({ token, user: { id: user.id, name: user.name, email: user.email } });
 }
 
 async function handleLogin(req, res) {
+  const sql = getDb();
   const { email, password } = req.body;
+  
   if (!email || !password) return res.status(400).json({ error: 'Invalid credentials' });
 
-  const user = await prisma.user.findUnique({
-    where: { email: email.toLowerCase() }
-  });
+  const result = await sql`SELECT id, name, email, "passwordHash" FROM "User" WHERE email = ${email.toLowerCase()}`;
   
-  if (!user) return res.status(401).json({ error: 'Invalid credentials' });
-
+  if (result.length === 0) return res.status(401).json({ error: 'Invalid credentials' });
+  
+  const user = result[0];
   const isValid = await comparePassword(password, user.passwordHash);
   if (!isValid) return res.status(401).json({ error: 'Invalid credentials' });
 
@@ -57,30 +53,25 @@ async function handleLogin(req, res) {
 }
 
 async function handleMe(req, res) {
+  const sql = getDb();
   const authHeader = req.headers.authorization;
+  
   if (!authHeader?.startsWith('Bearer ')) return res.status(401).json({ error: 'Unauthorized' });
 
   const decoded = verifyToken(authHeader.split(' ')[1]);
   if (!decoded) return res.status(401).json({ error: 'Unauthorized' });
 
-  const user = await prisma.user.findUnique({
-    where: { id: decoded.userId }
-  });
+  const result = await sql`SELECT id, name, email FROM "User" WHERE id = ${decoded.userId}`;
   
-  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+  if (result.length === 0) return res.status(401).json({ error: 'Unauthorized' });
 
+  const user = result[0];
   res.json({ user: { id: user.id, name: user.name, email: user.email } });
 }
 
 export default async function handler(req, res) {
   try {
     const action = req.query.action;
-    
-    // Check if DATABASE_URL is set
-    if (!process.env.DATABASE_URL) {
-      console.error('DATABASE_URL not set');
-      return res.status(500).json({ error: 'Database not configured' });
-    }
     
     if (req.method === 'POST') {
       if (action === 'signup') return await handleSignup(req, res);
@@ -90,7 +81,7 @@ export default async function handler(req, res) {
     
     res.status(405).json({ error: 'Method not allowed' });
   } catch (error) {
-    console.error('Auth error:', error.message, error.stack);
+    console.error('Auth error:', error.message);
     res.status(500).json({ error: 'Internal server error', message: error.message });
   }
 }
