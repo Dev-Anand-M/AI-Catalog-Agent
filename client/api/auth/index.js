@@ -57,13 +57,18 @@ function handleMe(req, res) {
 }
 
 export default async function handler(req, res) {
-  const action = req.query.action;
-  
-  if (req.method === 'POST') {
-    if (action === 'signup') return handleSignup(req, res);
-    if (action === 'login') return handleLogin(req, res);
+  try {
+    const action = req.query.action;
+    
+    if (req.method === 'POST') {
+      if (action === 'signup') return await handleSignup(req, res);
+      if (action === 'login') return await handleLogin(req, res);
+    }
+    if (req.method === 'GET' && action === 'me') return handleMe(req, res);
+    
+    res.status(405).json({ error: 'Method not allowed' });
+  } catch (error) {
+    console.error('Auth error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
-  if (req.method === 'GET' && action === 'me') return handleMe(req, res);
-  
-  res.status(405).json({ error: 'Method not allowed' });
 }
