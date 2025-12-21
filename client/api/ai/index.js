@@ -257,18 +257,27 @@ async function handleParseVoice(req, res) {
   
   // Check for save commands FIRST - before sending to AI
   const saveCommands = [
+    // Tamil script versions - COMPREHENSIVE
     'சேவ் பண்ணு', 'சேவ் பண்ணுங்க', 'சேவ் செய்', 'சேவ் போடு',
-    'சேமி பண்ணு', 'சேமி செய்', 'சேமிக்க', 'சேமி',
-    'முடிஞ்சது', 'ஓகே', 'சரி', 'செய்து முடி',
-    'सेव करो', 'सेव कर', 'सेव कर दो', 'बचाओ', 'सहेजो',
+    'சேமி பண்ணு', 'சேமி செய்', 'சேமிக்க', 'சேமி', 'சேமிக்கவும்',
+    'முடிஞ்சது', 'ஓகே', 'சரி', 'செய்து முடி', 'செய்',
+    // Hindi script versions
+    'सेव करो', 'सेव कर', 'सेव कर दो', 'सेव', 'बचाओ', 'सहेजो',
     'हो गया', 'ठीक है', 'खतम', 'पूरा हो गया',
-    'సేవ్ చేయి', 'సేవ్ చేయండి', 'భద్రపరచు', 'అయింది', 'సరే',
-    'ಸೇವ್ ಮಾಡು', 'ಸೇವ್ ಮಾಡಿ', 'ಉಳಿಸು', 'ಆಯ್ತು', 'ಸರಿ',
-    'সেভ করো', 'সেভ কর', 'সংরক্ষণ করো', 'হয়ে গেলো', 'ঠিক আছে',
-    'save pannu', 'save podu', 'save karo', 'save kar', 'save cheyyi', 'save cheyyandi', 'save maadu', 'save koro',
-    'ho gaya', 'hoye gelo', 'thik ache', 'theek hai', 'mudinjadhu', 'ayyindi', 'aaytu',
-    'save', 'done', 'finish', 'submit', 'confirm', 'ok', 'okay',
-    'khatam', 'seri', 'seyvi', 'sare', 'sari', 'ulisu'
+    // Telugu script versions
+    'సేవ్ చేయి', 'సేవ్ చేయండి', 'సేవ్', 'భద్రపరచు', 'అయింది', 'సరే',
+    // Kannada script versions
+    'ಸೇವ್ ಮಾಡು', 'ಸೇವ್ ಮಾಡಿ', 'ಸೇವ್', 'ಉಳಿಸು', 'ಆಯ್ತು', 'ಸರಿ',
+    // Bengali script versions
+    'সেভ করো', 'সেভ কর', 'সেভ', 'সংরক্ষণ করো', 'সংরক্ষণ', 'হয়ে গেলো', 'ঠিক আছে',
+    // Romanized versions - ALL languages
+    'save pannu', 'save pannunga', 'save podu', 'save sei',
+    'save karo', 'save kar', 'save cheyyi', 'save cheyyandi', 'save maadu', 'save koro',
+    'ho gaya', 'hoye gelo', 'thik ache', 'theek hai', 'theek', 'thik',
+    'mudinjadhu', 'ayyindi', 'aaytu',
+    'semi', 'semi pannu', 'semikka', 'seri', 'seyvi',
+    'save', 'done', 'finish', 'submit', 'confirm', 'ok', 'okay', 'yes',
+    'khatam', 'sare', 'sari', 'ulisu'
   ];
   
   // Check for cancel commands FIRST - "cancel" sounds like "cancer" (கேன்சர்) in Tamil!

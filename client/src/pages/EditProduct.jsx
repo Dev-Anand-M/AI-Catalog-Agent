@@ -179,37 +179,45 @@ export function EditProduct() {
         'save pannu', 'save podu', 'save karo', 'save kar', 'save cheyyi', 'save cheyyandi', 'save maadu', 'save koro',
         'ho gaya', 'hoye gelo', 'thik ache', 'theek hai', 'mudinjadhu', 'ayyindi', 'aaytu',
         // English
-        'save', 'done', 'finish', 'submit', 'confirm',
+        'save', 'done', 'finish', 'submit', 'confirm', 'ok', 'okay', 'yes',
         // Hindi + Hinglish
-        'सेव', 'सहेजो', 'बचाओ', 'khatam',
-        // Tamil + Tanglish
-        'சேமி', 'சேமிக்க', 'seri', 'seyvi',
+        'सेव करो', 'सेव कर', 'सेव कर दो', 'सेव', 'सहेजो', 'बचाओ', 'हो गया', 'ठीक है', 'khatam', 'theek', 'thik',
+        // Tamil + Tanglish - COMPREHENSIVE
+        'சேவ் பண்ணு', 'சேவ் பண்ணுங்க', 'சேவ் செய்', 'சேவ் போடு',
+        'சேமி பண்ணு', 'சேமி செய்', 'சேமிக்க', 'சேமி', 'சேமிக்கவும்',
+        'முடிஞ்சது', 'ஓகே', 'சரி', 'செய்து முடி', 'செய்',
+        'save pannu', 'save pannunga', 'save sei', 'save podu',
+        'semi', 'semi pannu', 'semikka', 'seri', 'seyvi', 'mudinjadhu', 'okay',
         // Telugu + Tenglish
-        'సేవ్', 'భద్రపరచు', 'sare',
+        'సేవ్ చేయి', 'సేవ్ చేయండి', 'సేవ్', 'భద్రపరచు', 'అయింది', 'సరే', 'sare', 'save cheyyi',
         // Kannada + Kanglish
-        'ಸೇವ್', 'ಉಳಿಸು', 'sari', 'ulisu',
+        'ಸೇವ್ ಮಾಡು', 'ಸೇವ್ ಮಾಡಿ', 'ಸೇವ್', 'ಉಳಿಸು', 'ಆಯ್ತು', 'ಸರಿ', 'sari', 'ulisu', 'aaytu',
         // Bengali + Benglish
-        'সেভ', 'সংরক্ষণ'
+        'সেভ করো', 'সেভ কর', 'সেভ', 'সংরক্ষণ করো', 'সংরক্ষণ', 'হয়ে গেলো', 'ঠিক আছে', 'save koro'
       ];
 
       // Multi-language cancel commands - check longer phrases first
+      // NOTE: "cancel" sounds like "cancer" (கேன்சர்) in Tamil speech recognition!
       const cancelCommands = [
         // Longer phrases first (to match before shorter ones)
-        'cancel pannu', 'cancel karo', 'cancel cheyyi', 'cancel maadu', 'cancel koro',
+        'cancel pannu', 'cancer pannu', 'cancel karo', 'cancel cheyyi', 'cancel maadu', 'cancel koro',
         'go back', 'wapas jao', 'back po', 'back vellu', 'back hogu', 'back jao',
         'hinde hogu', 'pechone jao', 'thirumbu', 'venakki',
         // English
-        'cancel', 'back', 'exit', 'close',
+        'cancel', 'back', 'exit', 'close', 'no',
         // Hindi + Hinglish
-        'रद्द', 'वापस', 'peeche', 'band karo',
-        // Tamil + Tanglish
-        'ரத்து', 'திரும்பு', 'radhu', 'thirimbu',
+        'कैंसल करो', 'कैंसल कर', 'कैंसल', 'रद्द करो', 'रद्द', 'वापस जाओ', 'वापस', 'पीछे', 'बंद करो', 'नहीं चाहिए', 'peeche', 'band karo', 'nahi',
+        // Tamil + Tanglish - INCLUDING "cancer" spelling!
+        'கேன்சர் பண்ணு', 'கேன்சர் பண்ணுங்க', 'கேன்சர் செய்', 'கேன்சர்',
+        'கேன்சல் பண்ணு', 'கேன்சல் பண்ணுங்க', 'கேன்சல் செய்', 'கேன்சல்',
+        'ரத்து பண்ணு', 'ரத்து செய்', 'ரத்து', 'திரும்பு', 'பேக் போ', 'வேண்டாம்',
+        'cancer', 'radhu', 'thirimbu', 'venda', 'vendaam',
         // Telugu + Tenglish
-        'రద్దు', 'వెనక్కి', 'raddu',
+        'క్యాన్సల్ చేయి', 'క్యాన్సల్ చేయండి', 'క్యాన్సల్', 'రద్దు చేయి', 'రద్దు', 'వెనక్కి', 'వద్దు', 'raddu', 'vaddu',
         // Kannada + Kanglish
-        'ರದ್ದು', 'ಹಿಂದೆ', 'raddu', 'hinde',
+        'ಕ್ಯಾನ್ಸಲ್ ಮಾಡು', 'ಕ್ಯಾನ್ಸಲ್ ಮಾಡಿ', 'ಕ್ಯಾನ್ಸಲ್', 'ರದ್ದು ಮಾಡು', 'ರದ್ದು', 'ಹಿಂದೆ ಹೋಗು', 'ಹಿಂದೆ', 'ಬೇಡ', 'hinde', 'beda',
         // Bengali + Benglish
-        'বাতিল', 'ফিরে যাও', 'batil', 'fire jao'
+        'ক্যান্সেল করো', 'ক্যান্সেল কর', 'ক্যান্সেল', 'বাতিল করো', 'বাতিল', 'ফিরে যাও', 'পেছনে যাও', 'লাগবে না', 'batil', 'fire jao', 'lagbe na'
       ];
 
       // Multi-language feedback messages
