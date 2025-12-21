@@ -217,118 +217,48 @@ Return JSON: {"action":"actionName","confidence":0.0-1.0}`;
 }
 
 async function handleChat(req, res) {
-  const { message, context = '', pageContent = '' } = req.body;
+  const { message, context = '' } = req.body;
   if (!message) return res.status(400).json({ error: 'Message required' });
 
-  // Comprehensive knowledge about the Digital Catalog app
-  const appKnowledge = `
-DIGITAL CATALOG AGENT - Complete App Knowledge:
+  const systemPrompt = `You are a voice assistant for Digital Catalog app.
+Page: ${context}
 
-APP PURPOSE: Help small Indian retailers create digital product catalogs using voice/text in local languages (Hindi, Tamil, Telugu, Kannada, Bengali, English).
+STRICT RULES:
+- Maximum 2 SHORT sentences
+- NO markdown, NO asterisks, NO bullet points, NO lists, NO dashes
+- Plain conversational text only
+- Be brief and direct
+- Only answer about this app`;
 
-PAGES & FEATURES:
-
-1. LANDING PAGE (/):
-   - Hero section explaining the app
-   - Language selector (6 Indian languages)
-   - Features: Voice Input, Photo Capture, AI Descriptions, Multi-Language, Mobile-First, Share Anywhere
-   - How it works: Choose Language → Describe Product → AI Generates → Share Catalog
-   - Call to action buttons: Get Started, Try Demo
-
-2. DASHBOARD (/dashboard):
-   - Shows all your products in a grid
-   - Each product card shows: name, description, price, category, edit/delete buttons
-   - "Add Product" button to create new products
-   - "Share Catalog" button to get shareable link
-   - "Publish to Platforms" button for export options
-   - "Payment Settings" to set up payment methods
-
-3. ADD PRODUCT (/products/new):
-   - Step 1: Choose language, then Voice or Text input
-   - Voice: Tap mic and speak product description
-   - Text: Type product description
-   - Can upload product image
-   - "Generate with AI" button creates product details
-   - Step 2: Review & edit generated name, description, category, price
-   - Save to add to catalog
-
-4. EDIT PRODUCT (/products/:id/edit):
-   - Same as add product but for existing products
-   - Voice commands: "update price to 500", "change category to clothing", "save", "cancel"
-   - Click "Voice Update" button to use voice commands
-
-5. PAYMENT SETTINGS (/payment):
-   - THREE payment options (you don't need all, pick what works for you):
-     a) UPI: Add UPI IDs like yourname@upi (can add multiple)
-     b) Bank Account: Account holder name, account number, IFSC code, bank name
-     c) QR Code: Upload your payment QR code image
-   - Customers see these on your public catalog
-   - You can use ANY combination - just UPI, just QR, or all three
-
-6. EXPORT/PUBLISH (/export):
-   - Shareable catalog link to share on WhatsApp, Facebook, etc.
-   - Export to platforms: Amazon, Flipkart, Google Merchant, WhatsApp Business
-   - Downloads CSV files for bulk upload to seller platforms
-
-7. PUBLIC CATALOG (/catalog/:userId):
-   - What customers see when they visit your catalog link
-   - Shows all your products with images, prices
-   - Click product to see details and "Contact Seller on WhatsApp" button
-   - Shows your payment options (UPI, QR code)
-
-8. LOGIN/SIGNUP:
-   - Create account with name, email, password
-   - Login to access your catalog
-
-VOICE COMMANDS (say these anytime):
-- "Go to dashboard" / "My catalog"
-- "Add product" / "New product"
-- "Export" / "Publish"
-- "Payment settings"
-- "Help" - explains voice commands
-- "Logout"
-
-ACCESSIBILITY:
-- Voice input for all major actions
-- Works in 6 Indian languages
-- Mobile-friendly design
-- Large touch targets
-
-IMPORTANT RULES FOR ASSISTANT:
-- ONLY answer questions about this Digital Catalog app
-- If asked about anything outside the app (like "president of India", weather, news, etc.), politely say: "I can only help with the Digital Catalog app. What would you like to know about creating your product catalog?"
-- Always provide helpful alternatives (e.g., if no bank account, suggest UPI or QR code)
-- Be an accessibility helper - describe what's on the current page when asked
-`;
-
-  const currentPageInfo = context ? `\nCURRENT PAGE: ${context}\nPAGE CONTENT: ${pageContent || 'Not provided'}` : '';
-
-  const systemPrompt = `You are the voice assistant for Digital Catalog Agent app. You help small Indian retailers create digital product catalogs.
-
-${appKnowledge}
-${currentPageInfo}
-
-RESPONSE RULES:
-1. ONLY answer questions about this app - refuse general knowledge questions politely
-2. If user asks "what's on this page" or "tell me about this page", describe the current page features in detail
-3. Always suggest alternatives (e.g., "You don't need a bank account - you can use UPI or upload a QR code instead")
-4. Keep responses conversational but complete - don't cut off mid-sentence
-5. If on Payment page and user says "I don't have bank account", explain UPI and QR options
-6. Speak in the user's language if they speak in Hindi/Tamil/etc.
-7. Be helpful and encouraging - many users are new to technology`;
-
-  const aiResponse = await callPerplexity(systemPrompt, message, 500);
+  let aiResponse = await callPerplexity(systemPrompt, message, 60);
   
-  // Check if the response seems to be answering a general knowledge question
-  const generalTopics = ['president', 'prime minister', 'capital', 'weather', 'news', 'cricket', 'movie', 'song', 'recipe'];
-  const isGeneralQuestion = generalTopics.some(topic => message.toLowerCase().includes(topic));
-  
-  if (isGeneralQuestion) {
-    res.json({ response: "I can only help with the Digital Catalog app. Would you like to know how to add products, set up payments, or share your catalog?" });
-    return;
+  if (aiResponse) {
+    // Aggressively clean markdown
+    aiResponse = aiResponse
+      .replace(/\*\*([^*]+)\*\*/g, '$1')
+      .replace(/\*([^*]+)\*/g, '$1')
+      .replace(/\*/g, '')
+      .replace(/__([^_]+)__/g, '$1')
+      .replace(/_([^_]+)_/g, '$1')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/#{1,6}\s*/g, '')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/^[\s]*[-•]\s*/gm, '')
+      .replace(/\n+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    
+    // Hard limit to 150 chars
+    if (aiResponse.length > 150) {
+      const truncated = aiResponse.substring(0, 150);
+      const lastEnd = Math.max(truncated.lastIndexOf('.'), truncated.lastIndexOf('?'), truncated.lastIndexOf('!'));
+      aiResponse = lastEnd > 50 ? aiResponse.substring(0, lastEnd + 1) : truncated + '...';
+    }
+    
+    return res.json({ response: aiResponse });
   }
   
-  res.json({ response: aiResponse || "I'm here to help with your Digital Catalog. You can ask me about adding products, setting up payments, sharing your catalog, or say 'help' for voice commands." });
+  res.json({ response: "I can help with your catalog. Ask about products, payments, or navigation." });
 }
 
 async function handleReadPage(req, res) {
