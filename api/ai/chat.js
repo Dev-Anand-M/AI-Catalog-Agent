@@ -17,7 +17,7 @@ async function callPerplexity(systemPrompt, userPrompt) {
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        max_tokens: 60,
+        max_tokens: 50,
         temperature: 0.7
       })
     });
@@ -70,7 +70,18 @@ STRICT RULES:
     const aiResponse = await callPerplexity(systemPrompt, message);
     
     if (aiResponse) {
-      return res.json({ response: aiResponse });
+      // Hard limit: truncate to ~150 chars (about 2 sentences)
+      let response = aiResponse;
+      if (response.length > 150) {
+        // Find the last sentence end within 150 chars
+        const truncated = response.substring(0, 150);
+        const lastPeriod = truncated.lastIndexOf('.');
+        const lastQuestion = truncated.lastIndexOf('?');
+        const lastExclaim = truncated.lastIndexOf('!');
+        const cutPoint = Math.max(lastPeriod, lastQuestion, lastExclaim);
+        response = cutPoint > 50 ? response.substring(0, cutPoint + 1) : truncated + '...';
+      }
+      return res.json({ response });
     }
 
     res.json({ response: "I'm here to help with your catalog. Try asking about products, navigation, or features." });
