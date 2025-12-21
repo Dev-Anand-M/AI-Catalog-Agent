@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Mic, Languages, Wand2, ArrowRight, Upload, X } from 'lucide-react';
+import { Sparkles, Mic, Languages, Wand2, ArrowRight, Upload, X, Keyboard } from 'lucide-react';
 import { productsApi, aiApi } from '../api/client';
 import { Button, Input, Select, Alert, Card, CardBody } from '../components/ui';
 import { Container } from '../components/layout';
 import { VoiceInput } from '../components/VoiceInput';
+import { RegionalKeyboard } from '../components/RegionalKeyboard';
 import { useLanguage } from '../context/LanguageContext';
 
 const CATEGORIES = [
@@ -51,6 +52,9 @@ export function AddProduct() {
     imageUrl: ''
   });
 
+  const [showKeyboard, setShowKeyboard] = useState(false);
+  const textareaRef = useRef(null);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -61,6 +65,16 @@ export function AddProduct() {
 
   const handleVoiceTranscript = (transcript) => {
     setPromptText(transcript);
+  };
+
+  const handleKeyboardChar = (char) => {
+    if (char === 'BACKSPACE') {
+      setPromptText(prev => prev.slice(0, -1));
+    } else {
+      setPromptText(prev => prev + char);
+    }
+    // Focus back on textarea
+    textareaRef.current?.focus();
   };
 
   const handleImageUpload = (e) => {
@@ -229,13 +243,39 @@ export function AddProduct() {
 
                 {inputMode === INPUT_MODES.TEXT && (
                   <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">{t('describe_product')}</label>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-sm font-medium text-gray-700">{t('describe_product')}</label>
+                      {formData.language !== 'English' && (
+                        <button
+                          type="button"
+                          onClick={() => setShowKeyboard(!showKeyboard)}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                            showKeyboard 
+                              ? 'bg-primary-500 text-white' 
+                              : 'bg-primary-50 text-primary-600 hover:bg-primary-100'
+                          }`}
+                        >
+                          <Keyboard className="w-4 h-4" />
+                          {formData.language} {t('keyboard') || 'Keyboard'}
+                        </button>
+                      )}
+                    </div>
                     <textarea
+                      ref={textareaRef}
                       value={promptText}
                       onChange={(e) => setPromptText(e.target.value)}
                       placeholder={t('describe_placeholder')}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 min-h-[120px]"
                     />
+                    
+                    {/* Regional Keyboard */}
+                    {showKeyboard && formData.language !== 'English' && (
+                      <RegionalKeyboard
+                        language={formData.language}
+                        onCharacter={handleKeyboardChar}
+                        onClose={() => setShowKeyboard(false)}
+                      />
+                    )}
                     
                     {/* Product Image Upload */}
                     <div className="mt-4">

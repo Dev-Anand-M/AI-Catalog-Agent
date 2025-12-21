@@ -66,17 +66,30 @@ function detectCategory(text) {
   return 'Other';
 }
 
-function generateFallback(promptText) {
+function generateFallback(promptText, language = 'en') {
   const words = promptText.trim().split(/\s+/).filter(w => w.length > 2);
-  const name = words.slice(0, 3).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') || 'Premium Product';
+  const name = words.slice(0, 3).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') || promptText || 'Premium Product';
   const category = detectCategory(promptText);
   const priceRanges = { Grocery: [50, 500], Clothing: [500, 3000], Handicraft: [200, 2000], Electronics: [500, 5000], Other: [100, 1000] };
   const [min, max] = priceRanges[category] || priceRanges.Other;
   const price = Math.floor(Math.random() * (max - min) + min);
 
+  // Fallback descriptions that include the product name
+  const fallbackDescs = {
+    ta: `${promptText} - தரமான பொருள். எங்கள் கடையில் சிறந்த விலையில் கிடைக்கும்.`,
+    hi: `${promptText} - उच्च गुणवत्ता वाला उत्पाद। हमारी दुकान में सर्वोत्तम मूल्य पर उपलब्ध।`,
+    te: `${promptText} - నాణ్యమైన ఉత్పత్తి. మా షాపులో ఉత్తమ ధరలో లభిస్తుంది.`,
+    kn: `${promptText} - ಗುಣಮಟ್ಟದ ಉತ್ಪನ್ನ. ನಮ್ಮ ಅಂಗಡಿಯಲ್ಲಿ ಉತ್ತಮ ಬೆಲೆಯಲ್ಲಿ ಲಭ್ಯವಿದೆ.`,
+    bn: `${promptText} - উচ্চ মানের পণ্য। আমাদের দোকানে সেরা দামে পাওয়া যায়।`,
+    en: `${promptText} - Quality product available at our store at the best price.`
+  };
+
   return {
-    name, category, suggestedPrice: price, language: 'English',
-    description: `Quality ${name.toLowerCase()}. Great value for money.`,
+    name: promptText || name, 
+    category, 
+    suggestedPrice: price, 
+    language: languageNames[language] || 'English',
+    description: fallbackDescs[language] || fallbackDescs.en,
     keywords: words.slice(0, 5), confidence: 0.7, source: 'local'
   };
 }
@@ -94,36 +107,54 @@ export default async function handler(req, res) {
     }
 
     const inputLang = languageNames[spokenLanguage] || 'mixed Indian languages';
+    const outputLang = languageNames[spokenLanguage] || 'English';
 
     if (hasApiKey()) {
-      const systemPrompt = `You are an AI helping Indian sellers create product listings.
-The user may speak in ${inputLang}, Hinglish, or mixed languages.
-Respond ONLY with valid JSON:
-{"name":"Product name","description":"2-3 sentence description","category":"Grocery/Clothing/Handicraft/Electronics/Other","suggestedPrice":number,"keywords":["keyword1","keyword2"]}`;
+      const systemPrompt = `You are a product catalog assistant for Indian retail stores.
+The user describes a product - it may be in ANY language (Tamil, Hindi, Telugu, Kannada, Bengali, English, or mixed like Hinglish/Tanglish).
 
-      const aiResponse = await callPerplexity(systemPrompt, `Create product listing: "${promptText}"`, 500);
+YOUR TASK:
+1. UNDERSTAND what product they are describing (even if in Tamil script like "உளுத்தம் பருப்பு" or Hindi "चावल")
+2. Generate a SPECIFIC description about THAT product in ${outputLang}
+3. The description MUST be about the actual product mentioned, NOT a generic description
+
+EXAMPLES:
+- Input: "உளுத்தம் பருப்பு" (Tamil for Urad Dal) → Description should be about urad dal specifically
+- Input: "basmati rice 5kg bag" → Description should be about basmati rice
+- Input: "சிவப்பு அரிசி" (Tamil for Red Rice) → Description should be about red rice
+- Input: "हल्दी पाउडर" (Hindi for Turmeric Powder) → Description should be about turmeric
+
+CRITICAL: Write the description in ${outputLang}. Make it specific to the product, not generic.
+
+Respond ONLY with valid JSON:
+{"name":"Product name in ${outputLang}","description":"2-3 sentences about THIS specific product in ${outputLang}","category":"Grocery/Clothing/Handicraft/Electronics/Other","suggestedPrice":number,"keywords":["keyword1","keyword2"]}`;
+
+      const aiResponse = await callPerplexity(systemPrompt, `Product: "${promptText}"`, 500);
       
       if (aiResponse) {
         try {
           const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
             const parsed = JSON.parse(jsonMatch[0]);
-            return res.json({
-              name: parsed.name || 'Product',
-              description: parsed.description || promptText,
-              category: parsed.category || detectCategory(promptText),
-              suggestedPrice: parsed.suggestedPrice || 500,
-              language: 'English',
-              keywords: parsed.keywords || [],
-              confidence: 0.95,
-              source: 'perplexity'
-            });
+            // Check description is not empty/generic
+            if (parsed.description && parsed.description.length > 15) {
+              return res.json({
+                name: parsed.name || promptText,
+                description: parsed.description,
+                category: parsed.category || detectCategory(promptText),
+                suggestedPrice: parsed.suggestedPrice || 500,
+                language: outputLang,
+                keywords: parsed.keywords || [],
+                confidence: 0.95,
+                source: 'perplexity'
+              });
+            }
           }
         } catch {}
       }
     }
 
-    res.json(generateFallback(promptText));
+    res.json(generateFallback(promptText, spokenLanguage));
   } catch (error) {
     console.error('AI error:', error);
     res.status(500).json({ error: 'Failed to generate product details' });

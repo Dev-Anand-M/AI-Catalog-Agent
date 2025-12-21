@@ -40,31 +40,40 @@ async function handleGenerateProduct(req, res) {
   if (!name) return res.status(400).json({ error: 'Product name or promptText required' });
 
   const langNames = {
-    en: 'English', hi: 'Hindi', ta: 'Tamil', te: 'Telugu', kn: 'Kannada', ml: 'Malayalam', bn: 'Bengali'
+    en: 'English', hi: 'Hindi', ta: 'Tamil', te: 'Telugu', kn: 'Kannada', bn: 'Bengali'
   };
 
+  const outputLang = langNames[language] || 'English';
+
   const systemPrompt = `You are a product catalog assistant for Indian retail stores.
-The user will give you a product name which may be in ${langNames[language] || 'any Indian language'} (like Tamil தமிழ், Hindi हिंदी, etc).
-Your task: Identify the product, then generate details in ${langNames[language] || 'English'}.
+The user describes a product - it may be in ANY language (Tamil, Hindi, Telugu, Kannada, Bengali, English, or mixed).
 
-IMPORTANT: 
-- Understand the product even if written in Tamil/Hindi/Telugu script
-- For example: "உளுத்தம் பருப்பு" = Urad Dal, "அரிசி" = Rice, "பருப்பு" = Dal/Lentils
-- Generate a helpful description about the product (2-3 sentences)
-- Set appropriate category and typical Indian retail price
+YOUR TASK:
+1. UNDERSTAND what product they are describing (even if in Tamil script like "உளுத்தம் பருப்பு" or Hindi "चावल")
+2. Generate a SPECIFIC description about THAT product in ${outputLang}
+3. The description MUST be about the actual product mentioned, NOT a generic description
 
-Return ONLY valid JSON (no other text):
-{"name":"product name","description":"2-3 sentence description","category":"Grocery","price":100,"unit":"kg","suggestedPrice":100}
+EXAMPLES:
+- Input: "உளுத்தம் பருப்பு" (Tamil for Urad Dal) → Description should be about urad dal specifically
+- Input: "basmati rice 5kg bag" → Description should be about basmati rice
+- Input: "சிவப்பு அரிசி" (Tamil for Red Rice) → Description should be about red rice
+- Input: "हल्दी पाउडर" (Hindi for Turmeric Powder) → Description should be about turmeric
+
+CRITICAL: Write the description in ${outputLang}. Make it specific to the product, not generic.
+
+Return ONLY valid JSON:
+{"name":"product name in ${outputLang}","description":"2-3 sentences about THIS specific product in ${outputLang}","category":"Grocery","price":100,"unit":"kg"}
 
 Categories: Grocery, Clothing, Handicraft, Electronics, Other`;
   
-  const aiResponse = await callPerplexity(systemPrompt, `Generate product details for: ${name}`, 400);
+  const aiResponse = await callPerplexity(systemPrompt, `Product: "${name}"`, 500);
   if (aiResponse) {
     try {
       const match = aiResponse.match(/\{[\s\S]*\}/);
       if (match) {
         const parsed = JSON.parse(match[0]);
-        if (parsed.description && parsed.description.length > 5) {
+        // Check if description exists and is not a generic fallback
+        if (parsed.description && parsed.description.length > 10) {
           return res.json({
             name: parsed.name || name,
             description: parsed.description,
@@ -80,16 +89,19 @@ Categories: Grocery, Clothing, Handicraft, Electronics, Other`;
     }
   }
   
-  // Fallback with basic description for common grocery items
-  const fallbackDesc = language === 'ta' 
-    ? 'தரமான இந்திய தயாரிப்பு. புதிய மற்றும் சுத்தமான பொருள்.'
-    : language === 'hi'
-    ? 'उच्च गुणवत्ता वाला भारतीय उत्पाद। ताजा और शुद्ध।'
-    : 'Quality Indian product. Fresh and pure.';
+  // Fallback - but include the product name in the description
+  const fallbackDescs = {
+    ta: `${name} - தரமான பொருள். எங்கள் கடையில் சிறந்த விலையில் கிடைக்கும்.`,
+    hi: `${name} - उच्च गुणवत्ता वाला उत्पाद। हमारी दुकान में सर्वोत्तम मूल्य पर उपलब्ध।`,
+    te: `${name} - నాణ్యమైన ఉత్పత్తి. మా షాపులో ఉత్తమ ధరలో లభిస్తుంది.`,
+    kn: `${name} - ಗುಣಮಟ್ಟದ ಉತ್ಪನ್ನ. ನಮ್ಮ ಅಂಗಡಿಯಲ್ಲಿ ಉತ್ತಮ ಬೆಲೆಯಲ್ಲಿ ಲಭ್ಯವಿದೆ.`,
+    bn: `${name} - উচ্চ মানের পণ্য। আমাদের দোকানে সেরা দামে পাওয়া যায়।`,
+    en: `${name} - Quality product available at our store at the best price.`
+  };
     
   res.json({ 
     name, 
-    description: fallbackDesc, 
+    description: fallbackDescs[language] || fallbackDescs.en, 
     category: 'Grocery', 
     price: 0, 
     suggestedPrice: 0, 
