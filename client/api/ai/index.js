@@ -45,63 +45,78 @@ async function handleGenerateProduct(req, res) {
 
   const outputLang = langNames[language] || 'English';
 
-  const systemPrompt = `You are a product catalog assistant for Indian retail stores.
-The user describes a product - it may be in ANY language (Tamil, Hindi, Telugu, Kannada, Bengali, English, or mixed).
+  // Simpler, more direct prompt
+  const systemPrompt = `You help create product listings for Indian stores. 
+User input may be in Tamil, Hindi, Telugu, Kannada, Bengali or English.
 
-YOUR TASK:
-1. UNDERSTAND what product they are describing (even if in Tamil script like "உளுத்தம் பருப்பு" or Hindi "चावल")
-2. Generate a SPECIFIC description about THAT product in ${outputLang}
-3. The description MUST be about the actual product mentioned, NOT a generic description
+TASK: Identify the product and create a listing in ${outputLang}.
 
-EXAMPLES:
-- Input: "உளுத்தம் பருப்பு" (Tamil for Urad Dal) → Description should be about urad dal specifically
-- Input: "basmati rice 5kg bag" → Description should be about basmati rice
-- Input: "சிவப்பு அரிசி" (Tamil for Red Rice) → Description should be about red rice
-- Input: "हल्दी पाउडर" (Hindi for Turmeric Powder) → Description should be about turmeric
+Common Tamil products:
+- அரிசி = Rice, நெல் = Paddy/Rice
+- பருப்பு = Dal/Lentils  
+- எண்ணெய் = Oil
+- மசாலா = Spices
 
-CRITICAL: Write the description in ${outputLang}. Make it specific to the product, not generic.
-
-Return ONLY valid JSON:
-{"name":"product name in ${outputLang}","description":"2-3 sentences about THIS specific product in ${outputLang}","category":"Grocery","price":100,"unit":"kg"}
+Return ONLY this JSON format:
+{"name":"product name","description":"2 sentences describing this specific product","category":"Grocery","price":100}
 
 Categories: Grocery, Clothing, Handicraft, Electronics, Other`;
   
-  const aiResponse = await callPerplexity(systemPrompt, `Product: "${name}"`, 500);
+  const aiResponse = await callPerplexity(systemPrompt, `Create listing for: ${name}`, 400);
+  
   if (aiResponse) {
     try {
-      const match = aiResponse.match(/\{[\s\S]*\}/);
-      if (match) {
-        const parsed = JSON.parse(match[0]);
-        // Check if description exists and is not a generic fallback
-        if (parsed.description && parsed.description.length > 10) {
+      // Try to extract JSON from response
+      const jsonMatch = aiResponse.match(/\{[\s\S]*?\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        if (parsed.description && parsed.description.length > 15) {
           return res.json({
             name: parsed.name || name,
             description: parsed.description,
             category: parsed.category || 'Grocery',
             price: parsed.price || 0,
-            suggestedPrice: parsed.suggestedPrice || parsed.price || 0,
-            unit: parsed.unit || 'kg'
+            suggestedPrice: parsed.price || 0,
+            unit: 'kg'
           });
         }
       }
     } catch (e) {
-      console.error('JSON parse error:', e.message);
+      console.error('Parse error:', e.message, 'Response:', aiResponse?.substring(0, 200));
     }
   }
   
-  // Fallback - but include the product name in the description
-  const fallbackDescs = {
-    ta: `${name} - தரமான பொருள். எங்கள் கடையில் சிறந்த விலையில் கிடைக்கும்.`,
-    hi: `${name} - उच्च गुणवत्ता वाला उत्पाद। हमारी दुकान में सर्वोत्तम मूल्य पर उपलब्ध।`,
-    te: `${name} - నాణ్యమైన ఉత్పత్తి. మా షాపులో ఉత్తమ ధరలో లభిస్తుంది.`,
-    kn: `${name} - ಗುಣಮಟ್ಟದ ಉತ್ಪನ್ನ. ನಮ್ಮ ಅಂಗಡಿಯಲ್ಲಿ ಉತ್ತಮ ಬೆಲೆಯಲ್ಲಿ ಲಭ್ಯವಿದೆ.`,
-    bn: `${name} - উচ্চ মানের পণ্য। আমাদের দোকানে সেরা দামে পাওয়া যায়।`,
-    en: `${name} - Quality product available at our store at the best price.`
-  };
+  // Better fallback - create a more specific description based on common words
+  let description = '';
+  const lowerName = name.toLowerCase();
+  
+  // Detect product type from Tamil/Hindi/English keywords
+  if (lowerName.includes('அரிசி') || lowerName.includes('நெல்') || lowerName.includes('rice') || lowerName.includes('चावल')) {
+    description = language === 'ta' 
+      ? 'புதிய அரிசி, நல்ல தரமானது. சமையலுக்கு ஏற்றது, சுவையான உணவுக்கு சிறந்தது.'
+      : language === 'hi' ? 'ताजा चावल, उच्च गुणवत्ता। खाना पकाने के लिए उपयुक्त।'
+      : 'Fresh rice, high quality. Perfect for cooking delicious meals.';
+  } else if (lowerName.includes('பருப்பு') || lowerName.includes('dal') || lowerName.includes('दाल')) {
+    description = language === 'ta'
+      ? 'தரமான பருப்பு, புரதம் நிறைந்தது. சாம்பார், ரசம் செய்ய சிறந்தது.'
+      : language === 'hi' ? 'गुणवत्तापूर्ण दाल, प्रोटीन से भरपूर।'
+      : 'Quality dal, rich in protein. Great for sambar and rasam.';
+  } else {
+    // Generic but with product name
+    const fallbackDescs = {
+      ta: `${name} - தரமான பொருள். எங்கள் கடையில் சிறந்த விலையில் கிடைக்கும்.`,
+      hi: `${name} - उच्च गुणवत्ता वाला उत्पाद। सर्वोत्तम मूल्य पर उपलब्ध।`,
+      te: `${name} - నాణ్యమైన ఉత్పత్తి. ఉత్తమ ధరలో లభిస్తుంది.`,
+      kn: `${name} - ಗುಣಮಟ್ಟದ ಉತ್ಪನ್ನ. ಉತ್ತಮ ಬೆಲೆಯಲ್ಲಿ ಲಭ್ಯ.`,
+      bn: `${name} - উচ্চ মানের পণ্য। সেরা দামে পাওয়া যায়।`,
+      en: `${name} - Quality product at the best price.`
+    };
+    description = fallbackDescs[language] || fallbackDescs.en;
+  }
     
   res.json({ 
     name, 
-    description: fallbackDescs[language] || fallbackDescs.en, 
+    description, 
     category: 'Grocery', 
     price: 0, 
     suggestedPrice: 0, 
