@@ -237,22 +237,44 @@ export function PublicCatalog() {
         )}
 
         {/* Payment Info */}
-        {catalog.payment && (catalog.payment.upi?.length > 0 || catalog.payment.qr) && (
+        {catalog.payment && (catalog.payment.upi?.length > 0 || catalog.payment.qr || catalog.payment.bank) && (
           <Card className="mt-8">
             <CardBody className="p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-4 text-center">💳 {t('payment_options')}</h2>
               <div className="flex flex-col md:flex-row gap-6 justify-center items-center">
                 {/* UPI IDs */}
-                {catalog.payment.upi?.length > 0 && (
+                {catalog.payment.upi?.length > 0 && catalog.payment.upi.some(u => u.upiId) && (
                   <div className="text-center">
                     <Smartphone className="w-8 h-8 mx-auto text-primary-500 mb-2" />
                     <p className="text-sm text-gray-500 mb-2">{t('pay_via_upi')}</p>
-                    {catalog.payment.upi.map((upi, idx) => (
+                    {catalog.payment.upi.filter(u => u.upiId).map((upi, idx) => (
                       <div key={idx} className="bg-primary-50 px-4 py-2 rounded-lg mb-2">
                         <p className="font-mono font-semibold text-primary-700">{upi.upiId}</p>
                         {upi.name && <p className="text-xs text-gray-500">{upi.name}</p>}
                       </div>
                     ))}
+                  </div>
+                )}
+                
+                {/* Bank Account */}
+                {catalog.payment.bank && catalog.payment.bank.accountNumber && (
+                  <div className="text-center">
+                    <div className="w-8 h-8 mx-auto bg-primary-500 rounded-full flex items-center justify-center mb-2">
+                      <span className="text-white text-sm font-bold">🏦</span>
+                    </div>
+                    <p className="text-sm text-gray-500 mb-2">{t('bank_transfer') || 'Bank Transfer'}</p>
+                    <div className="bg-primary-50 px-4 py-3 rounded-lg text-left">
+                      {catalog.payment.bank.accountName && (
+                        <p className="text-sm"><span className="text-gray-500">Name:</span> <span className="font-semibold">{catalog.payment.bank.accountName}</span></p>
+                      )}
+                      <p className="text-sm"><span className="text-gray-500">A/C:</span> <span className="font-mono font-semibold">{catalog.payment.bank.accountNumber}</span></p>
+                      {catalog.payment.bank.ifsc && (
+                        <p className="text-sm"><span className="text-gray-500">IFSC:</span> <span className="font-mono font-semibold">{catalog.payment.bank.ifsc}</span></p>
+                      )}
+                      {catalog.payment.bank.bankName && (
+                        <p className="text-sm"><span className="text-gray-500">Bank:</span> <span className="font-semibold">{catalog.payment.bank.bankName}</span></p>
+                      )}
+                    </div>
                   </div>
                 )}
                 
