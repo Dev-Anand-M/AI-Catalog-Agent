@@ -19,19 +19,40 @@ export function VoiceCommandButton() {
   const [showHelp, setShowHelp] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [autoHideTimer, setAutoHideTimer] = useState(null);
 
-  // Auto-show feedback when it changes, auto-hide based on message length
+  // Auto-show feedback when it changes
   useEffect(() => {
     if (feedback) {
       setShowFeedback(true);
-      // Calculate read time: ~200 words per minute, minimum 5 seconds, max 20 seconds
-      const wordCount = feedback.split(/\s+/).length;
-      const readTimeMs = Math.min(Math.max(wordCount * 300, 5000), 20000);
-      const timer = setTimeout(() => {
-        setShowFeedback(false);
-      }, readTimeMs);
-      return () => clearTimeout(timer);
+      
+      // Clear any existing timer
+      if (autoHideTimer) {
+        clearTimeout(autoHideTimer);
+      }
+      
+      // Don't auto-hide "Listening..." or "Thinking..." messages
+      const isStatusMessage = feedback.includes('Listening') || feedback.includes('Thinking') || 
+                              feedback.includes('கேட்கிறது') || feedback.includes('सुन रहे') ||
+                              feedback.includes('వింటోంది') || feedback.includes('ಕೇಳುತ್ತಿದೆ') ||
+                              feedback.includes('শুনছে') || feedback.includes('யோசிக்கிறது');
+      
+      if (!isStatusMessage) {
+        // Calculate read time: ~200 words per minute, minimum 8 seconds, max 25 seconds
+        const wordCount = feedback.split(/\s+/).length;
+        const readTimeMs = Math.min(Math.max(wordCount * 400, 8000), 25000);
+        const timer = setTimeout(() => {
+          setShowFeedback(false);
+        }, readTimeMs);
+        setAutoHideTimer(timer);
+      }
     }
+    
+    return () => {
+      if (autoHideTimer) {
+        clearTimeout(autoHideTimer);
+      }
+    };
   }, [feedback]);
 
   // Dismiss feedback and stop speech
@@ -175,9 +196,11 @@ export function VoiceCommandButton() {
       window.speechSynthesis.cancel();
     }
     
-    // Hide any existing feedback when starting to listen
-    setShowFeedback(false);
-    if (clearFeedback) clearFeedback();
+    // Only hide feedback if it's a response (not status), when starting new listen
+    if (!isListening && feedback && !feedback.includes('Listening')) {
+      setShowFeedback(false);
+      if (clearFeedback) clearFeedback();
+    }
     
     if (isListening) {
       stopListening();
