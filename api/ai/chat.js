@@ -17,7 +17,7 @@ async function callPerplexity(systemPrompt, userPrompt) {
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        max_tokens: 100,
+        max_tokens: 60,
         temperature: 0.7
       })
     });
@@ -25,16 +25,20 @@ async function callPerplexity(systemPrompt, userPrompt) {
     if (!response.ok) return null;
     const data = await response.json();
     let content = data.choices?.[0]?.message?.content || '';
-    // Remove think tags, markdown formatting (bold, italic, links), and clean up
+    // Aggressively remove all markdown and formatting
     content = content
       .replace(/<think>[\s\S]*?<\/think>/gi, '')
       .replace(/\*\*([^*]+)\*\*/g, '$1')  // **bold** -> bold
       .replace(/\*([^*]+)\*/g, '$1')       // *italic* -> italic
+      .replace(/\*/g, '')                   // any remaining asterisks
       .replace(/__([^_]+)__/g, '$1')       // __bold__ -> bold
       .replace(/_([^_]+)_/g, '$1')         // _italic_ -> italic
       .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')  // [text](url) -> text
       .replace(/#{1,6}\s*/g, '')           // # headers
       .replace(/`([^`]+)`/g, '$1')         // `code` -> code
+      .replace(/^[\s]*[-•]\s*/gm, '')      // bullet points at start of lines
+      .replace(/\n+/g, ' ')                // newlines to spaces
+      .replace(/\s+/g, ' ')                // multiple spaces to single
       .trim();
     return content;
   } catch {
@@ -54,17 +58,14 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Message required' });
     }
 
-    const systemPrompt = `You are a voice assistant for a digital product catalog app for Indian retailers.
-Current page: ${context}
-Language preference: ${language}
+    const systemPrompt = `You are a voice assistant for a digital catalog app.
+Page: ${context}
 
-CRITICAL RULES:
-- Keep responses to 1-2 SHORT sentences only
-- NEVER use markdown formatting (no asterisks, no bold, no italic, no bullet points)
-- NEVER use lists or dashes
-- Speak naturally as if talking to someone
-- Only answer questions about THIS app and its features
-- Do not answer general knowledge questions`;
+STRICT RULES:
+- Maximum 2 sentences
+- NO markdown, NO asterisks, NO bullet points, NO lists
+- Plain conversational text only
+- Be brief and direct`;
 
     const aiResponse = await callPerplexity(systemPrompt, message);
     
