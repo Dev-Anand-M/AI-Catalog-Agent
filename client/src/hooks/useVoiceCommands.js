@@ -5,10 +5,11 @@ import { useLanguage } from '../context/LanguageContext';
 import { aiApi, productsApi } from '../api/client';
 
 // Command patterns - includes pure languages + mixed (Hinglish, Tanglish, etc.)
+// NOTE: These should be specific phrases, not single common words that appear in questions
 const commands = {
   dashboard: [
     // English
-    'dashboard', 'catalog', 'products', 'my products', 'show products', 'show my items',
+    'dashboard', 'catalog', 'my products', 'show products', 'show my items', 'go to dashboard',
     // Hindi + Hinglish
     'डैशबोर्ड', 'सूची', 'मेरे उत्पाद', 'mera dashboard', 'products dikhao', 'meri list', 'suchi dikhao',
     // Tamil + Tanglish
@@ -21,10 +22,10 @@ const commands = {
     'ড্যাশবোর্ড', 'তালিকা', 'amar products', 'dashboard dekhao', 'list dekhao'
   ],
   addProduct: [
-    // English
-    'add', 'new', 'create', 'add product', 'new product', 'add item', 'create listing',
+    // English - more specific phrases, removed single "add", "new", "create"
+    'add product', 'new product', 'add item', 'create listing', 'create product',
     // Hindi + Hinglish
-    'जोड़ो', 'नया', 'उत्पाद जोड़ो', 'naya product', 'product add karo', 'naya item', 'add karo',
+    'जोड़ो', 'उत्पाद जोड़ो', 'naya product', 'product add karo', 'naya item', 'add karo',
     // Tamil + Tanglish
     'சேர்', 'புதிய', 'pudhu product', 'product seru', 'add pannu', 'new item seru',
     // Telugu + Tenglish
@@ -36,7 +37,7 @@ const commands = {
   ],
   export: [
     // English
-    'export', 'publish', 'share', 'upload', 'seller', 'amazon', 'flipkart',
+    'export', 'publish', 'upload catalog', 'seller page', 'amazon', 'flipkart',
     // Hindi + Hinglish
     'निर्यात', 'एक्सपोर्ट', 'export karo', 'publish karo', 'amazon pe daalo', 'flipkart upload',
     // Tamil + Tanglish
@@ -50,7 +51,7 @@ const commands = {
   ],
   payment: [
     // English
-    'payment', 'bank', 'upi', 'money', 'account', 'gpay', 'phonepe', 'paytm',
+    'payment', 'bank', 'upi', 'account', 'gpay', 'phonepe', 'paytm', 'payment settings',
     // Hindi + Hinglish
     'भुगतान', 'पेमेंट', 'बैंक', 'payment settings', 'bank details', 'upi id', 'paisa',
     // Tamil + Tanglish
@@ -63,7 +64,7 @@ const commands = {
     'পেমেন্ট', 'payment settings', 'bank details dao', 'upi set koro', 'taka'
   ],
   home: [
-    'home', 'main', 'start', 'beginning',
+    'go home', 'home page', 'main page', 'go to home',
     'होम', 'home jao', 'ghar',
     'முகப்பு', 'home po', 'home ku po',
     'హోమ్', 'home ki vellu', 'intiki',
@@ -71,7 +72,7 @@ const commands = {
     'হোম', 'home jao', 'bari'
   ],
   login: [
-    'login', 'sign in', 'signin',
+    'login', 'sign in', 'signin', 'log in',
     'लॉगिन', 'login karo', 'sign in karo',
     'உள்நுழை', 'login pannu',
     'లాగిన్', 'login cheyyi',
@@ -79,7 +80,7 @@ const commands = {
     'লগইন', 'login koro'
   ],
   logout: [
-    'logout', 'log out', 'sign out', 'signout', 'exit',
+    'logout', 'log out', 'sign out', 'signout',
     'लॉगआउट', 'logout karo', 'bahar jao',
     'வெளியேறு', 'logout pannu', 'veliya po',
     'లాగౌట్', 'logout cheyyi', 'bayataki',
@@ -87,7 +88,7 @@ const commands = {
     'লগআউট', 'logout koro', 'baire jao'
   ],
   demo: [
-    'demo', 'example', 'sample', 'try', 'test',
+    'demo', 'show demo', 'demo page',
     'डेमो', 'demo dikhao', 'example dikhao',
     'டெமோ', 'demo kaatu', 'example kaatu',
     'డెమో', 'demo chupinchu',
@@ -95,7 +96,7 @@ const commands = {
     'ডেমো', 'demo dekhao'
   ],
   help: [
-    'help', 'commands', 'what can i say', 'options',
+    'help me', 'show commands', 'what can i say', 'voice commands',
     'मदद', 'help karo', 'kya bol sakta', 'madad',
     'உதவி', 'help pannu', 'enna solrathu',
     'సహాయం', 'help cheyyi', 'emi cheppali',
@@ -103,7 +104,7 @@ const commands = {
     'সাহায্য', 'help koro', 'ki bolbo'
   ],
   readPage: [
-    'read', 'read page', 'what is this', 'describe', 'tell me', 'explain this',
+    'read page', 'read this', 'describe page', 'explain page',
     'पढ़ो', 'page padho', 'ye kya hai', 'batao', 'samjhao',
     'படி', 'page padi', 'idhu enna', 'sollu', 'explain pannu',
     'చదవండి', 'page chaduvandi', 'idi emiti', 'cheppandi',
@@ -123,9 +124,12 @@ const openProductPatterns = [
 ];
 
 // Question patterns - includes mixed language
+// These should trigger AI chat instead of navigation commands
 const questionPatterns = [
   // English
-  'explain', 'what', 'how', 'why', 'tell', 'describe', 'meaning',
+  'explain', 'what', 'how', 'why', 'tell', 'describe', 'meaning', 'walkthrough', 
+  'guide', 'tutorial', 'can you', 'could you', 'please', 'i am new', 'i\'m new',
+  'help me understand', 'show me how', 'teach me',
   // Hinglish
   'समझाओ', 'क्या', 'कैसे', 'बताओ', 'kya hai', 'kaise', 'kyun', 'batao', 'samjhao',
   // Tanglish
