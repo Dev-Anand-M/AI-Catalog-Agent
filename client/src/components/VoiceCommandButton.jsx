@@ -20,13 +20,16 @@ export function VoiceCommandButton() {
   const [showQuickActions, setShowQuickActions] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
 
-  // Auto-show feedback when it changes, auto-hide after 8 seconds
+  // Auto-show feedback when it changes, auto-hide based on message length
   useEffect(() => {
     if (feedback) {
       setShowFeedback(true);
+      // Calculate read time: ~200 words per minute, minimum 5 seconds, max 20 seconds
+      const wordCount = feedback.split(/\s+/).length;
+      const readTimeMs = Math.min(Math.max(wordCount * 300, 5000), 20000);
       const timer = setTimeout(() => {
         setShowFeedback(false);
-      }, 8000); // Hide after 8 seconds
+      }, readTimeMs);
       return () => clearTimeout(timer);
     }
   }, [feedback]);
