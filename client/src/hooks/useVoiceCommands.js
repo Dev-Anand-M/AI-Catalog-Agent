@@ -213,7 +213,19 @@ export function useVoiceCommands() {
     if (!('speechSynthesis' in window)) return;
     
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // Strip markdown formatting before speaking
+    const cleanText = text
+      .replace(/\*\*([^*]+)\*\*/g, '$1')  // **bold** -> bold
+      .replace(/\*([^*]+)\*/g, '$1')       // *italic* -> italic
+      .replace(/__([^_]+)__/g, '$1')       // __bold__ -> bold
+      .replace(/_([^_]+)_/g, '$1')         // _italic_ -> italic
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')  // [text](url) -> text
+      .replace(/#{1,6}\s*/g, '')           // # headers
+      .replace(/`([^`]+)`/g, '$1')         // `code` -> code
+      .replace(/- /g, ', ');               // - list items -> comma separated
+    
+    const utterance = new SpeechSynthesisUtterance(cleanText);
     const langCode = speechLangCodes[language] || 'en-IN';
     utterance.lang = langCode;
     utterance.rate = 0.9;
@@ -353,19 +365,7 @@ export function useVoiceCommands() {
   }, [language, user, authLogout, navigate, speak, location.pathname]);
 
   const startListening = useCallback(() => {
-    if (!isSupported) return;
-    
-    // Cancel any ongoing speech when button is clicked
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
-    
-    // If already listening, stop
-    if (isListening) {
-      stopListening();
-      return;
-    }
-    
+    if (!isSupported || isListening) return;
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     const r = new SR();
     r.lang = speechLangCodes[language] || 'en-IN';
@@ -409,26 +409,15 @@ export function useVoiceCommands() {
     r.onend = () => setIsListening(false);
     recognitionRef.current = r;
     try { r.start(); } catch (e) { setFeedback(msgs.notRecognized); }
-  }, [isSupported, isListening, language, matchCommand, executeCommand, isQuestion, askAI, stopListening]);
+  }, [isSupported, isListening, language, matchCommand, executeCommand, isQuestion, askAI]);
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current) recognitionRef.current.stop();
-    // Also stop any ongoing speech
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
     setIsListening(false);
   }, []);
 
-  // Function to stop speech only
-  const stopSpeaking = useCallback(() => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
-  }, []);
-
   return {
-    isListening, lastCommand, feedback, startListening, stopListening, stopSpeaking,
+    isListening, lastCommand, feedback, startListening, stopListening,
     executeCommand, speak, isSupported,
     isEnabled: true, isAwake: isListening, isWakeWordListening: false,
     toggleVoiceCommands: startListening,

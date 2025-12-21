@@ -3,142 +3,6 @@ import { Mic, MicOff, HelpCircle, X, Navigation } from 'lucide-react';
 import { useVoiceCommands } from '../hooks/useVoiceCommands';
 import { useLanguage } from '../context/LanguageContext';
 
-// Multi-language labels for quick actions
-const quickActionLabels = {
-  en: {
-    dashboard: '📊 Dashboard',
-    addProduct: '➕ Add Product',
-    export: '📤 Export',
-    payment: '💳 Payment',
-    readPage: '🔊 Read Page',
-    help: '❓ Help',
-    quickActions: 'Quick Actions',
-    voiceCommands: 'Voice Commands',
-    tapMic: 'Tap the mic button, then speak your command',
-    sayThings: 'Say things like:',
-    cmdDashboard: '"Dashboard" or "Show my products"',
-    cmdAdd: '"Add product" or "Create new"',
-    cmdOpen: '"Open [product name]" - opens that product',
-    cmdExport: '"Export" or "Publish catalog"',
-    cmdPayment: '"Payment" or "Bank details"',
-    cmdRead: '"Read page" or "What is this"',
-    worksIn: 'Works in all 6 Indian languages',
-    listening: '🎤 Listening...',
-    tapToSpeak: '🎤 Tap mic to speak',
-    heard: 'Heard',
-  },
-  hi: {
-    dashboard: '📊 डैशबोर्ड',
-    addProduct: '➕ उत्पाद जोड़ें',
-    export: '📤 निर्यात',
-    payment: '💳 भुगतान',
-    readPage: '🔊 पेज पढ़ें',
-    help: '❓ मदद',
-    quickActions: 'त्वरित कार्य',
-    voiceCommands: 'वॉइस कमांड',
-    tapMic: 'माइक बटन दबाएं, फिर बोलें',
-    sayThings: 'ऐसे बोलें:',
-    cmdDashboard: '"डैशबोर्ड" या "मेरे उत्पाद दिखाओ"',
-    cmdAdd: '"उत्पाद जोड़ो" या "नया बनाओ"',
-    cmdOpen: '"[उत्पाद नाम] खोलो" - वह उत्पाद खोलता है',
-    cmdExport: '"निर्यात" या "कैटलॉग प्रकाशित करो"',
-    cmdPayment: '"भुगतान" या "बैंक विवरण"',
-    cmdRead: '"पेज पढ़ो" या "यह क्या है"',
-    worksIn: 'सभी 6 भारतीय भाषाओं में काम करता है',
-    listening: '🎤 सुन रहे हैं...',
-    tapToSpeak: '🎤 बोलने के लिए टैप करें',
-    heard: 'सुना',
-  },
-  ta: {
-    dashboard: '📊 டாஷ்போர்டு',
-    addProduct: '➕ பொருள் சேர்',
-    export: '📤 ஏற்றுமதி',
-    payment: '💳 கட்டணம்',
-    readPage: '🔊 பக்கம் படி',
-    help: '❓ உதவி',
-    quickActions: 'விரைவு செயல்கள்',
-    voiceCommands: 'குரல் கட்டளைகள்',
-    tapMic: 'மைக் பட்டனை தட்டி, பேசுங்கள்',
-    sayThings: 'இப்படி சொல்லுங்கள்:',
-    cmdDashboard: '"டாஷ்போர்டு" அல்லது "என் பொருட்கள் காட்டு"',
-    cmdAdd: '"பொருள் சேர்" அல்லது "புதியது உருவாக்கு"',
-    cmdOpen: '"[பொருள் பெயர்] திற" - அந்த பொருளை திறக்கும்',
-    cmdExport: '"ஏற்றுமதி" அல்லது "கேட்டலாக் வெளியிடு"',
-    cmdPayment: '"கட்டணம்" அல்லது "வங்கி விவரங்கள்"',
-    cmdRead: '"பக்கம் படி" அல்லது "இது என்ன"',
-    worksIn: 'அனைத்து 6 இந்திய மொழிகளிலும் வேலை செய்யும்',
-    listening: '🎤 கேட்கிறது...',
-    tapToSpeak: '🎤 பேச தட்டவும்',
-    heard: 'கேட்டது',
-  },
-  te: {
-    dashboard: '📊 డాష్‌బోర్డ్',
-    addProduct: '➕ ఉత్పత్తి జోడించు',
-    export: '📤 ఎగుమతి',
-    payment: '💳 చెల్లింపు',
-    readPage: '🔊 పేజీ చదువు',
-    help: '❓ సహాయం',
-    quickActions: 'త్వరిత చర్యలు',
-    voiceCommands: 'వాయిస్ కమాండ్లు',
-    tapMic: 'మైక్ బటన్ నొక్కి, మాట్లాడండి',
-    sayThings: 'ఇలా చెప్పండి:',
-    cmdDashboard: '"డాష్‌బోర్డ్" లేదా "నా ఉత్పత్తులు చూపించు"',
-    cmdAdd: '"ఉత్పత్తి జోడించు" లేదా "కొత్తది సృష్టించు"',
-    cmdOpen: '"[ఉత్పత్తి పేరు] తెరువు" - ఆ ఉత్పత్తిని తెరుస్తుంది',
-    cmdExport: '"ఎగుమతి" లేదా "కేటలాగ్ ప్రచురించు"',
-    cmdPayment: '"చెల్లింపు" లేదా "బ్యాంక్ వివరాలు"',
-    cmdRead: '"పేజీ చదువు" లేదా "ఇది ఏమిటి"',
-    worksIn: 'అన్ని 6 భారతీయ భాషల్లో పని చేస్తుంది',
-    listening: '🎤 వింటోంది...',
-    tapToSpeak: '🎤 మాట్లాడటానికి నొక్కండి',
-    heard: 'విన్నది',
-  },
-  kn: {
-    dashboard: '📊 ಡ್ಯಾಶ್‌ಬೋರ್ಡ್',
-    addProduct: '➕ ಉತ್ಪನ್ನ ಸೇರಿಸಿ',
-    export: '📤 ರಫ್ತು',
-    payment: '💳 ಪಾವತಿ',
-    readPage: '🔊 ಪುಟ ಓದಿ',
-    help: '❓ ಸಹಾಯ',
-    quickActions: 'ತ್ವರಿತ ಕ್ರಿಯೆಗಳು',
-    voiceCommands: 'ಧ್ವನಿ ಆದೇಶಗಳು',
-    tapMic: 'ಮೈಕ್ ಬಟನ್ ಒತ್ತಿ, ಮಾತನಾಡಿ',
-    sayThings: 'ಹೀಗೆ ಹೇಳಿ:',
-    cmdDashboard: '"ಡ್ಯಾಶ್‌ಬೋರ್ಡ್" ಅಥವಾ "ನನ್ನ ಉತ್ಪನ್ನಗಳು ತೋರಿಸಿ"',
-    cmdAdd: '"ಉತ್ಪನ್ನ ಸೇರಿಸಿ" ಅಥವಾ "ಹೊಸದು ರಚಿಸಿ"',
-    cmdOpen: '"[ಉತ್ಪನ್ನ ಹೆಸರು] ತೆರೆ" - ಆ ಉತ್ಪನ್ನವನ್ನು ತೆರೆಯುತ್ತದೆ',
-    cmdExport: '"ರಫ್ತು" ಅಥವಾ "ಕ್ಯಾಟಲಾಗ್ ಪ್ರಕಟಿಸಿ"',
-    cmdPayment: '"ಪಾವತಿ" ಅಥವಾ "ಬ್ಯಾಂಕ್ ವಿವರಗಳು"',
-    cmdRead: '"ಪುಟ ಓದಿ" ಅಥವಾ "ಇದು ಏನು"',
-    worksIn: 'ಎಲ್ಲಾ 6 ಭಾರತೀಯ ಭಾಷೆಗಳಲ್ಲಿ ಕೆಲಸ ಮಾಡುತ್ತದೆ',
-    listening: '🎤 ಕೇಳುತ್ತಿದೆ...',
-    tapToSpeak: '🎤 ಮಾತನಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ',
-    heard: 'ಕೇಳಿದ್ದು',
-  },
-  bn: {
-    dashboard: '📊 ড্যাশবোর্ড',
-    addProduct: '➕ পণ্য যোগ করুন',
-    export: '📤 রপ্তানি',
-    payment: '💳 পেমেন্ট',
-    readPage: '🔊 পেজ পড়ুন',
-    help: '❓ সাহায্য',
-    quickActions: 'দ্রুত কার্যক্রম',
-    voiceCommands: 'ভয়েস কমান্ড',
-    tapMic: 'মাইক বাটন চাপুন, তারপর বলুন',
-    sayThings: 'এভাবে বলুন:',
-    cmdDashboard: '"ড্যাশবোর্ড" বা "আমার পণ্য দেখাও"',
-    cmdAdd: '"পণ্য যোগ করো" বা "নতুন তৈরি করো"',
-    cmdOpen: '"[পণ্যের নাম] খোলো" - সেই পণ্য খুলবে',
-    cmdExport: '"রপ্তানি" বা "ক্যাটালগ প্রকাশ করো"',
-    cmdPayment: '"পেমেন্ট" বা "ব্যাংক বিবরণ"',
-    cmdRead: '"পেজ পড়ো" বা "এটা কি"',
-    worksIn: 'সব ৬টি ভারতীয় ভাষায় কাজ করে',
-    listening: '🎤 শুনছে...',
-    tapToSpeak: '🎤 বলতে ট্যাপ করুন',
-    heard: 'শুনেছি',
-  },
-};
-
 export function VoiceCommandButton() {
   const {
     isListening,
@@ -154,20 +18,36 @@ export function VoiceCommandButton() {
   const [showHelp, setShowHelp] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(false);
 
-  // Get labels for current language
-  const labels = quickActionLabels[language] || quickActionLabels.en;
+  // Strip markdown formatting from text for display
+  const stripMarkdown = (text) => {
+    if (!text) return text;
+    return text
+      .replace(/\*\*([^*]+)\*\*/g, '$1')  // **bold** -> bold
+      .replace(/\*([^*]+)\*/g, '$1')       // *italic* -> italic
+      .replace(/__([^_]+)__/g, '$1')       // __bold__ -> bold
+      .replace(/_([^_]+)_/g, '$1')         // _italic_ -> italic
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')  // [text](url) -> text
+      .replace(/#{1,6}\s*/g, '')           // # headers
+      .replace(/`([^`]+)`/g, '$1')         // `code` -> code
+      .replace(/- /g, '• ');               // - list -> • list
+  };
 
   // Quick actions for tap navigation
   const quickActions = [
-    { action: 'dashboard', label: labels.dashboard },
-    { action: 'addProduct', label: labels.addProduct },
-    { action: 'export', label: labels.export },
-    { action: 'payment', label: labels.payment },
-    { action: 'readPage', label: labels.readPage },
-    { action: 'help', label: labels.help },
+    { action: 'dashboard', label: '📊 Dashboard' },
+    { action: 'addProduct', label: '➕ Add Product' },
+    { action: 'export', label: '📤 Export' },
+    { action: 'payment', label: '💳 Payment' },
+    { action: 'readPage', label: '🔊 Read Page' },
+    { action: 'help', label: '❓ Help' },
   ];
 
   const handleMicClick = () => {
+    // Stop any ongoing speech when mic is clicked
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    
     if (isListening) {
       stopListening();
     } else {
@@ -186,9 +66,9 @@ export function VoiceCommandButton() {
       {/* Feedback Toast */}
       {feedback && (
         <div className="px-4 py-2 bg-gray-900 text-white rounded-lg shadow-lg max-w-xs">
-          <p className="text-sm">{feedback}</p>
+          <p className="text-sm">{stripMarkdown(feedback)}</p>
           {lastCommand && (
-            <p className="text-xs opacity-75 mt-1">{labels.heard}: "{lastCommand}"</p>
+            <p className="text-xs opacity-75 mt-1">Heard: "{lastCommand}"</p>
           )}
         </div>
       )}
@@ -197,7 +77,7 @@ export function VoiceCommandButton() {
       {showQuickActions && (
         <div className="bg-white rounded-xl shadow-2xl p-4 w-64 border">
           <div className="flex justify-between items-center mb-3">
-            <h3 className="font-semibold text-gray-900">{labels.quickActions}</h3>
+            <h3 className="font-semibold text-gray-900">Quick Actions</h3>
             <button 
               onClick={() => setShowQuickActions(false)} 
               className="text-gray-400 hover:text-gray-600"
@@ -223,7 +103,7 @@ export function VoiceCommandButton() {
       {showHelp && (
         <div className="bg-white rounded-xl shadow-2xl p-4 w-72 border">
           <div className="flex justify-between items-center mb-3">
-            <h3 className="font-semibold text-gray-900">{labels.voiceCommands}</h3>
+            <h3 className="font-semibold text-gray-900">Voice Commands</h3>
             <button 
               onClick={() => setShowHelp(false)} 
               className="text-gray-400 hover:text-gray-600"
@@ -234,22 +114,22 @@ export function VoiceCommandButton() {
           
           <div className="bg-teal-50 rounded-lg p-3 mb-3">
             <p className="text-sm text-teal-800 font-medium">
-              {labels.tapMic}
+              Tap the mic button, then speak your command
             </p>
           </div>
 
-          <p className="text-xs font-medium text-gray-500 mb-2">{labels.sayThings}</p>
+          <p className="text-xs font-medium text-gray-500 mb-2">Say things like:</p>
           <div className="space-y-1 text-sm text-gray-600">
-            <p>• {labels.cmdDashboard}</p>
-            <p>• {labels.cmdAdd}</p>
-            <p>• <strong>{labels.cmdOpen}</strong></p>
-            <p>• {labels.cmdExport}</p>
-            <p>• {labels.cmdPayment}</p>
-            <p>• {labels.cmdRead}</p>
+            <p>• "Dashboard" or "Show my products"</p>
+            <p>• "Add product" or "Create new"</p>
+            <p>• <strong>"Open [product name]"</strong> - opens that product</p>
+            <p>• "Export" or "Publish catalog"</p>
+            <p>• "Payment" or "Bank details"</p>
+            <p>• "Read page" or "What is this"</p>
           </div>
           
           <p className="text-xs text-gray-400 mt-3">
-            {labels.worksIn}
+            Works in English & Hindi
           </p>
         </div>
       )}
@@ -308,7 +188,7 @@ export function VoiceCommandButton() {
           ? 'bg-red-500 text-white' 
           : 'bg-white text-gray-600 border'
       }`}>
-        {isListening ? labels.listening : labels.tapToSpeak}
+        {isListening ? '🎤 Listening...' : '🎤 Tap mic to speak'}
       </span>
     </div>
   );
