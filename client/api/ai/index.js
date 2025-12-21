@@ -228,7 +228,8 @@ STRICT RULES:
 - NO markdown, NO asterisks, NO bullet points, NO lists, NO dashes
 - Plain conversational text only
 - Be brief and direct
-- Only answer about this app`;
+- Only answer about this app
+- Do NOT suggest voice commands or say things like "say dashboard" or "try saying"`;
 
   let aiResponse = await callPerplexity(systemPrompt, message, 60);
   
@@ -258,7 +259,7 @@ STRICT RULES:
     return res.json({ response: aiResponse });
   }
   
-  res.json({ response: "I can help with your catalog. Ask about products, payments, or navigation." });
+  res.json({ response: "I can help with your catalog." });
 }
 
 async function handleReadPage(req, res) {
