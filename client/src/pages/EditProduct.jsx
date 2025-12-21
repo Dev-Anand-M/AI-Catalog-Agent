@@ -284,7 +284,9 @@ export function EditProduct() {
           return;
         }
 
-        if (action === 'update' && field && value !== null && confidence > 0.5) {
+        // STRICT: Only update if action is explicitly "update", field is valid, value exists, and confidence is HIGH
+        const validFields = ['price', 'name', 'description', 'category'];
+        if (action === 'update' && field && validFields.includes(field) && value !== null && value !== '' && confidence >= 0.6) {
           const updatedData = {
             ...formData,
             [field]: field === 'price' ? value.toString() : value

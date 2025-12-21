@@ -256,45 +256,30 @@ async function handleParseVoice(req, res) {
   const text = transcript.toLowerCase().replace(/[.,!?।।]/g, '').trim();
   
   // Check for save commands FIRST - before sending to AI
-  // Include Tamil script versions (கேன்சல் பண்ணு, சேவ் பண்ணு, etc.)
   const saveCommands = [
-    // Tamil script versions (speech recognition outputs these)
     'சேவ் பண்ணு', 'சேவ் பண்ணுங்க', 'சேவ் செய்', 'சேவ் போடு',
     'சேமி பண்ணு', 'சேமி செய்', 'சேமிக்க', 'சேமி',
     'முடிஞ்சது', 'ஓகே', 'சரி', 'செய்து முடி',
-    // Hindi script versions
     'सेव करो', 'सेव कर', 'सेव कर दो', 'बचाओ', 'सहेजो',
     'हो गया', 'ठीक है', 'खतम', 'पूरा हो गया',
-    // Telugu script versions
     'సేవ్ చేయి', 'సేవ్ చేయండి', 'భద్రపరచు', 'అయింది', 'సరే',
-    // Kannada script versions
     'ಸೇವ್ ಮಾಡು', 'ಸೇವ್ ಮಾಡಿ', 'ಉಳಿಸು', 'ಆಯ್ತು', 'ಸರಿ',
-    // Bengali script versions
     'সেভ করো', 'সেভ কর', 'সংরক্ষণ করো', 'হয়ে গেলো', 'ঠিক আছে',
-    // Romanized versions
     'save pannu', 'save podu', 'save karo', 'save kar', 'save cheyyi', 'save cheyyandi', 'save maadu', 'save koro',
     'ho gaya', 'hoye gelo', 'thik ache', 'theek hai', 'mudinjadhu', 'ayyindi', 'aaytu',
     'save', 'done', 'finish', 'submit', 'confirm', 'ok', 'okay',
     'khatam', 'seri', 'seyvi', 'sare', 'sari', 'ulisu'
   ];
   
-  // Check for cancel commands FIRST - before sending to AI
-  // Include Tamil script versions - NOTE: "cancel" sounds like "cancer" (கேன்சர்) in Tamil!
+  // Check for cancel commands FIRST - "cancel" sounds like "cancer" (கேன்சர்) in Tamil!
   const cancelCommands = [
-    // Tamil script versions (speech recognition outputs these)
-    // "cancel" is heard as "cancer" (கேன்சர்) by Tamil speech recognition!
     'கேன்சர் பண்ணு', 'கேன்சர் பண்ணுங்க', 'கேன்சர் செய்', 'கேன்சர்',
     'கேன்சல் பண்ணு', 'கேன்சல் பண்ணுங்க', 'கேன்சல் செய்', 'கேன்சல்',
     'ரத்து பண்ணு', 'ரத்து செய்', 'திரும்பு', 'பேக் போ', 'வேண்டாம்',
-    // Hindi script versions
     'कैंसल करो', 'कैंसल कर', 'रद्द करो', 'वापस जाओ', 'पीछे', 'बंद करो', 'नहीं चाहिए',
-    // Telugu script versions
     'క్యాన్సల్ చేయి', 'క్యాన్సల్ చేయండి', 'రద్దు చేయి', 'వెనక్కి', 'వద్దు',
-    // Kannada script versions
     'ಕ್ಯಾನ್ಸಲ್ ಮಾಡು', 'ಕ್ಯಾನ್ಸಲ್ ಮಾಡಿ', 'ರದ್ದು ಮಾಡು', 'ಹಿಂದೆ ಹೋಗು', 'ಬೇಡ',
-    // Bengali script versions
     'ক্যান্সেল করো', 'ক্যান্সেল কর', 'বাতিল করো', 'ফিরে যাও', 'পেছনে যাও', 'লাগবে না',
-    // Romanized versions
     'cancel pannu', 'cancer pannu', 'cancel karo', 'cancel cheyyi', 'cancel maadu', 'cancel koro',
     'go back', 'wapas jao', 'back po', 'back vellu', 'back hogu', 'back jao',
     'hinde hogu', 'pechone jao', 'thirumbu', 'venakki',
@@ -306,7 +291,7 @@ async function handleParseVoice(req, res) {
     'বাতিল', 'ফিরে যাও', 'batil', 'fire jao'
   ];
   
-  // Check cancel first (longer phrases checked first due to array order)
+  // Check cancel first
   const isCancelCommand = cancelCommands.some(cmd => text.includes(cmd.toLowerCase()));
   if (isCancelCommand) {
     return res.json({ transcript, action: 'cancel', field: null, value: null, confidence: 1.0, source: 'local' });
@@ -318,10 +303,70 @@ async function handleParseVoice(req, res) {
     return res.json({ transcript, action: 'save', field: null, value: null, confidence: 1.0, source: 'local' });
   }
 
+  // STRICT: Only process if it contains explicit update keywords
+  // Must say "update", "change", "set", "price", "name", "description", "category" etc.
+  const updateKeywords = [
+    // English
+    'update', 'change', 'set', 'make', 'edit',
+    'price', 'name', 'description', 'category',
+    // Hindi
+    'बदलो', 'करो', 'कीमत', 'नाम', 'विवरण', 'श्रेणी', 'दाम',
+    // Tamil
+    'மாற்று', 'செய்', 'விலை', 'பெயர்', 'விவரம்', 'வகை',
+    // Telugu
+    'మార్చు', 'చేయి', 'ధర', 'పేరు', 'వివరణ', 'వర్గం',
+    // Kannada
+    'ಬದಲಾಯಿಸು', 'ಮಾಡು', 'ಬೆಲೆ', 'ಹೆಸರು', 'ವಿವರಣೆ', 'ವರ್ಗ',
+    // Bengali
+    'বদলাও', 'করো', 'দাম', 'নাম', 'বিবরণ', 'শ্রেণী'
+  ];
+  
+  const hasUpdateKeyword = updateKeywords.some(kw => text.includes(kw.toLowerCase()));
+  
+  // If no update keyword found, return unknown - DON'T update anything!
+  if (!hasUpdateKeyword) {
+    return res.json({ transcript, action: 'unknown', field: null, value: null, confidence: 0.2, source: 'local' });
+  }
+
+  // Local price parsing - most common update
+  const pricePatterns = [
+    /(?:price|कीमत|दाम|விலை|ధర|ಬೆಲೆ|দাম)\s*(?:to|=|:)?\s*(\d+)/i,
+    /(\d+)\s*(?:price|कीमत|दाम|விலை|ధర|ಬೆಲೆ|দাম|rupees|रुपये|ரூபாய்|రూపాయలు|ರೂಪಾಯಿ|টাকা)/i,
+    /(?:update|change|set|बदलो|மாற்று|మార్చు|ಬದಲಾಯಿಸು|বদলাও)\s*(?:price|कीमत|दाम|விலை|ధర|ಬೆಲೆ|দাম)\s*(?:to|=|:)?\s*(\d+)/i
+  ];
+  
+  for (const pattern of pricePatterns) {
+    const match = text.match(pattern);
+    if (match) {
+      const price = parseInt(match[1]);
+      if (price > 0 && price < 10000000) { // Reasonable price range
+        return res.json({ transcript, action: 'update', field: 'price', value: price, confidence: 0.9, source: 'local' });
+      }
+    }
+  }
+
+  // Only call AI if we have update keywords but couldn't parse locally
   const systemPrompt = `Parse voice command to update product. Current: ${JSON.stringify(currentProduct || {})}
-IMPORTANT: Only return update actions for actual field updates like price, name, description, category.
-Do NOT interpret "save", "cancel", "back", "done" as field updates.
-Return JSON: {"action":"update","field":"name/description/category/price","value":"new value","confidence":0.0-1.0}`;
+
+STRICT RULES:
+1. ONLY return action:"update" if the user EXPLICITLY says to update/change/set a specific field
+2. The user MUST mention both the field AND the new value
+3. Valid fields: price, name, description, category
+4. If unclear or just random words, return action:"unknown"
+5. Do NOT guess or assume - if not explicit, return unknown
+
+Examples of VALID updates:
+- "update price to 500" → {"action":"update","field":"price","value":500,"confidence":0.9}
+- "change name to Rice" → {"action":"update","field":"name","value":"Rice","confidence":0.9}
+- "set category to Grocery" → {"action":"update","field":"category","value":"Grocery","confidence":0.9}
+
+Examples of INVALID (return unknown):
+- "strangers" → {"action":"unknown","field":null,"value":null,"confidence":0.1}
+- "hello" → {"action":"unknown","field":null,"value":null,"confidence":0.1}
+- "rice" → {"action":"unknown","field":null,"value":null,"confidence":0.1}
+- random words → {"action":"unknown","field":null,"value":null,"confidence":0.1}
+
+Return JSON: {"action":"update/unknown","field":"name/description/category/price/null","value":"value or null","confidence":0.0-1.0}`;
   
   const aiResponse = await callPerplexity(systemPrompt, `Parse: "${transcript}"`, 100);
   if (aiResponse) {
@@ -329,12 +374,23 @@ Return JSON: {"action":"update","field":"name/description/category/price","value
       const match = aiResponse.match(/\{[\s\S]*\}/);
       if (match) {
         const parsed = JSON.parse(match[0]);
+        
+        // Extra validation: reject if confidence is low or action is unknown
+        if (parsed.action === 'unknown' || parsed.confidence < 0.6) {
+          return res.json({ transcript, action: 'unknown', field: null, value: null, confidence: 0.2, source: 'local' });
+        }
+        
+        // Reject if AI tried to update name without explicit "name" keyword in transcript
+        if (parsed.field === 'name' && !text.includes('name') && !text.includes('नाम') && 
+            !text.includes('பெயர்') && !text.includes('పేరు') && !text.includes('ಹೆಸರು') && !text.includes('নাম')) {
+          return res.json({ transcript, action: 'unknown', field: null, value: null, confidence: 0.2, source: 'local' });
+        }
+        
         // Double-check AI didn't interpret save/cancel as field update
         if (parsed.value && typeof parsed.value === 'string') {
           const valueCheck = parsed.value.toLowerCase();
           if (cancelCommands.some(cmd => valueCheck.includes(cmd.toLowerCase())) ||
               saveCommands.some(cmd => valueCheck.includes(cmd.toLowerCase()))) {
-            // AI incorrectly interpreted save/cancel as a value - reject it
             return res.json({ transcript, action: 'unknown', field: null, value: null, confidence: 0.3, source: 'local' });
           }
         }
@@ -343,11 +399,8 @@ Return JSON: {"action":"update","field":"name/description/category/price","value
     } catch {}
   }
   
-  // Fallback
-  let result = { action: 'unknown', field: null, value: null, confidence: 0.3 };
-  const priceMatch = text.match(/price\s*(?:to|=|:)?\s*(\d+)/i);
-  if (priceMatch) result = { action: 'update', field: 'price', value: parseInt(priceMatch[1]), confidence: 0.8 };
-  res.json({ transcript, ...result, source: 'local' });
+  // Default: return unknown - don't update anything
+  res.json({ transcript, action: 'unknown', field: null, value: null, confidence: 0.2, source: 'local' });
 }
 
 async function handleInterpret(req, res) {
