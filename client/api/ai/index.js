@@ -36,8 +36,25 @@ async function callPerplexity(systemPrompt, userPrompt, maxTokens = 200) {
 
 async function handleGenerateProduct(req, res) {
   const { productName, promptText, language = 'en' } = req.body;
-  const name = productName || promptText;
+  let name = productName || promptText;
   if (!name) return res.status(400).json({ error: 'Product name or promptText required' });
+
+  // Fix common Tamil speech recognition errors
+  const tamilCorrections = {
+    'ஜாதி': 'ஜாடி',           // jathi → jadi (pot)
+    'பீங்கானல்': 'பீங்கான்',   // peengaanal → peengaan (ceramic)
+    'அரிசில்': 'அரிசி',       // arisil → arisi (rice)
+    'பருப்பல்': 'பருப்பு',     // paruppal → paruppu (dal)
+    'எண்ணெயல்': 'எண்ணெய்',   // ennaiyal → ennai (oil)
+    'மசாலால்': 'மசாலா',       // masalaal → masala
+    'துணில்': 'துணி',         // thunil → thuni (cloth)
+    'சேலைல்': 'சேலை',        // selaiyil → selai (saree)
+  };
+  
+  // Apply Tamil corrections
+  for (const [wrong, correct] of Object.entries(tamilCorrections)) {
+    name = name.replace(new RegExp(wrong, 'g'), correct);
+  }
 
   const langNames = {
     en: 'English', hi: 'Hindi', ta: 'Tamil', te: 'Telugu', kn: 'Kannada', bn: 'Bengali'
@@ -56,6 +73,8 @@ Common Tamil products:
 - பருப்பு = Dal/Lentils  
 - எண்ணெய் = Oil
 - மசாலா = Spices
+- பீங்கான் = Ceramic, ஜாடி = Pot/Jar
+- மண் பானை = Clay pot
 
 Return ONLY this JSON format:
 {"name":"product name","description":"2 sentences describing this specific product","category":"Grocery","price":100}
@@ -88,6 +107,7 @@ Categories: Grocery, Clothing, Handicraft, Electronics, Other`;
   
   // Better fallback - create a more specific description based on common words
   let description = '';
+  let category = 'Grocery';
   const lowerName = name.toLowerCase();
   
   // Detect product type from Tamil/Hindi/English keywords
@@ -101,6 +121,12 @@ Categories: Grocery, Clothing, Handicraft, Electronics, Other`;
       ? 'தரமான பருப்பு, புரதம் நிறைந்தது. சாம்பார், ரசம் செய்ய சிறந்தது.'
       : language === 'hi' ? 'गुणवत्तापूर्ण दाल, प्रोटीन से भरपूर।'
       : 'Quality dal, rich in protein. Great for sambar and rasam.';
+  } else if (lowerName.includes('பீங்கான்') || lowerName.includes('ஜாடி') || lowerName.includes('மண்') || lowerName.includes('பானை') || lowerName.includes('ceramic') || lowerName.includes('pot') || lowerName.includes('clay')) {
+    category = 'Handicraft';
+    description = language === 'ta'
+      ? 'கைவினைஞர்களால் செய்யப்பட்ட அழகான பீங்கான் ஜாடி. வீட்டு அலங்காரத்திற்கும் சமையலுக்கும் ஏற்றது.'
+      : language === 'hi' ? 'कारीगरों द्वारा बनाया गया सुंदर सिरेमिक बर्तन। घर की सजावट और खाना पकाने के लिए उपयुक्त।'
+      : 'Beautiful ceramic pot made by artisans. Perfect for home decor and cooking.';
   } else {
     // Generic but with product name
     const fallbackDescs = {
@@ -117,10 +143,10 @@ Categories: Grocery, Clothing, Handicraft, Electronics, Other`;
   res.json({ 
     name, 
     description, 
-    category: 'Grocery', 
+    category, 
     price: 0, 
     suggestedPrice: 0, 
-    unit: 'kg' 
+    unit: 'piece' 
   });
 }
 
