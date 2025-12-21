@@ -420,9 +420,14 @@ export function useVoiceCommands() {
     setIsListening(false);
   }, []);
 
+  const clearFeedback = useCallback(() => {
+    setFeedback('');
+    setLastCommand('');
+  }, []);
+
   return {
     isListening, lastCommand, feedback, startListening, stopListening,
-    executeCommand, speak, isSupported,
+    executeCommand, speak, isSupported, clearFeedback,
     isEnabled: true, isAwake: isListening, isWakeWordListening: false,
     toggleVoiceCommands: startListening,
   };

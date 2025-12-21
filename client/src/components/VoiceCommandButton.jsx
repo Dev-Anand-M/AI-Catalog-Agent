@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Mic, MicOff, HelpCircle, X, Navigation } from 'lucide-react';
 import { useVoiceCommands } from '../hooks/useVoiceCommands';
 import { useLanguage } from '../context/LanguageContext';
@@ -12,11 +12,33 @@ export function VoiceCommandButton() {
     stopListening,
     executeCommand,
     isSupported,
+    clearFeedback,
   } = useVoiceCommands();
   
   const { language, t } = useLanguage();
   const [showHelp, setShowHelp] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+
+  // Auto-show feedback when it changes, auto-hide after 8 seconds
+  useEffect(() => {
+    if (feedback) {
+      setShowFeedback(true);
+      const timer = setTimeout(() => {
+        setShowFeedback(false);
+      }, 8000); // Hide after 8 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [feedback]);
+
+  // Dismiss feedback and stop speech
+  const dismissFeedback = () => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    setShowFeedback(false);
+    if (clearFeedback) clearFeedback();
+  };
 
   // Strip markdown formatting from text for display
   const stripMarkdown = (text) => {
@@ -166,9 +188,18 @@ export function VoiceCommandButton() {
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
       {/* Feedback Toast */}
-      {feedback && (
-        <div className="px-4 py-2 bg-gray-900 text-white rounded-lg shadow-lg max-w-xs">
-          <p className="text-sm">{stripMarkdown(feedback)}</p>
+      {showFeedback && feedback && (
+        <div 
+          className="px-4 py-2 bg-gray-900 text-white rounded-lg shadow-lg max-w-xs cursor-pointer relative group"
+          onClick={dismissFeedback}
+        >
+          <button 
+            onClick={(e) => { e.stopPropagation(); dismissFeedback(); }}
+            className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center shadow-lg"
+          >
+            <X className="w-3 h-3 text-white" />
+          </button>
+          <p className="text-sm pr-4">{stripMarkdown(feedback)}</p>
           {lastCommand && (
             <p className="text-xs opacity-75 mt-1">{labels.heard}: "{lastCommand}"</p>
           )}
