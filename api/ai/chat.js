@@ -24,7 +24,19 @@ async function callPerplexity(systemPrompt, userPrompt) {
 
     if (!response.ok) return null;
     const data = await response.json();
-    return data.choices?.[0]?.message?.content?.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+    let content = data.choices?.[0]?.message?.content || '';
+    // Remove think tags, markdown formatting (bold, italic, links), and clean up
+    content = content
+      .replace(/<think>[\s\S]*?<\/think>/gi, '')
+      .replace(/\*\*([^*]+)\*\*/g, '$1')  // **bold** -> bold
+      .replace(/\*([^*]+)\*/g, '$1')       // *italic* -> italic
+      .replace(/__([^_]+)__/g, '$1')       // __bold__ -> bold
+      .replace(/_([^_]+)_/g, '$1')         // _italic_ -> italic
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')  // [text](url) -> text
+      .replace(/#{1,6}\s*/g, '')           // # headers
+      .replace(/`([^`]+)`/g, '$1')         // `code` -> code
+      .trim();
+    return content;
   } catch {
     return null;
   }
