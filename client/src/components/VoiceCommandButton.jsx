@@ -175,6 +175,10 @@ export function VoiceCommandButton() {
       window.speechSynthesis.cancel();
     }
     
+    // Hide any existing feedback when starting to listen
+    setShowFeedback(false);
+    if (clearFeedback) clearFeedback();
+    
     if (isListening) {
       stopListening();
     } else {
