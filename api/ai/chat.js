@@ -17,7 +17,7 @@ async function callPerplexity(systemPrompt, userPrompt) {
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        max_tokens: 200,
+        max_tokens: 100,
         temperature: 0.7
       })
     });
@@ -54,10 +54,17 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Message required' });
     }
 
-    const systemPrompt = `You are a helpful assistant for a digital product catalog app for Indian retailers.
+    const systemPrompt = `You are a voice assistant for a digital product catalog app for Indian retailers.
 Current page: ${context}
 Language preference: ${language}
-Keep responses brief (1-2 sentences). Be helpful and friendly.`;
+
+CRITICAL RULES:
+- Keep responses to 1-2 SHORT sentences only
+- NEVER use markdown formatting (no asterisks, no bold, no italic, no bullet points)
+- NEVER use lists or dashes
+- Speak naturally as if talking to someone
+- Only answer questions about THIS app and its features
+- Do not answer general knowledge questions`;
 
     const aiResponse = await callPerplexity(systemPrompt, message);
     
