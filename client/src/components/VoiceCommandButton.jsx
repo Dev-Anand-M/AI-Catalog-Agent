@@ -301,14 +301,16 @@ export function VoiceCommandButton() {
 
       {/* Button Group */}
       <div className="flex items-center gap-2">
-        {/* Quick Actions Button */}
-        <button
-          onClick={() => setShowQuickActions(!showQuickActions)}
-          className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors border"
-          title="Quick Actions"
-        >
-          <Navigation className="w-5 h-5" />
-        </button>
+        {/* Quick Actions Button - Only show when logged in */}
+        {user && (
+          <button
+            onClick={() => setShowQuickActions(!showQuickActions)}
+            className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors border"
+            title="Quick Actions"
+          >
+            <Navigation className="w-5 h-5" />
+          </button>
+        )}
 
         {/* Help Button */}
         <button
