@@ -24,11 +24,6 @@ export function VoiceCommandButton() {
   const [showFeedback, setShowFeedback] = useState(false);
   const [autoHideTimer, setAutoHideTimer] = useState(null);
 
-  // Don't render if user is not logged in
-  if (!user) {
-    return null;
-  }
-
   // Auto-show feedback when it changes
   useEffect(() => {
     if (feedback) {
