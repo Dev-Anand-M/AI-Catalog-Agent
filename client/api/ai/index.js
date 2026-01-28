@@ -360,8 +360,25 @@ async function handleParseVoice(req, res) {
     return res.json({ transcript, action: 'save', field: null, value: null, confidence: 1.0, source: 'local' });
   }
 
-  // STRICT: Only process if it contains explicit update keywords
-  // Must say "update", "change", "set", "price", "name", "description", "category" etc.
+  // Local price parsing - most common update (works without "update" keyword)
+  const pricePatterns = [
+    /(?:price|कीमत|दाम|விலை|ధర|ಬೆಲೆ|দাম)\s*(?:to|=|:)?\s*(\d+)/i,
+    /(\d+)\s*(?:price|कीमत|दाम|விலை|ధర|ಬೆಲೆ|দাম|rupees|रुपये|ரூபாய்|రూపాయలు|ರೂಪಾಯಿ|টাকা)/i,
+    /(?:update|change|set|बदलो|மாற்று|మార్చు|ಬದಲಾಯಿಸು|বদলাও)\s*(?:price|कीमत|दाम|விலை|ధర|ಬೆಲೆ|দাম)\s*(?:to|=|:)?\s*(\d+)/i,
+    /^(\d+)$/  // Just a number by itself
+  ];
+  
+  for (const pattern of pricePatterns) {
+    const match = text.match(pattern);
+    if (match) {
+      const price = parseInt(match[1]);
+      if (price > 0 && price < 10000000) { // Reasonable price range
+        return res.json({ transcript, action: 'update', field: 'price', value: price, confidence: 0.9, source: 'local' });
+      }
+    }
+  }
+
+  // Check if it contains explicit update keywords for name/description/category updates
   const updateKeywords = [
     // English
     'update', 'change', 'set', 'make', 'edit',
@@ -380,25 +397,13 @@ async function handleParseVoice(req, res) {
   
   const hasUpdateKeyword = updateKeywords.some(kw => text.includes(kw.toLowerCase()));
   
-  // If no update keyword found, return unknown - DON'T update anything!
-  if (!hasUpdateKeyword) {
-    return res.json({ transcript, action: 'unknown', field: null, value: null, confidence: 0.2, source: 'local' });
-  }
-
-  // Local price parsing - most common update
-  const pricePatterns = [
-    /(?:price|कीमत|दाम|விலை|ధర|ಬೆಲೆ|দাম)\s*(?:to|=|:)?\s*(\d+)/i,
-    /(\d+)\s*(?:price|कीमत|दाम|விலை|ధర|ಬೆಲೆ|দাম|rupees|रुपये|ரூபாய்|రూపాయలు|ರೂಪಾಯಿ|টাকা)/i,
-    /(?:update|change|set|बदलो|மாற்று|మార్చు|ಬದಲಾಯಿಸು|বদলাও)\s*(?:price|कीमत|दाम|விலை|ధర|ಬೆಲೆ|দাম)\s*(?:to|=|:)?\s*(\d+)/i
-  ];
-  
-  for (const pattern of pricePatterns) {
-    const match = text.match(pattern);
-    if (match) {
-      const price = parseInt(match[1]);
-      if (price > 0 && price < 10000000) { // Reasonable price range
-        return res.json({ transcript, action: 'update', field: 'price', value: price, confidence: 0.9, source: 'local' });
-      }
+  // If no update keyword found AND not a simple number, call AI to parse it
+  // This allows AI to handle complex commands while preventing random words from updating name
+  if (!hasUpdateKeyword && !/^\d+$/.test(text)) {
+    // Only reject if it's very short (likely random word) or contains common non-update words
+    const commonWords = ['hello', 'hi', 'test', 'testing', 'வணக்கம்', 'हैलो', 'హలో', 'ಹಲೋ', 'হ্যালো'];
+    if (text.length < 3 || commonWords.some(word => text === word.toLowerCase())) {
+      return res.json({ transcript, action: 'unknown', field: null, value: null, confidence: 0.2, source: 'local' });
     }
   }
 

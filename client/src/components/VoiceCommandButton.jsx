@@ -2,8 +2,11 @@ import { useState, useEffect } from 'react';
 import { Mic, MicOff, HelpCircle, X, Navigation } from 'lucide-react';
 import { useVoiceCommands } from '../hooks/useVoiceCommands';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 
 export function VoiceCommandButton() {
+  const { user } = useAuth(); // Get authentication state
+  
   const {
     isListening,
     lastCommand,
@@ -20,6 +23,11 @@ export function VoiceCommandButton() {
   const [showQuickActions, setShowQuickActions] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [autoHideTimer, setAutoHideTimer] = useState(null);
+
+  // Don't render if user is not logged in
+  if (!user) {
+    return null;
+  }
 
   // Auto-show feedback when it changes
   useEffect(() => {

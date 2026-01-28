@@ -35,18 +35,22 @@ export function useVoiceInput(language = 'English') {
       recognition.continuous = true;
       recognition.interimResults = true;
 
+      console.log('🎤 Starting speech recognition with language:', recognition.lang);
+
       recognition.onstart = () => {
         setIsListening(true);
         setError('');
-        console.log('Voice recognition started');
+        console.log('✅ Voice recognition started successfully');
       };
 
       recognition.onresult = (event) => {
+        console.log('🗣️ Speech detected:', event.results);
         let finalTranscript = '';
         let interimTranscript = '';
 
         for (let i = event.resultIndex; i < event.results.length; i++) {
           const text = event.results[i][0].transcript;
+          console.log('📝 Transcript:', text, 'isFinal:', event.results[i].isFinal);
           if (event.results[i].isFinal) {
             finalTranscript += text + ' ';
           } else {
@@ -55,12 +59,13 @@ export function useVoiceInput(language = 'English') {
         }
 
         if (finalTranscript) {
+          console.log('✅ Final transcript:', finalTranscript);
           setTranscript(prev => prev + finalTranscript);
         }
       };
 
       recognition.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
+        console.error('❌ Speech recognition error:', event.error, event);
         let errorMessage = 'Voice recognition error. ';
         
         switch (event.error) {
@@ -86,13 +91,14 @@ export function useVoiceInput(language = 'English') {
 
       recognition.onend = () => {
         setIsListening(false);
-        console.log('Voice recognition ended');
+        console.log('🛑 Voice recognition ended');
       };
 
       recognitionRef.current = recognition;
       recognition.start();
+      console.log('🚀 Recognition.start() called');
     } catch (err) {
-      console.error('Failed to start voice recognition:', err);
+      console.error('💥 Failed to start voice recognition:', err);
       setError('Failed to start voice recognition. Please try again.');
       setIsListening(false);
     }
