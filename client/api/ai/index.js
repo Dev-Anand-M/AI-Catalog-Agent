@@ -1,12 +1,18 @@
 const PERPLEXITY_API_URL = 'https://api.perplexity.ai/chat/completions';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
-function hasApiKey() {
+function hasPerplexityKey() {
   const key = process.env.PERPLEXITY_API_KEY;
   return key && key.startsWith('pplx-');
 }
 
+function hasGeminiKey() {
+  const key = process.env.GEMINI_API_KEY;
+  return key && key.length > 10;
+}
+
 async function callPerplexity(systemPrompt, userPrompt, maxTokens = 200) {
-  if (!hasApiKey()) return null;
+  if (!hasPerplexityKey()) return null;
   try {
     const response = await fetch(PERPLEXITY_API_URL, {
       method: 'POST',
@@ -32,6 +38,48 @@ async function callPerplexity(systemPrompt, userPrompt, maxTokens = 200) {
     content = content.replace(/\[\d+\]/g, '');
     return content.trim();
   } catch { return null; }
+}
+
+async function callGemini(systemPrompt, userPrompt, maxTokens = 200) {
+  if (!hasGeminiKey()) return null;
+  try {
+    const response = await fetch(`${GEMINI_API_URL}?key=${process.env.GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: `${systemPrompt}\n\n${userPrompt}`
+          }]
+        }],
+        generationConfig: {
+          maxOutputTokens: maxTokens,
+          temperature: 0.7
+        }
+      })
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    let content = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    // Remove citation references
+    content = content.replace(/\[\d+\]/g, '');
+    return content.trim();
+  } catch { return null; }
+}
+
+// Try Perplexity first, fallback to Gemini
+async function callAI(systemPrompt, userPrompt, maxTokens = 200) {
+  // Try Perplexity first
+  let result = await callPerplexity(systemPrompt, userPrompt, maxTokens);
+  if (result) return result;
+  
+  // Fallback to Gemini
+  result = await callGemini(systemPrompt, userPrompt, maxTokens);
+  if (result) return result;
+  
+  return null;
 }
 
 async function handleGenerateProduct(req, res) {
@@ -109,7 +157,7 @@ Return ONLY this JSON format:
 
 Categories: Grocery, Clothing, Handicraft, Electronics, Other`;
   
-  const aiResponse = await callPerplexity(systemPrompt, `Create listing for: ${name}`, 400);
+  const aiResponse = await callAI(systemPrompt, `Create listing for: ${name}`, 400);
   
   if (aiResponse) {
     try {
@@ -377,7 +425,7 @@ Examples of INVALID (return unknown):
 
 Return JSON: {"action":"update/unknown","field":"name/description/category/price/null","value":"value or null","confidence":0.0-1.0}`;
   
-  const aiResponse = await callPerplexity(systemPrompt, `Parse: "${transcript}"`, 100);
+  const aiResponse = await callAI(systemPrompt, `Parse: "${transcript}"`, 100);
   if (aiResponse) {
     try {
       const match = aiResponse.match(/\{[\s\S]*\}/);
@@ -419,7 +467,7 @@ async function handleInterpret(req, res) {
   const systemPrompt = `Map voice to action: dashboard, addProduct, export, payment, home, login, logout, demo, help, readPage
 Return JSON: {"action":"actionName","confidence":0.0-1.0}`;
   
-  const aiResponse = await callPerplexity(systemPrompt, `Interpret: "${transcript}"`, 50);
+  const aiResponse = await callAI(systemPrompt, `Interpret: "${transcript}"`, 50);
   if (aiResponse) {
     try {
       const match = aiResponse.match(/\{[\s\S]*\}/);
@@ -444,7 +492,7 @@ STRICT RULES:
 - Only answer about this app
 - Do NOT suggest voice commands or say things like "say dashboard" or "try saying"`;
 
-  let aiResponse = await callPerplexity(systemPrompt, message, 60);
+  let aiResponse = await callAI(systemPrompt, message, 60);
   
   if (aiResponse) {
     // Aggressively clean markdown
@@ -502,7 +550,7 @@ async function handleReadPage(req, res) {
   }
 
   const systemPrompt = `You are an accessibility assistant for Digital Catalog Agent app. Describe this page clearly for someone who cannot see it. Mention all buttons, forms, and what actions they can take. Be thorough but conversational.`;
-  const aiResponse = await callPerplexity(systemPrompt, `Page: ${pageName}. Content: ${pageContent.substring(0, 2000)}`, 300);
+  const aiResponse = await callAI(systemPrompt, `Page: ${pageName}. Content: ${pageContent.substring(0, 2000)}`, 300);
   res.json({ summary: aiResponse || `You are on the ${pageName} page. Ask me what you can do here.` });
 }
 
