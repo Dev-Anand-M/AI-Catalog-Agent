@@ -201,7 +201,9 @@ export function ExportCatalog() {
       const response = await api.post('/shopify/sync', { products });
       setShopifySync({ loading: false, result: response.data });
     } catch (err) {
-      setShopifySync({ loading: false, result: { error: err.response?.data?.error || 'Sync failed' } });
+      const errData = err.response?.data?.error;
+      const errMsg = typeof errData === 'string' ? errData : (errData?.message || 'Sync failed');
+      setShopifySync({ loading: false, result: { error: errMsg } });
     }
   };
 

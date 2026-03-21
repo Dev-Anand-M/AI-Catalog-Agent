@@ -1,5 +1,6 @@
 import { getDb } from '../_lib/db.js';
 import { getUserIdFromRequest } from '../_lib/auth.js';
+import { syncProductToShopify } from '../shopify/sync.js';
 
 export default async function handler(req, res) {
   try {
@@ -24,7 +25,14 @@ export default async function handler(req, res) {
         VALUES (${userId}, ${name}, ${description || ''}, ${category || 'Other'}, ${parseFloat(price) || 0}, ${language || 'en'}, ${imageUrl || null}, NOW())
         RETURNING *
       `;
-      return res.status(201).json(result[0]);
+      const newProduct = result[0];
+
+      // Auto-sync to Shopify in background (don't block response)
+      syncProductToShopify(newProduct).catch(err =>
+        console.error('Shopify auto-sync failed:', err.message)
+      );
+
+      return res.status(201).json(newProduct);
     }
 
     res.status(405).json({ error: 'Method not allowed' });
