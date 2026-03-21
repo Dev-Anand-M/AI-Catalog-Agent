@@ -13,7 +13,7 @@ export async function syncProductToShopify(product) {
     product: {
       title: product.name,
       body_html: product.description || '',
-      vendor: 'Digital Catalog Agent',
+      vendor: product.sellerName || 'Digital Catalog Agent',
       product_type: product.category || '',
       tags: [product.language, product.category].filter(Boolean),
       variants: [
@@ -82,24 +82,28 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Products array required' });
     }
 
+    const sql = getDb();
+
+    // Get seller name to use as Shopify vendor
+    const userRows = await sql`SELECT name FROM "User" WHERE id = ${userId}`;
+    const sellerName = userRows[0]?.name || 'Local Seller';
+
+    // Tag each product with seller name
+    const productsWithSeller = products.map(p => ({ ...p, sellerName }));
+
     // One API call to get all existing Shopify handles
     const shopifyHandles = await fetchAllShopifyHandles();
 
-    const sql = getDb();
-
-    // Determine which products need syncing
     const toSync = [];
     let skipped = 0;
 
-    for (const p of products) {
+    for (const p of productsWithSeller) {
       if (p.shopifyUrl) {
         const handle = p.shopifyUrl.split('/products/')[1];
         if (handle && shopifyHandles.has(handle)) {
-          // Still exists in Shopify — skip
           skipped++;
           continue;
         }
-        // Was deleted from Shopify — clear stale URL and re-sync
         await sql`UPDATE "Product" SET "shopifyUrl" = NULL WHERE id = ${p.id}`.catch(() => {});
         toSync.push({ ...p, shopifyUrl: null });
       } else {

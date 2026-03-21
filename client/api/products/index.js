@@ -27,8 +27,12 @@ export default async function handler(req, res) {
       `;
       const newProduct = result[0];
 
+      // Fetch seller name for Shopify vendor field
+      const userRows = await sql`SELECT name FROM "User" WHERE id = ${userId}`;
+      const sellerName = userRows[0]?.name || 'Local Seller';
+
       // Auto-sync to Shopify in background (don't block response)
-      syncProductToShopify(newProduct).catch(err =>
+      syncProductToShopify({ ...newProduct, sellerName }).catch(err =>
         console.error('Shopify auto-sync failed:', err.message)
       );
 
