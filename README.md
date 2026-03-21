@@ -115,7 +115,10 @@ cd server && npm run dev
 
 ---
 
-## Author
+## Team
 
 **Dev Anand M**  
-Final Year Student — Design Lab / Capstone Project  
+**Hemanth B**  
+**Dhanushree A**  
+
+Final Year Students — Design Lab / Capstone Project
