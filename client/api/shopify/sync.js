@@ -57,6 +57,22 @@ export async function syncProductToShopify(product) {
   return { ...data.product, shopifyUrl };
 }
 
+// Check if a Shopify product still exists by its handle (extracted from URL)
+async function shopifyProductExists(shopifyUrl) {
+  try {
+    const handle = shopifyUrl.split('/products/')[1];
+    if (!handle) return false;
+    const res = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products.json?handle=${handle}`, {
+      headers: { 'X-Shopify-Access-Token': SHOPIFY_TOKEN }
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    return data.products && data.products.length > 0;
+  } catch {
+    return false;
+  }
+}
+
 // POST /api/shopify/sync — bulk sync products array
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -72,20 +88,39 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Products array required' });
     }
 
-    // Only sync products that don't already have a shopifyUrl (no duplicates)
-    const unsynced = products.filter(p => !p.shopifyUrl);
+    // For products with a shopifyUrl, verify they still exist in Shopify
+    // If deleted from Shopify, clear the URL so they get re-synced
+    const verified = await Promise.all(
+      products.map(async p => {
+        if (!p.shopifyUrl) return p;
+        const exists = await shopifyProductExists(p.shopifyUrl);
+        if (!exists) {
+          // Clear stale shopifyUrl from DB
+          try {
+            const sql = getDb();
+            await sql`UPDATE "Product" SET "shopifyUrl" = NULL WHERE id = ${p.id}`;
+          } catch (e) {
+            console.error('Failed to clear stale shopifyUrl:', e.message);
+          }
+          return { ...p, shopifyUrl: null };
+        }
+        return p;
+      })
+    );
 
-    if (unsynced.length === 0) {
-      return res.json({ synced: 0, failed: 0, total: products.length, skipped: products.length });
+    const toSync = verified.filter(p => !p.shopifyUrl);
+    const skipped = verified.length - toSync.length;
+
+    if (toSync.length === 0) {
+      return res.json({ synced: 0, failed: 0, total: products.length, skipped });
     }
 
     const results = await Promise.allSettled(
-      unsynced.map(p => syncProductToShopify(p))
+      toSync.map(p => syncProductToShopify(p))
     );
 
     const synced = results.filter(r => r.status === 'fulfilled').length;
     const failed = results.filter(r => r.status === 'rejected').length;
-    const skipped = products.length - unsynced.length;
 
     res.json({ synced, failed, total: products.length, skipped });
   } catch (error) {
