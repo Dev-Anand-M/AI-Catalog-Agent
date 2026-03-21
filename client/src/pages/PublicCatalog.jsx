@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Store, Package, Share2, Smartphone, QrCode, X, MessageCircle } from 'lucide-react';
+import { Store, Package, Share2, Smartphone, QrCode, X, MessageCircle, ShoppingBag } from 'lucide-react';
 import { catalogApi } from '../api/client';
 import { Container } from '../components/layout';
 import { Card, CardBody, Alert, Button } from '../components/ui';
@@ -159,6 +159,18 @@ export function PublicCatalog() {
                     <span className="text-xl font-bold text-primary-600">₹{product.price}</span>
                     <span className="text-xs bg-gray-100 px-2 py-1 rounded">{product.category}</span>
                   </div>
+                  {product.shopifyUrl && (
+                    <a
+                      href={product.shopifyUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={e => e.stopPropagation()}
+                      className="mt-3 flex items-center justify-center gap-2 w-full py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
+                    >
+                      <ShoppingBag className="w-4 h-4" />
+                      Buy Now
+                    </a>
+                  )}
                   <p className="text-xs text-primary-500 mt-2 text-center">{t('tap_view_details')}</p>
                 </CardBody>
               </Card>
@@ -218,6 +230,18 @@ export function PublicCatalog() {
                   </div>
                 </div>
                 
+                {/* Buy / Contact Buttons */}
+                {selectedProduct.shopifyUrl && (
+                  <a
+                    href={selectedProduct.shopifyUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full py-4 text-lg bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-colors mb-3"
+                  >
+                    <ShoppingBag className="w-5 h-5" />
+                    Buy Now on Shopify
+                  </a>
+                )}
                 {/* Contact Button */}
                 <Button 
                   variant="primary" 

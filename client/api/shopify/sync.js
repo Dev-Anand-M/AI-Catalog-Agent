@@ -1,4 +1,5 @@
 import { getUserIdFromRequest } from '../_lib/auth.js';
+import { getDb } from '../_lib/db.js';
 
 const SHOPIFY_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN;
 const SHOPIFY_TOKEN = process.env.SHOPIFY_ACCESS_TOKEN;
@@ -41,7 +42,19 @@ export async function syncProductToShopify(product) {
   }
 
   const data = await res.json();
-  return data.product;
+  const shopifyUrl = `https://${SHOPIFY_DOMAIN}/products/${data.product.handle}`;
+
+  // Save shopifyUrl back to the Product row
+  if (product.id) {
+    try {
+      const sql = getDb();
+      await sql`UPDATE "Product" SET "shopifyUrl" = ${shopifyUrl} WHERE id = ${product.id}`;
+    } catch (e) {
+      console.error('Failed to save shopifyUrl:', e.message);
+    }
+  }
+
+  return { ...data.product, shopifyUrl };
 }
 
 // POST /api/shopify/sync — bulk sync products array
