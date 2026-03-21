@@ -36,3 +36,10 @@ server/uploads/*
 
 # Vercel
 .vercel
+
+# Kiro IDE
+.kiro/
+
+# Docs
+GEMINI_SETUP.md
+PROJECT_REPORT.md
