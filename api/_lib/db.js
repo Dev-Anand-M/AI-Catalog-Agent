@@ -1,45 +1,106 @@
-// Database connection for Vercel
-// Uses Vercel Postgres or falls back to in-memory for demo
+// Database connection using Supabase REST API
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
 
-let users = [];
-let products = [];
-let nextUserId = 1;
-let nextProductId = 1;
+const headers = () => ({
+  'Content-Type': 'application/json',
+  'apikey': SUPABASE_KEY,
+  'Authorization': `Bearer ${SUPABASE_KEY}`,
+  'Prefer': 'return=representation'
+});
 
-// In-memory database for demo/prototype
-// For production, replace with Vercel Postgres: https://vercel.com/docs/storage/vercel-postgres
+const q = (table) => `${SUPABASE_URL}/rest/v1/${table}`;
 
 export const db = {
   // Users
-  findUserByEmail: (email) => users.find(u => u.email === email),
-  findUserById: (id) => users.find(u => u.id === id),
-  createUser: (data) => {
-    const user = { id: nextUserId++, ...data, createdAt: new Date() };
-    users.push(user);
-    return user;
+  findUserByEmail: async (email) => {
+    const res = await fetch(`${q('User')}?email=eq.${encodeURIComponent(email)}&limit=1`, { headers: headers() });
+    const rows = await res.json();
+    return rows[0] || null;
+  },
+
+  findUserById: async (id) => {
+    const res = await fetch(`${q('User')}?id=eq.${id}&limit=1`, { headers: headers() });
+    const rows = await res.json();
+    return rows[0] || null;
+  },
+
+  createUser: async (data) => {
+    const res = await fetch(q('User'), {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify(data)
+    });
+    const rows = await res.json();
+    return rows[0];
   },
 
   // Products
-  findProductsByUserId: (userId) => products.filter(p => p.userId === userId).sort((a, b) => b.createdAt - a.createdAt),
-  findProductById: (id, userId) => products.find(p => p.id === id && p.userId === userId),
-  findProductByIdPublic: (id) => products.find(p => p.id === id),
-  findProductsByUserIdPublic: (userId) => products.filter(p => p.userId === userId),
-  createProduct: (data) => {
-    const product = { id: nextProductId++, ...data, createdAt: new Date() };
-    products.push(product);
-    return product;
+  findProductsByUserId: async (userId) => {
+    const res = await fetch(`${q('Product')}?userId=eq.${userId}&order=createdAt.desc`, { headers: headers() });
+    return res.json();
   },
-  updateProduct: (id, userId, data) => {
-    const index = products.findIndex(p => p.id === id && p.userId === userId);
-    if (index === -1) return null;
-    products[index] = { ...products[index], ...data };
-    return products[index];
+
+  findProductById: async (id, userId) => {
+    const res = await fetch(`${q('Product')}?id=eq.${id}&userId=eq.${userId}&limit=1`, { headers: headers() });
+    const rows = await res.json();
+    return rows[0] || null;
   },
-  deleteProduct: (id, userId) => {
-    const index = products.findIndex(p => p.id === id && p.userId === userId);
-    if (index === -1) return false;
-    products.splice(index, 1);
-    return true;
+
+  findProductByIdPublic: async (id) => {
+    const res = await fetch(`${q('Product')}?id=eq.${id}&limit=1`, { headers: headers() });
+    const rows = await res.json();
+    return rows[0] || null;
+  },
+
+  findProductsByUserIdPublic: async (userId) => {
+    const res = await fetch(`${q('Product')}?userId=eq.${userId}&order=createdAt.desc`, { headers: headers() });
+    return res.json();
+  },
+
+  createProduct: async (data) => {
+    const res = await fetch(q('Product'), {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify(data)
+    });
+    const rows = await res.json();
+    return rows[0];
+  },
+
+  updateProduct: async (id, userId, data) => {
+    const res = await fetch(`${q('Product')}?id=eq.${id}&userId=eq.${userId}`, {
+      method: 'PATCH',
+      headers: headers(),
+      body: JSON.stringify(data)
+    });
+    const rows = await res.json();
+    return rows[0] || null;
+  },
+
+  deleteProduct: async (id, userId) => {
+    const res = await fetch(`${q('Product')}?id=eq.${id}&userId=eq.${userId}`, {
+      method: 'DELETE',
+      headers: { ...headers(), 'Prefer': 'return=minimal' }
+    });
+    return res.ok;
+  },
+
+  // Payment Settings
+  findPaymentByUserId: async (userId) => {
+    const res = await fetch(`${q('PaymentSettings')}?userId=eq.${userId}&limit=1`, { headers: headers() });
+    const rows = await res.json();
+    return rows[0] || null;
+  },
+
+  upsertPayment: async (userId, data) => {
+    const res = await fetch(q('PaymentSettings'), {
+      method: 'POST',
+      headers: { ...headers(), 'Prefer': 'return=representation,resolution=merge-duplicates' },
+      body: JSON.stringify({ userId, ...data })
+    });
+    const rows = await res.json();
+    return rows[0];
   }
 };
 

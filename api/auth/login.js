@@ -14,7 +14,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Email and password required' });
     }
 
-    const user = db.findUserByEmail(email.toLowerCase());
+    const user = await db.findUserByEmail(email.toLowerCase());
     if (!user) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
@@ -25,11 +25,7 @@ export default async function handler(req, res) {
     }
 
     const token = signToken(user.id);
-
-    res.json({
-      token,
-      user: { id: user.id, name: user.name, email: user.email }
-    });
+    res.json({ token, user: { id: user.id, name: user.name, email: user.email } });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Something went wrong' });

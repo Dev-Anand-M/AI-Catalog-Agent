@@ -3,13 +3,11 @@ import { requireAuth } from '../_lib/auth.js';
 
 async function handler(req, res) {
   if (req.method === 'GET') {
-    // List user's products
-    const products = db.findProductsByUserId(req.userId);
+    const products = await db.findProductsByUserId(req.userId);
     return res.json(products);
   }
 
   if (req.method === 'POST') {
-    // Create product
     const { name, description, category, price, language, imageUrl } = req.body;
 
     const errors = {};
@@ -23,7 +21,7 @@ async function handler(req, res) {
       return res.status(400).json({ error: 'Validation failed', details: errors });
     }
 
-    const product = db.createProduct({
+    const product = await db.createProduct({
       userId: req.userId,
       name: name.trim(),
       description: description.trim(),

@@ -5,10 +5,8 @@ async function handler(req, res) {
   const id = parseInt(req.query.id);
 
   if (req.method === 'GET') {
-    const product = db.findProductById(id, req.userId);
-    if (!product) {
-      return res.status(404).json({ error: 'Product not found' });
-    }
+    const product = await db.findProductById(id, req.userId);
+    if (!product) return res.status(404).json({ error: 'Product not found' });
     return res.json(product);
   }
 
@@ -24,7 +22,7 @@ async function handler(req, res) {
       return res.status(400).json({ error: 'Validation failed', details: errors });
     }
 
-    const product = db.updateProduct(id, req.userId, {
+    const product = await db.updateProduct(id, req.userId, {
       ...(name && { name: name.trim() }),
       ...(description && { description: description.trim() }),
       ...(category && { category: category.trim() }),
@@ -33,17 +31,13 @@ async function handler(req, res) {
       ...(imageUrl !== undefined && { imageUrl })
     });
 
-    if (!product) {
-      return res.status(404).json({ error: 'Product not found' });
-    }
+    if (!product) return res.status(404).json({ error: 'Product not found' });
     return res.json(product);
   }
 
   if (req.method === 'DELETE') {
-    const deleted = db.deleteProduct(id, req.userId);
-    if (!deleted) {
-      return res.status(404).json({ error: 'Product not found' });
-    }
+    const deleted = await db.deleteProduct(id, req.userId);
+    if (!deleted) return res.status(404).json({ error: 'Product not found' });
     return res.json({ message: 'Product deleted successfully' });
   }
 
