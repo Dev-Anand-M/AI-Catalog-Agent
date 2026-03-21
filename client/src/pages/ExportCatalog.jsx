@@ -312,7 +312,8 @@ export function ExportCatalog() {
                       {shopifySync.result && !shopifySync.result.error && (
                         <p className="text-sm text-green-700 mt-1">
                           ✓ Synced {shopifySync.result.synced}/{shopifySync.result.total} products
-                          {shopifySync.result.failed > 0 && ` (${shopifySync.result.failed} failed)`}
+                          {shopifySync.result.skipped > 0 && ` (${shopifySync.result.skipped} already synced)`}
+                          {shopifySync.result.failed > 0 && ` · ${shopifySync.result.failed} failed`}
                         </p>
                       )}
                       {shopifySync.result?.error && (

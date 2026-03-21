@@ -72,14 +72,22 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Products array required' });
     }
 
+    // Only sync products that don't already have a shopifyUrl (no duplicates)
+    const unsynced = products.filter(p => !p.shopifyUrl);
+
+    if (unsynced.length === 0) {
+      return res.json({ synced: 0, failed: 0, total: products.length, skipped: products.length });
+    }
+
     const results = await Promise.allSettled(
-      products.map(p => syncProductToShopify(p))
+      unsynced.map(p => syncProductToShopify(p))
     );
 
     const synced = results.filter(r => r.status === 'fulfilled').length;
     const failed = results.filter(r => r.status === 'rejected').length;
+    const skipped = products.length - unsynced.length;
 
-    res.json({ synced, failed, total: products.length });
+    res.json({ synced, failed, total: products.length, skipped });
   } catch (error) {
     console.error('Shopify sync error:', error);
     res.status(500).json({ error: error.message || 'Sync failed' });
