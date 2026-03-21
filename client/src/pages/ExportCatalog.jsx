@@ -322,7 +322,7 @@ export function ExportCatalog() {
                     </div>
                     <Button
                       variant="primary"
-                      onClick={handleShopifySync}
+                      onClick={() => handleShopifySync()}
                       disabled={shopifySync.loading}
                       className="bg-green-600 hover:bg-green-700"
                     >

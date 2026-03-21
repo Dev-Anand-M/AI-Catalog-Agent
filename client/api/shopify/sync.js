@@ -57,23 +57,17 @@ export async function syncProductToShopify(product) {
   return { ...data.product, shopifyUrl };
 }
 
-// Check if a Shopify product still exists by its handle (extracted from URL)
-async function shopifyProductExists(shopifyUrl) {
-  try {
-    const handle = shopifyUrl.split('/products/')[1];
-    if (!handle) return false;
-    const res = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products.json?handle=${handle}`, {
-      headers: { 'X-Shopify-Access-Token': SHOPIFY_TOKEN }
-    });
-    if (!res.ok) return false;
-    const data = await res.json();
-    return data.products && data.products.length > 0;
-  } catch {
-    return false;
-  }
+// Fetch all Shopify product handles in one call
+async function fetchAllShopifyHandles() {
+  const res = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products.json?limit=250&fields=id,handle`, {
+    headers: { 'X-Shopify-Access-Token': SHOPIFY_TOKEN }
+  });
+  if (!res.ok) return new Set();
+  const data = await res.json();
+  return new Set((data.products || []).map(p => p.handle));
 }
 
-// POST /api/shopify/sync — bulk sync products array
+// POST /api/shopify/sync — smart sync: skip existing, re-sync deleted
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -88,37 +82,36 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Products array required' });
     }
 
-    // For products with a shopifyUrl, verify they still exist in Shopify
-    // If deleted from Shopify, clear the URL so they get re-synced
-    const verified = await Promise.all(
-      products.map(async p => {
-        if (!p.shopifyUrl) return p;
-        const exists = await shopifyProductExists(p.shopifyUrl);
-        if (!exists) {
-          // Clear stale shopifyUrl from DB
-          try {
-            const sql = getDb();
-            await sql`UPDATE "Product" SET "shopifyUrl" = NULL WHERE id = ${p.id}`;
-          } catch (e) {
-            console.error('Failed to clear stale shopifyUrl:', e.message);
-          }
-          return { ...p, shopifyUrl: null };
-        }
-        return p;
-      })
-    );
+    // One API call to get all existing Shopify handles
+    const shopifyHandles = await fetchAllShopifyHandles();
 
-    const toSync = verified.filter(p => !p.shopifyUrl);
-    const skipped = verified.length - toSync.length;
+    const sql = getDb();
+
+    // Determine which products need syncing
+    const toSync = [];
+    let skipped = 0;
+
+    for (const p of products) {
+      if (p.shopifyUrl) {
+        const handle = p.shopifyUrl.split('/products/')[1];
+        if (handle && shopifyHandles.has(handle)) {
+          // Still exists in Shopify — skip
+          skipped++;
+          continue;
+        }
+        // Was deleted from Shopify — clear stale URL and re-sync
+        await sql`UPDATE "Product" SET "shopifyUrl" = NULL WHERE id = ${p.id}`.catch(() => {});
+        toSync.push({ ...p, shopifyUrl: null });
+      } else {
+        toSync.push(p);
+      }
+    }
 
     if (toSync.length === 0) {
       return res.json({ synced: 0, failed: 0, total: products.length, skipped });
     }
 
-    const results = await Promise.allSettled(
-      toSync.map(p => syncProductToShopify(p))
-    );
-
+    const results = await Promise.allSettled(toSync.map(p => syncProductToShopify(p)));
     const synced = results.filter(r => r.status === 'fulfilled').length;
     const failed = results.filter(r => r.status === 'rejected').length;
 
