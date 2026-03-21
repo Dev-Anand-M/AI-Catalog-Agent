@@ -1,5 +1,6 @@
 import { db } from '../_lib/db.js';
 import { requireAuth } from '../_lib/auth.js';
+import { syncProductToShopify } from '../shopify/sync.js';
 
 async function handler(req, res) {
   if (req.method === 'GET') {
@@ -30,6 +31,11 @@ async function handler(req, res) {
       language: language.trim(),
       imageUrl: imageUrl || null
     });
+
+    // Auto-sync to Shopify in background (don't block response)
+    syncProductToShopify(product).catch(err =>
+      console.error('Shopify auto-sync failed:', err.message)
+    );
 
     return res.status(201).json(product);
   }

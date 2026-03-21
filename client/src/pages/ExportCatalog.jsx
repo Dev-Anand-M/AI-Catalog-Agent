@@ -4,16 +4,17 @@ import {
   Download, 
   Share2, 
   CheckCircle, 
-  ExternalLink, 
   FileSpreadsheet,
   MessageCircle,
   ShoppingBag,
   Store,
   Globe,
   Copy,
-  Loader2
+  Loader2,
+  RefreshCw
 } from 'lucide-react';
-import { productsApi } from '../api/client';
+import { productsApi, aiApi } from '../api/client';
+import api from '../api/client';
 import { Button, Alert, Card, CardBody } from '../components/ui';
 import { Container } from '../components/layout';
 import { useLanguage } from '../context/LanguageContext';
@@ -78,6 +79,7 @@ export function ExportCatalog() {
   const [error, setError] = useState('');
   const [shareLink, setShareLink] = useState('');
   const [copied, setCopied] = useState(false);
+  const [shopifySync, setShopifySync] = useState({ loading: false, result: null });
 
   useEffect(() => {
     fetchProducts();
@@ -193,6 +195,16 @@ export function ExportCatalog() {
     setExported(prev => [...prev, 'whatsapp']);
   };
 
+  const handleShopifySync = async () => {
+    setShopifySync({ loading: true, result: null });
+    try {
+      const response = await api.post('/shopify/sync', { products });
+      setShopifySync({ loading: false, result: response.data });
+    } catch (err) {
+      setShopifySync({ loading: false, result: { error: err.response?.data?.error || 'Sync failed' } });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -281,6 +293,42 @@ export function ExportCatalog() {
                         </Button>
                       </div>
                     </div>
+                  </div>
+                </CardBody>
+              </Card>
+
+              {/* Shopify Sync */}
+              <Card className="mb-8 border-2 border-green-200 bg-green-50">
+                <CardBody>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <ShoppingBag className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900">Shopify — Auto Sync</h3>
+                      <p className="text-sm text-gray-600">Products are auto-synced to Shopify when added. Click to sync all now.</p>
+                      {shopifySync.result && !shopifySync.result.error && (
+                        <p className="text-sm text-green-700 mt-1">
+                          ✓ Synced {shopifySync.result.synced}/{shopifySync.result.total} products
+                          {shopifySync.result.failed > 0 && ` (${shopifySync.result.failed} failed)`}
+                        </p>
+                      )}
+                      {shopifySync.result?.error && (
+                        <p className="text-sm text-red-600 mt-1">✗ {shopifySync.result.error}</p>
+                      )}
+                    </div>
+                    <Button
+                      variant="primary"
+                      onClick={handleShopifySync}
+                      disabled={shopifySync.loading}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      {shopifySync.loading ? (
+                        <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Syncing...</>
+                      ) : (
+                        <><RefreshCw className="w-4 h-4 mr-2" />Sync All</>
+                      )}
+                    </Button>
                   </div>
                 </CardBody>
               </Card>
