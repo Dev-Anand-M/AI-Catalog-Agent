@@ -198,16 +198,18 @@ export function ExportCatalog() {
   const handleShopifySync = async () => {
     setShopifySync({ loading: true, result: null });
     try {
-      // Send in batches of 3 to avoid Vercel timeout
-      const batchSize = 3;
       let totalSynced = 0, totalFailed = 0, totalSkipped = 0;
 
-      for (let i = 0; i < products.length; i += batchSize) {
-        const batch = products.slice(i, i + batchSize);
-        const response = await api.post('/shopify/sync', { products: batch });
-        totalSynced += response.data.synced || 0;
-        totalFailed += response.data.failed || 0;
-        totalSkipped += response.data.skipped || 0;
+      // Sync one product at a time to avoid timeouts and duplicates
+      for (const product of products) {
+        try {
+          const response = await api.post('/shopify/sync', { products: [product] });
+          totalSynced += response.data.synced || 0;
+          totalFailed += response.data.failed || 0;
+          totalSkipped += response.data.skipped || 0;
+        } catch {
+          totalFailed++;
+        }
       }
 
       setShopifySync({ loading: false, result: { synced: totalSynced, failed: totalFailed, skipped: totalSkipped, total: products.length } });
