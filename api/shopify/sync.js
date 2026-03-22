@@ -42,6 +42,50 @@ export async function syncProductToShopify(product) {
   return data.product;
 }
 
+export async function updateProductInShopify(shopifyProductId, product) {
+  if (!SHOPIFY_DOMAIN || !SHOPIFY_TOKEN) {
+    throw new Error('Shopify credentials not configured');
+  }
+
+  if (!shopifyProductId) {
+    throw new Error('Shopify product ID is required for updates');
+  }
+
+  const shopifyProduct = {
+    product: {
+      id: shopifyProductId,
+      title: product.name,
+      body_html: product.description,
+      product_type: product.category,
+      tags: [product.language, product.category],
+      variants: [
+        {
+          price: product.price.toFixed(2),
+          inventory_management: null,
+          fulfillment_service: 'manual'
+        }
+      ]
+    }
+  };
+
+  const res = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products/${shopifyProductId}.json`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Shopify-Access-Token': SHOPIFY_TOKEN
+    },
+    body: JSON.stringify(shopifyProduct)
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.errors || 'Failed to update product in Shopify');
+  }
+
+  const data = await res.json();
+  return data.product;
+}
+
 export async function getShopifyProducts() {
   if (!SHOPIFY_DOMAIN || !SHOPIFY_TOKEN) {
     throw new Error('Shopify credentials not configured');
@@ -59,7 +103,9 @@ export async function getShopifyProducts() {
 }
 
 // Handler for manual sync of all products
-export default async function handler(req, res) {
+import { requireAuth } from '../_lib/auth.js';
+
+async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -83,3 +129,5 @@ export default async function handler(req, res) {
     res.status(500).json({ error: error.message });
   }
 }
+
+export default requireAuth(handler);

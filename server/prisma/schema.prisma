@@ -19,16 +19,18 @@ model User {
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
-  userId      Int
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name        String
-  description String
-  category    String
-  price       Float
-  language    String
-  imageUrl    String?
-  createdAt   DateTime @default(now())
+  id               Int      @id @default(autoincrement())
+  userId           Int
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name             String
+  description      String
+  category         String
+  price            Float
+  language         String
+  imageUrl         String?
+  shopifyProductId String?
+  shopifyUrl       String?
+  createdAt        DateTime @default(now())
 }
 
 model PaymentSettings {

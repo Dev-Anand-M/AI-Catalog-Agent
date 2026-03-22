@@ -1,5 +1,6 @@
 import { db } from '../_lib/db.js';
 import { requireAuth } from '../_lib/auth.js';
+import { updateProductInShopify } from '../shopify/sync.js';
 
 async function handler(req, res) {
   const id = parseInt(req.query.id);
@@ -32,6 +33,14 @@ async function handler(req, res) {
     });
 
     if (!product) return res.status(404).json({ error: 'Product not found' });
+
+    // Auto-sync updates to Shopify in background (don't block response)
+    if (product.shopifyProductId) {
+      updateProductInShopify(product.shopifyProductId, product).catch(err =>
+        console.error('Shopify update sync failed:', err.message)
+      );
+    }
+
     return res.json(product);
   }
 

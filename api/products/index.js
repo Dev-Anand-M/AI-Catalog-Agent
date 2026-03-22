@@ -32,10 +32,16 @@ async function handler(req, res) {
       imageUrl: imageUrl || null
     });
 
-    // Auto-sync to Shopify in background (don't block response)
-    syncProductToShopify(product).catch(err =>
-      console.error('Shopify auto-sync failed:', err.message)
-    );
+    // Auto-sync to Shopify in background and update product with Shopify details
+    syncProductToShopify(product)
+      .then(async (shopifyProduct) => {
+        // Update the product with Shopify details
+        await db.updateProduct(product.id, req.userId, {
+          shopifyProductId: shopifyProduct.id.toString(),
+          shopifyUrl: `https://${process.env.SHOPIFY_STORE_DOMAIN}/products/${shopifyProduct.handle}`
+        });
+      })
+      .catch(err => console.error('Shopify auto-sync failed:', err.message));
 
     return res.status(201).json(product);
   }
