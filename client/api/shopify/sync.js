@@ -23,9 +23,12 @@ export async function syncProductToShopify(product) {
           fulfillment_service: 'manual'
         }
       ],
-      ...(product.imageUrl ? { images: [{ src: product.imageUrl }] } : {})
+      ...(product.imageUrl && product.imageUrl.startsWith('http') ? { images: [{ src: product.imageUrl }] } : {})
     }
   };
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
 
   const res = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products.json`, {
     method: 'POST',
@@ -33,8 +36,10 @@ export async function syncProductToShopify(product) {
       'Content-Type': 'application/json',
       'X-Shopify-Access-Token': SHOPIFY_TOKEN
     },
-    body: JSON.stringify(shopifyProduct)
+    body: JSON.stringify(shopifyProduct),
+    signal: controller.signal
   });
+  clearTimeout(timeout);
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));

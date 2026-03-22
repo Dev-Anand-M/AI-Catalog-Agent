@@ -3,6 +3,23 @@ import { Camera, Upload, X, RotateCcw, Image as ImageIcon } from 'lucide-react';
 import { useCamera } from '../hooks/useCamera';
 import { Button, Alert } from './ui';
 
+// Compress image to max 800px wide and ~200KB
+function compressImage(dataUrl, maxWidth = 800, quality = 0.7) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const scale = Math.min(1, maxWidth / img.width);
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = dataUrl;
+  });
+}
+
 export function ImageInput({ onImageSelect, currentImage }) {
   const [mode, setMode] = useState(null); // 'camera' or 'upload'
   const [uploadedImage, setUploadedImage] = useState(null);
@@ -22,27 +39,28 @@ export function ImageInput({ onImageSelect, currentImage }) {
 
   const displayImage = capturedImage || uploadedImage || currentImage;
 
-  const handleCapture = () => {
+  const handleCapture = async () => {
     const image = capturePhoto();
     if (image && onImageSelect) {
-      onImageSelect(image);
+      const compressed = await compressImage(image);
+      onImageSelect(compressed);
     }
   };
 
-  const handleFileSelect = (e) => {
+  const handleFileSelect = async (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Image size should be less than 5MB');
+      if (file.size > 10 * 1024 * 1024) {
+        alert('Image size should be less than 10MB');
         return;
       }
       
       const reader = new FileReader();
-      reader.onload = (event) => {
-        const imageData = event.target.result;
-        setUploadedImage(imageData);
+      reader.onload = async (event) => {
+        const compressed = await compressImage(event.target.result);
+        setUploadedImage(compressed);
         if (onImageSelect) {
-          onImageSelect(imageData);
+          onImageSelect(compressed);
         }
       };
       reader.readAsDataURL(file);
