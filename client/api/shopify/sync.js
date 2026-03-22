@@ -57,16 +57,6 @@ export async function syncProductToShopify(product) {
   return { ...data.product, shopifyUrl };
 }
 
-// Fetch all Shopify product handles in one call
-async function fetchAllShopifyHandles() {
-  const res = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products.json?limit=250&fields=id,handle`, {
-    headers: { 'X-Shopify-Access-Token': SHOPIFY_TOKEN }
-  });
-  if (!res.ok) return new Set();
-  const data = await res.json();
-  return new Set((data.products || []).map(p => p.handle));
-}
-
 // POST /api/shopify/sync — smart sync: skip existing, re-sync deleted
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -88,28 +78,12 @@ export default async function handler(req, res) {
     const userRows = await sql`SELECT name FROM "User" WHERE id = ${userId}`;
     const sellerName = userRows[0]?.name || 'Local Seller';
 
-    // Tag each product with seller name
-    const productsWithSeller = products.map(p => ({ ...p, sellerName }));
+    // Only sync products without a shopifyUrl (not yet synced)
+    const toSync = products
+      .filter(p => !p.shopifyUrl)
+      .map(p => ({ ...p, sellerName }));
 
-    // One API call to get all existing Shopify handles
-    const shopifyHandles = await fetchAllShopifyHandles();
-
-    const toSync = [];
-    let skipped = 0;
-
-    for (const p of productsWithSeller) {
-      if (p.shopifyUrl) {
-        const handle = p.shopifyUrl.split('/products/')[1];
-        if (handle && shopifyHandles.has(handle)) {
-          skipped++;
-          continue;
-        }
-        await sql`UPDATE "Product" SET "shopifyUrl" = NULL WHERE id = ${p.id}`.catch(() => {});
-        toSync.push({ ...p, shopifyUrl: null });
-      } else {
-        toSync.push(p);
-      }
-    }
+    const skipped = products.length - toSync.length;
 
     if (toSync.length === 0) {
       return res.json({ synced: 0, failed: 0, total: products.length, skipped });
