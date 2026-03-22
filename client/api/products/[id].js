@@ -39,9 +39,12 @@ export default async function handler(req, res) {
         const userRows = await sql`SELECT name FROM "User" WHERE id = ${userId}`;
         const sellerName = userRows[0]?.name || 'Local Seller';
         
-        updateShopifyProduct({ ...updatedProduct, sellerName }).catch(err =>
-          console.error('Shopify update failed:', err.message)
-        );
+        try {
+          await updateShopifyProduct({ ...updatedProduct, sellerName });
+          console.log('Shopify product updated successfully:', updatedProduct.id);
+        } catch (err) {
+          console.error('Shopify update failed for product', updatedProduct.id, ':', err.message);
+        }
       }
 
       return res.json(updatedProduct);
