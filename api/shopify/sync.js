@@ -51,24 +51,36 @@ export async function updateProductInShopify(shopifyProductId, product) {
     throw new Error('Shopify product ID is required for updates');
   }
 
+  // First, get the existing product to find the variant ID
+  const getRes = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products/${shopifyProductId}.json`, {
+    headers: {
+      'X-Shopify-Access-Token': SHOPIFY_TOKEN
+    }
+  });
+
+  if (!getRes.ok) {
+    throw new Error('Failed to fetch existing Shopify product');
+  }
+
+  const existingProduct = await getRes.json();
+  const variantId = existingProduct.product.variants[0]?.id;
+
+  if (!variantId) {
+    throw new Error('No variant found for product');
+  }
+
+  // Update the product details
   const shopifyProduct = {
     product: {
       id: shopifyProductId,
       title: product.name,
       body_html: product.description,
       product_type: product.category,
-      tags: [product.language, product.category],
-      variants: [
-        {
-          price: (product.price / 100).toFixed(2),
-          inventory_management: null,
-          fulfillment_service: 'manual'
-        }
-      ]
+      tags: [product.language, product.category]
     }
   };
 
-  const res = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products/${shopifyProductId}.json`, {
+  const updateRes = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products/${shopifyProductId}.json`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -77,12 +89,32 @@ export async function updateProductInShopify(shopifyProductId, product) {
     body: JSON.stringify(shopifyProduct)
   });
 
-  if (!res.ok) {
-    const err = await res.json();
+  if (!updateRes.ok) {
+    const err = await updateRes.json();
     throw new Error(err.errors || 'Failed to update product in Shopify');
   }
 
-  const data = await res.json();
+  // Update the variant price separately
+  const variantRes = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/variants/${variantId}.json`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Shopify-Access-Token': SHOPIFY_TOKEN
+    },
+    body: JSON.stringify({
+      variant: {
+        id: variantId,
+        price: (product.price / 100).toFixed(2)
+      }
+    })
+  });
+
+  if (!variantRes.ok) {
+    const err = await variantRes.json();
+    throw new Error(err.errors || 'Failed to update variant price in Shopify');
+  }
+
+  const data = await updateRes.json();
   return data.product;
 }
 
