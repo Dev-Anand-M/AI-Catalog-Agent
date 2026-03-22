@@ -1,5 +1,6 @@
 import { getDb } from '../_lib/db.js';
 import { getUserIdFromRequest } from '../_lib/auth.js';
+import { updateShopifyProduct } from '../shopify/sync.js';
 
 export default async function handler(req, res) {
   try {
@@ -30,7 +31,20 @@ export default async function handler(req, res) {
       `;
       
       if (result.length === 0) return res.status(404).json({ error: 'Product not found' });
-      return res.json(result[0]);
+      
+      const updatedProduct = result[0];
+
+      // If product has shopifyUrl, update it in Shopify
+      if (updatedProduct.shopifyUrl) {
+        const userRows = await sql`SELECT name FROM "User" WHERE id = ${userId}`;
+        const sellerName = userRows[0]?.name || 'Local Seller';
+        
+        updateShopifyProduct({ ...updatedProduct, sellerName }).catch(err =>
+          console.error('Shopify update failed:', err.message)
+        );
+      }
+
+      return res.json(updatedProduct);
     }
 
     if (req.method === 'DELETE') {

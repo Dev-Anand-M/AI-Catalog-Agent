@@ -63,6 +63,72 @@ export async function syncProductToShopify(product) {
   return { ...data.product, shopifyUrl };
 }
 
+// Update existing Shopify product
+export async function updateShopifyProduct(product) {
+  if (!SHOPIFY_DOMAIN || !SHOPIFY_TOKEN || !product.shopifyUrl) {
+    throw new Error('Product not synced to Shopify');
+  }
+
+  // Extract Shopify product ID from URL
+  const handle = product.shopifyUrl.split('/products/')[1];
+  if (!handle) throw new Error('Invalid Shopify URL');
+
+  // Get Shopify product ID by handle
+  const findRes = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products.json?handle=${handle}`, {
+    headers: { 'X-Shopify-Access-Token': SHOPIFY_TOKEN }
+  });
+  
+  if (!findRes.ok) throw new Error('Product not found in Shopify');
+  const findData = await findRes.json();
+  if (!findData.products || findData.products.length === 0) {
+    throw new Error('Product deleted from Shopify');
+  }
+
+  const shopifyId = findData.products[0].id;
+  const variantId = findData.products[0].variants[0].id;
+
+  // Update the product
+  const shopifyProduct = {
+    product: {
+      id: shopifyId,
+      title: product.name,
+      body_html: product.description || '',
+      vendor: product.sellerName || 'Digital Catalog Agent',
+      product_type: product.category || '',
+      tags: [product.language, product.category].filter(Boolean),
+      variants: [
+        {
+          id: variantId,
+          price: parseFloat(product.price).toFixed(2)
+        }
+      ],
+      ...(product.imageUrl && product.imageUrl.startsWith('http') ? { images: [{ src: product.imageUrl }] } : {})
+    }
+  };
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+
+  const res = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products/${shopifyId}.json`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Shopify-Access-Token': SHOPIFY_TOKEN
+    },
+    body: JSON.stringify(shopifyProduct),
+    signal: controller.signal
+  });
+  clearTimeout(timeout);
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    const msg = typeof err.errors === 'string' ? err.errors : JSON.stringify(err.errors || 'Failed to update Shopify product');
+    throw new Error(msg);
+  }
+
+  return await res.json();
+}
+
 // POST /api/shopify/sync — smart sync: skip existing, re-sync deleted
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
