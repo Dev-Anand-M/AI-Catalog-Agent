@@ -16,7 +16,7 @@ export async function syncProductToShopify(product) {
       tags: [product.language, product.category],
       variants: [
         {
-          price: product.price.toFixed(2),
+          price: (product.price / 100).toFixed(2),
           inventory_management: null,
           fulfillment_service: 'manual'
         }
@@ -60,7 +60,7 @@ export async function updateProductInShopify(shopifyProductId, product) {
       tags: [product.language, product.category],
       variants: [
         {
-          price: product.price.toFixed(2),
+          price: (product.price / 100).toFixed(2),
           inventory_management: null,
           fulfillment_service: 'manual'
         }
