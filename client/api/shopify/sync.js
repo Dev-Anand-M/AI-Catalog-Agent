@@ -22,7 +22,8 @@ export async function syncProductToShopify(product) {
           inventory_management: null,
           fulfillment_service: 'manual'
         }
-      ]
+      ],
+      ...(product.imageUrl ? { images: [{ src: product.imageUrl }] } : {})
     }
   };
 
