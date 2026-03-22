@@ -1,7 +1,8 @@
 import { useState, useRef } from 'react';
-import { Camera, Upload, X, RotateCcw, Image as ImageIcon } from 'lucide-react';
+import { Camera, Upload, X, RotateCcw, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { useCamera } from '../hooks/useCamera';
 import { Button, Alert } from './ui';
+import api from '../api/client';
 
 // Compress image to max 800px wide and ~200KB
 function compressImage(dataUrl, maxWidth = 800, quality = 0.7) {
@@ -23,6 +24,7 @@ function compressImage(dataUrl, maxWidth = 800, quality = 0.7) {
 export function ImageInput({ onImageSelect, currentImage }) {
   const [mode, setMode] = useState(null); // 'camera' or 'upload'
   const [uploadedImage, setUploadedImage] = useState(null);
+  const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef(null);
   
   const {
@@ -43,7 +45,16 @@ export function ImageInput({ onImageSelect, currentImage }) {
     const image = capturePhoto();
     if (image && onImageSelect) {
       const compressed = await compressImage(image);
-      onImageSelect(compressed);
+      setUploading(true);
+      try {
+        const response = await api.post('/upload/image', { image: compressed });
+        onImageSelect(response.data.url);
+      } catch (err) {
+        alert('Failed to upload image');
+        console.error(err);
+      } finally {
+        setUploading(false);
+      }
     }
   };
 
@@ -59,8 +70,17 @@ export function ImageInput({ onImageSelect, currentImage }) {
       reader.onload = async (event) => {
         const compressed = await compressImage(event.target.result);
         setUploadedImage(compressed);
-        if (onImageSelect) {
-          onImageSelect(compressed);
+        setUploading(true);
+        try {
+          const response = await api.post('/upload/image', { image: compressed });
+          if (onImageSelect) {
+            onImageSelect(response.data.url);
+          }
+        } catch (err) {
+          alert('Failed to upload image');
+          console.error(err);
+        } finally {
+          setUploading(false);
         }
       };
       reader.readAsDataURL(file);
@@ -93,6 +113,12 @@ export function ImageInput({ onImageSelect, currentImage }) {
   if (displayImage && !isCapturing) {
     return (
       <div className="space-y-4">
+        {uploading && (
+          <div className="flex items-center justify-center gap-2 text-primary-600 mb-2">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span className="text-sm">Uploading image...</span>
+          </div>
+        )}
         <div className="relative rounded-xl overflow-hidden border-2 border-green-400">
           <img
             src={displayImage}
