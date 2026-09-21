@@ -1,5 +1,18 @@
 // Database connection using Supabase REST API
+import postgres from 'postgres';
 import { normalizePhone, normalizeIdentifier } from './identifier.js';
+
+let sqlInstance = null;
+export function getDb() {
+  if (!sqlInstance) {
+    const conn = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.SUPABASE_DB_URL || '';
+    sqlInstance = postgres(conn || 'postgres://localhost:5432/postgres', {
+      ssl: conn && !conn.includes('localhost') ? 'require' : false,
+      max: 1
+    });
+  }
+  return sqlInstance;
+}
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
