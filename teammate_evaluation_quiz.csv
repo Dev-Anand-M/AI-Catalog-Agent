@@ -1,0 +1,52 @@
+"AI Catalog Agent Project Quiz","Comprehensive quiz covering project features, architecture, and implementation","Full Stack","mixed",45
+"Type","Question","Opt1","Opt2","Opt3","Opt4","Correct"
+"mcq","What is the primary purpose of the AI Catalog Agent?","To help retailers create product catalogs using AI and voice","To sell products online","To manage inventory","To create websites",0
+"mcq","Which database is used in this project?","MySQL","MongoDB","Supabase PostgreSQL","SQLite",2
+"mcq","What is the main frontend framework used?","Angular","Vue.js","React","Svelte",2
+"mcq","Which AI service is primarily integrated for product generation?","OpenAI ChatGPT","Google Gemini","Perplexity AI","Amazon Alexa",2
+"boolean","The project supports voice input in multiple Indian languages","True"
+"mcq","What authentication method is used?","OAuth 2.0","JWT (JSON Web Tokens)","Session Cookies","Firebase Auth",1
+"mcq","Which of these languages is NOT supported by the voice input feature?","Hindi","Tamil","French","Telugu",2
+"mcq","What is Prisma in this project?","A design tool","A database ORM","An AI model","A testing framework",1
+"boolean","Users can upload product images using their camera","True"
+"mcq","What is the purpose of the .env file?","To store environment variables and secrets","To store product data","To configure the UI","To store user passwords",0
+"mcq","Which payment methods can retailers configure?","Credit cards only","UPI and Bank Account","PayPal only","Cryptocurrency",1
+"boolean","The project allows exporting catalogs to Shopify","True"
+"mcq","What does CRUD stand for in Product Management?","Create, Read, Update, Delete","Copy, Remove, Upload, Download","Connect, Register, Upload, Deploy","Compile, Run, Use, Debug",0
+"mcq","Which port does the backend server run on by default?","8080","5000","3000","3001",3
+"mcq","What is Row Level Security (RLS)?","A firewall feature","Database-level access control","A network protocol","An encryption method",1
+"boolean","The AI can generate product descriptions from voice input","True"
+"mcq","What is the purpose of bcrypt in this project?","To encrypt files","To hash passwords","To compress images","To generate tokens",1
+"mcq","Which feature helps visually impaired users?","Dark mode","Page reading with AI","Larger fonts","High contrast colors",1
+"mcq","What does JWT stand for?","JavaScript Web Technology","Java Web Toolkit","JSON Web Token","Just Write Text",2
+"mcq","Which cloud service is recommended for image storage?","Dropbox","Cloudinary or AWS S3","Google Drive","OneDrive",1
+"boolean","The project supports Hinglish and Tanglish input","True"
+"mcq","What is the purpose of Vercel in the deployment?","To host the database","To host the frontend","To provide AI services","To manage emails",1
+"mcq","Which tool is used for API testing?","Selenium","Postman","Jenkins","Git",1
+"mcq","What format can catalogs be exported to?","PDF and CSV","Only JSON","Only XML","Only TXT",0
+"boolean","Users need to write code to add products","False"
+"mcq","What is the main advantage of using Supabase?","It's free","PostgreSQL with built-in auth and RLS","It's faster than all databases","It requires no setup",1
+"mcq","Which middleware is used for authentication in Express?","passport.js","Custom authMiddleware","oauth-middleware","session-middleware",1
+"boolean","The project uses Docker for containerization","True"
+"mcq","What is the purpose of Prisma migrations?","To move files","To update the database schema","To migrate users","To backup data",1
+"mcq","Which React hook is used for state management in components?","useState and useEffect","useDatabase","useAPI","usePrisma",0
+"boolean","The AI can detect product categories automatically","True"
+"mcq","What does API stand for?","Application Programming Interface","Advanced Product Integration","Automated Process Intelligence","Application Product Index",0
+"mcq","Which feature allows retailers to accept payments?","Payment Settings with UPI/Bank/QR","Stripe integration only","PayPal only","No payment feature",0
+"mcq","What is the purpose of CORS middleware?","To compress data","To allow cross-origin requests","To encrypt data","To log errors",1
+"boolean","The project requires users to know SQL","False"
+"mcq","Which component handles camera capture?","CameraInput.jsx","ImageCapture.jsx","CameraCapture.jsx","PhotoComponent.jsx",2
+"mcq","What is the purpose of Context API in React?","To manage global state","To call APIs","To style components","To route pages",0
+"boolean","Products can be synced to Shopify stores","True"
+"mcq","What is the recommended Node.js version?","14.x or higher","18.x or higher","10.x or higher","Any version",1
+"mcq","Which feature makes this project accessible to low-literacy users?","Voice input and AI assistance","Professional UI only","English-only interface","Complex forms",0
+"boolean","The database uses connection pooling for better performance","True"
+"mcq","What is the main target audience for this project?","Large corporations","Small retailers and artisans","Software developers","Government agencies",1
+"mcq","Which HTTP status code indicates successful resource creation?","200 OK","201 Created","204 No Content","301 Moved",1
+"boolean","Users can update products using voice commands","True"
+"mcq","What is the purpose of Rate Limiting?","To increase speed","To prevent abuse and overload","To compress data","To cache responses",1
+"mcq","Which feature distinguishes this project from competitors?","Multi-language voice input for Indian languages","Only English support","Desktop-only interface","No AI integration",0
+"boolean","The project uses Tailwind CSS for styling","True"
+"mcq","What happens if AI services are unavailable?","Application crashes","Fallback to local generation","User cannot proceed","Show error only",1
+"boolean","The project stores passwords in plain text","False"
+"mcq","What is the main innovation of this project?","Fastest website","AI-powered catalog creation with voice input in Indian languages","Cheapest solution","Most features",1

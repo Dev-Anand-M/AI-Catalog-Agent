@@ -1,6 +1,10 @@
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+// Fail fast: never fall back to a guessable secret (token forgery risk).
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET is not set. Add it to server/.env before starting the server.');
+}
 
 const authMiddleware = (req, res, next) => {
   try {

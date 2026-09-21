@@ -1,14 +1,14 @@
 {
-  "name": "digital-catalog-agent",
+  "name": "ai-catalog-agent",
   "version": "1.0.0",
-  "description": "Digital Catalog Agent for small retailers and artisans",
+  "description": "AI-powered Digital Catalog Agent for small retailers and artisans with Supabase backend",
   "private": true,
   "workspaces": [
     "client",
     "server"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev": "npx concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:client": "npm run dev --workspace=client",
     "dev:server": "npm run dev --workspace=server",
     "build": "npm run build --workspace=client && npm run build --workspace=server",
@@ -18,13 +18,42 @@
     "test": "npm run test --workspaces --if-present",
     "test:client": "npm run test --workspace=client",
     "test:server": "npm run test --workspace=server",
+    "test:watch": "npm run test:watch --workspaces --if-present",
     "db:migrate": "npm run db:migrate --workspace=server",
-    "db:seed": "npm run db:seed --workspace=server"
+    "db:deploy": "npm run db:deploy --workspace=server",
+    "db:seed": "npm run db:seed --workspace=server",
+    "db:generate": "npm run db:generate --workspace=server",
+    "db:studio": "npm run db:studio --workspace=server",
+    "db:reset": "npm run db:reset --workspace=server",
+    "lint": "npm run lint --workspaces --if-present",
+    "lint:fix": "npm run lint:fix --workspaces --if-present",
+    "format": "npm run format --workspaces --if-present",
+    "install:all": "npm install && npm install --workspace=client && npm install --workspace=server",
+    "clean": "rm -rf node_modules client/node_modules server/node_modules client/dist server/dist",
+    "postinstall": "npm run db:generate --workspace=server"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "keywords": [
+    "ai",
+    "catalog",
+    "e-commerce",
+    "supabase",
+    "react",
+    "node.js",
+    "prisma",
+    "voice-commands",
+    "image-recognition"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/ai-catalog-agent.git"
   }
 }

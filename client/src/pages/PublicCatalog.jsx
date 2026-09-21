@@ -1,27 +1,37 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Store, Package, Share2, Smartphone, QrCode, X, MessageCircle, ShoppingBag } from 'lucide-react';
+import { 
+  Store, 
+  Package, 
+  Share2, 
+  Smartphone, 
+  QrCode, 
+  X, 
+  MessageCircle, 
+  ShoppingBag,
+  Search,
+  CheckCircle2,
+  ExternalLink,
+  CreditCard
+} from 'lucide-react';
 import { catalogApi } from '../api/client';
 import { Container } from '../components/layout';
-import { Card, CardBody, Alert, Button } from '../components/ui';
+import { Alert, Button } from '../components/ui';
 import { useLanguage } from '../context/LanguageContext';
-
-const CATEGORY_ICONS = {
-  Grocery: '🛒',
-  Clothing: '👕',
-  Handicraft: '🎨',
-  Electronics: '📱',
-  Other: '📦'
-};
+import { getCategoryLabel, getCategoryIcon, getCategoryColor, CATEGORIES } from '../lib/categories';
+import { LanguageSelector } from '../components/LanguageSelector';
 
 export function PublicCatalog() {
   const { userId } = useParams();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [catalog, setCatalog] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('ALL');
 
   useEffect(() => {
     loadCatalog();
@@ -29,22 +39,17 @@ export function PublicCatalog() {
 
   const loadCatalog = async () => {
     try {
+      setLoading(true);
       const response = await catalogApi.get(userId);
       const data = response.data;
       
-      // Map API response to component format
       setCatalog({
-        seller: data.user,
+        seller: data.seller || data.user || { name: 'Artisan Store' },
         products: data.products || [],
-        payment: data.paymentSettings ? {
-          upi: data.paymentSettings.upiData || [],
-          bank: data.paymentSettings.bankAccount || null,
-          qr: data.paymentSettings.qrCodeUrl || null,
-          phoneNumber: data.paymentSettings.phoneNumber || null
-        } : null
+        payment: data.payment || null
       });
     } catch (err) {
-      setError(err.response?.data?.error || 'Catalog not found');
+      setError(err.response?.data?.error || t('catalog_not_found'));
     } finally {
       setLoading(false);
     }
@@ -55,8 +60,8 @@ export function PublicCatalog() {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: `${catalog.seller.name}'s Catalog`,
-          text: 'Check out this product catalog!',
+          title: `${catalog?.seller?.name || 'Artisan'}'s Catalog`,
+          text: 'Check out these handcrafted products and order directly!',
           url
         });
       } else {
@@ -70,261 +75,361 @@ export function PublicCatalog() {
   };
 
   const handleContactSeller = (product) => {
-    const message = `Hi ${catalog.seller.name}! I'm interested in:\n\n📦 ${product.name}\n💰 Price: ₹${product.price}\n\nIs this available?`;
-    const phoneNumber = catalog.payment?.phoneNumber;
+    const sellerName = catalog?.seller?.name || 'Seller';
+    const message = `Namaste ${sellerName}! I found this product in your digital catalog:\n\n*${product.name}*\nCategory: ${product.category}\nPrice: ₹${product.price}\n\nI would like to place an order. Please let me know availability and delivery details!`;
     
-    // If phone number exists, use it; otherwise open WhatsApp without number
+    // Check if phone number exists in UPI or payment settings
+    const upiList = catalog?.payment?.upi || [];
+    const firstUpi = upiList[0];
+    const phoneMatch = firstUpi?.upiId?.match(/^(\d{10})/);
+    const phoneNumber = phoneMatch ? phoneMatch[1] : '';
+
     const whatsappUrl = phoneNumber 
-      ? `https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`
+      ? `https://wa.me/91${phoneNumber}?text=${encodeURIComponent(message)}`
       : `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 
-  const openProductDetail = (product) => {
-    setSelectedProduct(product);
-  };
-
-  const closeProductDetail = () => {
-    setSelectedProduct(null);
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+        <div className="text-center space-y-2">
+          <div className="w-10 h-10 border-3 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-sm font-semibold text-slate-600">{t('loading') || 'Loading catalog storefront...'}</p>
+        </div>
       </div>
     );
   }
 
-  if (error) {
+  if (error || !catalog) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
+      <div className="min-h-screen bg-slate-50 py-16">
         <Container>
-          <div className="text-center">
-            <Package className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('catalog_not_found')}</h1>
-            <p className="text-gray-600">{error}</p>
+          <div className="max-w-md mx-auto text-center bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <Package className="w-16 h-16 mx-auto text-slate-400 stroke-[1.5]" />
+            <h1 className="text-xl font-bold text-slate-900">{t('catalog_not_found')}</h1>
+            <p className="text-slate-500 text-sm">{error || t('catalog_unavailable')}</p>
           </div>
         </Container>
       </div>
     );
   }
 
+  // Build category list from known categories present in the catalog
+  const categories = ['ALL', ...CATEGORIES.map(c => c.value).filter(v => catalog.products.some(p => p.category === v || p.category === (v === 'Handicraft' ? 'Handicrafts' : v)))];
+  // Also include any unknown categories present in products
+  for (const p of catalog.products) {
+    if (p.category && !categories.includes(p.category)) categories.push(p.category);
+  }
+
+  const filteredProducts = catalog.products.filter(p => {
+    const matchesSearch = (p.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (p.description || '').toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCat = selectedCategory === 'ALL' || p.category === selectedCategory;
+    return matchesSearch && matchesCat;
+  });
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white py-8">
-      <Container>
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
-            <Store className="w-8 h-8 text-primary-600" />
+    <div className="min-h-screen bg-zinc-50/50 text-zinc-900 pb-16">
+      {/* Language Bar for Storefront Customers */}
+      <div className="bg-white border-b border-zinc-200/80 py-2.5 px-4 shadow-2xs">
+        <Container className="flex items-center justify-center">
+          <LanguageSelector variant="buttons" />
+        </Container>
+      </div>
+
+      {/* Storefront Hero Banner */}
+      <div className="bg-white border-b border-zinc-200/80 py-8 px-4 shadow-2xs">
+        <Container>
+          <div className="max-w-3xl mx-auto text-center space-y-3">
+            <div className="inline-flex items-center justify-center w-12 h-12 bg-zinc-900 text-white rounded-xl shadow-xs mb-1">
+              <Store className="w-6 h-6 stroke-[2]" />
+            </div>
+            
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200/80 mb-2">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> {t('verified_merchant')}
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-zinc-950 tracking-tight">{catalog.seller.name || t('seller_name') || 'Artisan Store'}</h1>
+              <p className="text-xs sm:text-sm text-zinc-500 mt-1 max-w-lg mx-auto">
+                {t('browse_catalog_desc')}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+              <button
+                type="button"
+                onClick={handleShare}
+                className="btn-secondary text-xs font-medium py-1.5 px-3 min-h-[38px] flex items-center gap-1.5"
+              >
+                <Share2 className="w-3.5 h-3.5 text-zinc-500" />
+                {copied ? (t('link_copied') || '✓ Link Copied!') : t('share_storefront')}
+              </button>
+
+              {catalog.payment && (
+                <button
+                  type="button"
+                  onClick={() => setShowPaymentModal(true)}
+                  className="px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200/80 text-zinc-900 text-xs font-medium rounded-lg border border-zinc-200/80 flex items-center gap-1.5 transition-colors min-h-[38px]"
+                >
+                  <CreditCard className="w-3.5 h-3.5 text-zinc-600" />
+                  {t('view_payment_options')}
+                </button>
+              )}
+            </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">{catalog.seller.name}</h1>
-          <p className="text-gray-600 mb-4">{catalog.products.length} {t('products_available')}</p>
-          <Button variant="outline" size="sm" onClick={handleShare}>
-            <Share2 className="w-4 h-4 mr-2" />
-            {copied ? t('link_copied') : t('share_catalog')}
-          </Button>
+        </Container>
+      </div>
+
+      {/* Catalog Search & Category Filters */}
+      <Container className="py-6">
+        <div className="bg-white border border-zinc-200/80 rounded-xl p-3.5 mb-6 space-y-3 shadow-2xs">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="relative w-full sm:w-80">
+              <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t('search_products')}
+                className="w-full pl-9 pr-4 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-xs text-zinc-900 placeholder:text-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-zinc-900 min-h-[38px] transition-colors"
+              />
+            </div>
+
+            <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-0.5 sm:pb-0">
+              {categories.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all border ${
+                    selectedCategory === cat
+                      ? 'border-zinc-900 bg-zinc-900 text-white shadow-sm'
+                      : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400'
+                  }`}
+                >
+                  {cat === 'ALL' ? (
+                    <>{t('all_categories')}</>
+                  ) : (
+                    <>
+                      <span aria-hidden="true">{getCategoryIcon(cat)}</span>
+                      {getCategoryLabel(cat, language)}
+                    </>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Products Grid */}
-        {catalog.products.length === 0 ? (
-          <Card>
-            <CardBody className="text-center py-12">
-              <Package className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-600">{t('no_products_catalog')}</p>
-            </CardBody>
-          </Card>
+        {filteredProducts.length === 0 ? (
+          <div className="bg-white border border-zinc-200/80 rounded-xl p-12 text-center space-y-3 shadow-2xs">
+            <ShoppingBag className="w-10 h-10 text-zinc-300 mx-auto stroke-[1.5]" />
+            <h3 className="text-sm font-semibold text-zinc-900">{t('no_products_found')}</h3>
+            <p className="text-zinc-500 text-xs">{t('no_products_desc')}</p>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {catalog.products.map(product => (
-              <Card 
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {filteredProducts.map((product) => (
+              <div 
                 key={product.id} 
-                className="hover:shadow-lg transition-shadow cursor-pointer"
-                onClick={() => openProductDetail(product)}
+                className="merchant-card overflow-hidden flex flex-col justify-between hover:border-zinc-300 transition-all cursor-pointer group"
+                onClick={() => setSelectedProduct(product)}
               >
-                <CardBody className="p-4">
-                  {product.imageUrl && (
-                    <img 
-                      src={product.imageUrl} 
-                      alt={product.name}
-                      className="w-full h-48 object-cover rounded-lg mb-4"
-                    />
-                  )}
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold text-gray-900 text-lg">{product.name}</h3>
-                    <span className="text-2xl">{CATEGORY_ICONS[product.category] || '📦'}</span>
+                <div>
+                  <div className="relative aspect-square bg-zinc-100 border-b border-zinc-200/80 overflow-hidden">
+                    {product.imageUrl ? (
+                      <img 
+                        src={product.imageUrl} 
+                        alt={product.name} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" 
+                      />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-zinc-400 text-xs">
+                        <ShoppingBag className="w-7 h-7 mb-1 stroke-[1.5] text-zinc-300" />
+                        {t('handcrafted_item')}
+                      </div>
+                    )}
+                    <span className={`absolute top-2 left-2 inline-flex items-center gap-1 bg-white/95 backdrop-blur-sm border px-2 py-0.5 rounded-full text-[10px] font-semibold shadow-2xs ${getCategoryColor(product.category)}`}>
+                      <span aria-hidden="true">{getCategoryIcon(product.category)}</span>
+                      {getCategoryLabel(product.category, language)}
+                    </span>
                   </div>
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xl font-bold text-primary-600">₹{product.price}</span>
-                    <span className="text-xs bg-gray-100 px-2 py-1 rounded">{product.category}</span>
+
+                  <div className="p-3.5 space-y-1.5">
+                    <h3 className="text-sm font-semibold text-zinc-950 tracking-tight line-clamp-1">
+                      {product.name}
+                    </h3>
+                    <p className="text-xs text-zinc-500 line-clamp-2 leading-relaxed">
+                      {product.description}
+                    </p>
+                    <div className="flex items-baseline gap-2 pt-1">
+                      <span className="text-lg font-bold text-zinc-950 font-mono">
+                        ₹{parseFloat(product.price).toFixed(2)}
+                      </span>
+                    </div>
                   </div>
+                </div>
+
+                <div className="p-3.5 pt-0 space-y-2">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleContactSeller(product);
+                    }}
+                    className="w-full py-2 bg-zinc-900 hover:bg-zinc-800 text-white font-medium text-xs rounded-md flex items-center justify-center gap-1.5 shadow-xs transition-colors min-h-[38px]"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    {t('order_via_whatsapp')}
+                  </button>
+
+                  {/* Buyers who would rather check out on the Shopify storefront
+                      get a real link. Shown only for products the seller has
+                      actually synced, so the button never leads to a 404. */}
                   {product.shopifyUrl && (
                     <a
                       href={product.shopifyUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      onClick={e => e.stopPropagation()}
-                      className="mt-3 flex items-center justify-center gap-2 w-full py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                      className="w-full py-2 bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium text-xs rounded-md flex items-center justify-center gap-1.5 transition-colors min-h-[38px]"
                     >
-                      <ShoppingBag className="w-4 h-4" />
-                      Buy Now
+                      <ShoppingBag className="w-3.5 h-3.5" />
+                      {t('open_in_shopify', 'Open in Shopify')}
                     </a>
                   )}
-                  <p className="text-xs text-primary-500 mt-2 text-center">{t('tap_view_details')}</p>
-                </CardBody>
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
         )}
+      </Container>
 
-        {/* Product Detail Modal */}
-        {selectedProduct && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={closeProductDetail}>
-            <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-              {/* Modal Header */}
-              <div className="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between rounded-t-2xl">
-                <h2 className="text-lg font-semibold text-gray-900">{t('product_details')}</h2>
-                <button onClick={closeProductDetail} className="p-2 hover:bg-gray-100 rounded-full">
-                  <X className="w-5 h-5 text-gray-500" />
-                </button>
+      {/* Product Detail Modal */}
+      {selectedProduct && (
+        <div className="modal-overlay">
+          <div className="modal-overlay-inner">
+          <div className="modal-panel max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[calc(100vh-2rem)]">
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+              <h3 className="font-bold text-slate-900 text-sm">{selectedProduct.name}</h3>
+              <button 
+                onClick={() => setSelectedProduct(null)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-5 overflow-y-auto space-y-4">
+              <div className="aspect-square w-full rounded-xl bg-slate-100 overflow-hidden border border-slate-200">
+                {selectedProduct.imageUrl ? (
+                  <img src={selectedProduct.imageUrl} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <ShoppingBag className="w-12 h-12 m-auto text-slate-300 mt-20" />
+                )}
               </div>
-              
-              {/* Modal Content */}
-              <div className="p-4">
-                {selectedProduct.imageUrl && (
-                  <img 
-                    src={selectedProduct.imageUrl} 
-                    alt={selectedProduct.name}
-                    className="w-full h-64 object-cover rounded-xl mb-4"
-                  />
-                )}
-                
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="text-2xl font-bold text-gray-900">{selectedProduct.name}</h3>
-                  <span className="text-3xl">{CATEGORY_ICONS[selectedProduct.category] || '📦'}</span>
-                </div>
-                
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="text-3xl font-bold text-primary-600">₹{selectedProduct.price}</span>
-                  <span className="px-3 py-1 bg-primary-100 text-primary-700 text-sm rounded-full">
-                    {selectedProduct.category}
-                  </span>
-                </div>
-                
-                <div className="mb-6">
-                  <h4 className="text-sm font-medium text-gray-500 mb-2">{t('description')}</h4>
-                  <p className="text-gray-700 leading-relaxed">{selectedProduct.description}</p>
-                </div>
-                
-                {/* Seller Info */}
-                <div className="bg-gray-50 rounded-xl p-4 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center">
-                      <Store className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">{t('sold_by')}</p>
-                      <p className="font-semibold text-gray-900">{catalog.seller.name}</p>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Buy / Contact Buttons */}
-                {selectedProduct.shopifyUrl && (
-                  <a
-                    href={selectedProduct.shopifyUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 w-full py-4 text-lg bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-colors mb-3"
-                  >
-                    <ShoppingBag className="w-5 h-5" />
-                    Buy Now on Shopify
-                  </a>
-                )}
-                {/* Contact Button */}
-                <Button 
-                  variant="primary" 
-                  className="w-full py-4 text-lg bg-green-500 hover:bg-green-600"
-                  onClick={() => handleContactSeller(selectedProduct)}
-                >
-                  <MessageCircle className="w-5 h-5 mr-2" />
-                  {t('contact_whatsapp')}
-                </Button>
-                
-                <p className="text-xs text-gray-500 text-center mt-3">
-                  {t('whatsapp_note')}
-                </p>
+
+              <div>
+                <span className={`inline-flex items-center gap-1 border px-2 py-0.5 rounded-full text-xs font-semibold mb-1 ${getCategoryColor(selectedProduct.category)}`}>
+                  <span aria-hidden="true">{getCategoryIcon(selectedProduct.category)}</span>
+                  {getCategoryLabel(selectedProduct.category, language)}
+                </span>
+                <h2 className="text-xl font-bold text-slate-900">{selectedProduct.name}</h2>
+                <p className="text-2xl font-extrabold text-slate-900 font-mono mt-1">₹{parseFloat(selectedProduct.price).toFixed(2)}</p>
+              </div>
+
+              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                <span className="text-[11px] font-bold uppercase text-slate-500">{t('description')}</span>
+                <p className="text-xs text-slate-700 leading-relaxed">{selectedProduct.description}</p>
               </div>
             </div>
+
+            <div className="p-4 border-t border-slate-100 bg-slate-50 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setSelectedProduct(null)}
+                className="btn-secondary text-xs px-4"
+              >
+                {t('cancel')}
+              </button>
+              {selectedProduct.shopifyUrl && (
+                <a
+                  href={selectedProduct.shopifyUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-secondary text-xs px-4"
+                >
+                  <ShoppingBag className="w-3.5 h-3.5 text-emerald-700" />
+                  {t('open_in_shopify', 'Open in Shopify')}
+                  <ExternalLink className="w-3 h-3 text-zinc-400" />
+                </a>
+              )}
+              <button
+                type="button"
+                onClick={() => handleContactSeller(selectedProduct)}
+                className="flex-1 btn-success text-xs font-bold flex items-center justify-center gap-1.5"
+              >
+                <MessageCircle className="w-4 h-4" />
+                {t('order_via_whatsapp')}
+              </button>
+            </div>
           </div>
-        )}
-
-        {/* Payment Info */}
-        {catalog.payment && (catalog.payment.upi?.length > 0 || catalog.payment.qr || catalog.payment.bank) && (
-          <Card className="mt-8">
-            <CardBody className="p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 text-center">💳 {t('payment_options')}</h2>
-              <div className="flex flex-col md:flex-row gap-6 justify-center items-center">
-                {/* UPI IDs */}
-                {catalog.payment.upi?.length > 0 && catalog.payment.upi.some(u => u.upiId) && (
-                  <div className="text-center">
-                    <Smartphone className="w-8 h-8 mx-auto text-primary-500 mb-2" />
-                    <p className="text-sm text-gray-500 mb-2">{t('pay_via_upi')}</p>
-                    {catalog.payment.upi.filter(u => u.upiId).map((upi, idx) => (
-                      <div key={idx} className="bg-primary-50 px-4 py-2 rounded-lg mb-2">
-                        <p className="font-mono font-semibold text-primary-700">{upi.upiId}</p>
-                        {upi.name && <p className="text-xs text-gray-500">{upi.name}</p>}
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                {/* Bank Account */}
-                {catalog.payment.bank && catalog.payment.bank.accountNumber && (
-                  <div className="text-center">
-                    <div className="w-8 h-8 mx-auto bg-primary-500 rounded-full flex items-center justify-center mb-2">
-                      <span className="text-white text-sm font-bold">🏦</span>
-                    </div>
-                    <p className="text-sm text-gray-500 mb-2">{t('bank_transfer') || 'Bank Transfer'}</p>
-                    <div className="bg-primary-50 px-4 py-3 rounded-lg text-left">
-                      {catalog.payment.bank.accountName && (
-                        <p className="text-sm"><span className="text-gray-500">Name:</span> <span className="font-semibold">{catalog.payment.bank.accountName}</span></p>
-                      )}
-                      <p className="text-sm"><span className="text-gray-500">A/C:</span> <span className="font-mono font-semibold">{catalog.payment.bank.accountNumber}</span></p>
-                      {catalog.payment.bank.ifsc && (
-                        <p className="text-sm"><span className="text-gray-500">IFSC:</span> <span className="font-mono font-semibold">{catalog.payment.bank.ifsc}</span></p>
-                      )}
-                      {catalog.payment.bank.bankName && (
-                        <p className="text-sm"><span className="text-gray-500">Bank:</span> <span className="font-semibold">{catalog.payment.bank.bankName}</span></p>
-                      )}
-                    </div>
-                  </div>
-                )}
-                
-                {/* QR Code */}
-                {catalog.payment.qr && (
-                  <div className="text-center">
-                    <QrCode className="w-8 h-8 mx-auto text-primary-500 mb-2" />
-                    <p className="text-sm text-gray-500 mb-2">{t('scan_to_pay')}</p>
-                    <img 
-                      src={catalog.payment.qr} 
-                      alt="Payment QR Code" 
-                      className="w-40 h-40 mx-auto rounded-lg border"
-                    />
-                  </div>
-                )}
-              </div>
-            </CardBody>
-          </Card>
-        )}
-
-        {/* Footer */}
-        <div className="mt-12 text-center text-sm text-gray-500">
-          <p>{t('powered_by')}</p>
-          <p className="mt-1">{t('create_own_catalog')} <a href="/" className="text-primary-600 hover:underline">digitalcatalog.app</a></p>
+          </div>
         </div>
-      </Container>
+      )}
+
+      {/* Payment Information Modal — the panel is free to grow past the viewport;
+          the overlay scrolls, so the whole UPI list stays reachable. */}
+      {showPaymentModal && catalog.payment && (
+        <div className="modal-overlay" onClick={() => setShowPaymentModal(false)}>
+          <div className="modal-overlay-inner">
+          <div
+            className="modal-panel max-w-md p-5 space-y-4"
+            role="dialog"
+            aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+                <CreditCard className="w-5 h-5 text-emerald-600" />
+                {t('payment_info_modal')}
+              </h3>
+              <button onClick={() => setShowPaymentModal(false)} className="p-1 text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {catalog.payment.qr && (
+              <div className="text-center p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                <p className="text-xs font-semibold text-slate-600 mb-2">{t('scan_pay') || 'Scan QR to Pay via Any UPI App'}</p>
+                <img src={catalog.payment.qr} alt="UPI QR" className="w-44 h-44 mx-auto object-contain bg-white p-2 rounded-lg border border-slate-200" />
+              </div>
+            )}
+
+            {catalog.payment.upi && catalog.payment.upi.length > 0 && (
+              <div className="space-y-2">
+                <span className="text-xs font-bold text-slate-600 uppercase">{t('upi')}</span>
+                {catalog.payment.upi.map((u, i) => (
+                  <div key={i} className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between text-xs">
+                    <span className="font-bold font-mono text-slate-900">{u.upiId}</span>
+                    <span className="text-slate-500">{u.name || 'Merchant'}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setShowPaymentModal(false)}
+              className="w-full btn-secondary text-xs"
+            >
+              {t('cancel')}
+            </button>
+          </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

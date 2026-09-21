@@ -1,15 +1,49 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
+const db = require('../db');
+const { generateWithFallback, auditAiRun } = require('../lib/aiProviders');
+
+let sharp;
+try {
+  sharp = require('sharp');
+} catch (e) {
+  console.warn('Sharp not available in this environment, fallback active');
+}
 
 const router = express.Router();
 
-// Perplexity API configuration
-const PERPLEXITY_API_URL = 'https://api.perplexity.ai/chat/completions';
-const PERPLEXITY_MODEL = 'sonar-pro'; // Using sonar-pro for cleaner responses without reasoning
+// Rewrite ?action=query requests to path-based routes
+router.use((req, res, next) => {
+  if (req.query.action) {
+    req.url = '/' + req.query.action;
+  }
+  next();
+});
 
-// Check if API key is configured
+// Legacy single-provider check — kept only so the pricing-note path can skip
+// the full chain when no keys exist at all. All real calls go through
+// generateWithFallback which handles precedence + auditing.
 function hasApiKey() {
-  const key = process.env.PERPLEXITY_API_KEY;
-  return key && key !== 'your-perplexity-api-key-here' && key.startsWith('pplx-');
+  return !!(
+    process.env.PERPLEXITY_API_KEY ||
+    process.env.GEMINI_API_KEY ||
+    process.env.GOOGLE_API_KEY ||
+    process.env.OPENAI_API_KEY ||
+    process.env.GROK_API_KEY ||
+    process.env.XAI_API_KEY ||
+    process.env.SAMBANOVA_API_KEY ||
+    process.env.GROQ_API_KEY ||
+    process.env.DEEPSEEK_API_KEY
+  );
+}
+
+// Run a prompt through the fallback chain and return cleaned text (or null).
+// Records WHAT/WHEN/WHY audit when providers fail over.
+async function callAI(systemPrompt, userPrompt, maxTokens = 500, purpose = 'ai', userId = null, ip = null) {
+  if (!hasApiKey()) return null;
+  const result = await generateWithFallback({ systemPrompt, userPrompt, maxTokens });
+  await auditAiRun({ userId, purpose, result, ip });
+  return result.text;
 }
 
 // Helper function to clean AI response (remove thinking tags, citations, markdown)
@@ -164,7 +198,7 @@ Rules:
 - Price in INR (Indian Rupees)
 - Understand regional language input but output in English`;
 
-      const aiResponse = await callPerplexity(systemPrompt, `Create English product listing from this voice input: "${promptText}"`, 500);
+      const aiResponse = await callAI(systemPrompt, `Create English product listing from this voice input: "${promptText}"`, 500, 'generate-product', req.userId, req.headers['x-forwarded-for'] || null);
       
       if (aiResponse) {
         try {
@@ -208,10 +242,13 @@ router.post('/translate', async (req, res) => {
     const targetLang = languageNames[targetLanguage] || targetLanguage;
 
     if (hasApiKey()) {
-      const aiResponse = await callPerplexity(
+      const aiResponse = await callAI(
         `Translate to ${targetLang}. Respond with ONLY the translation.`,
         `Translate: "${text}"`,
-        300
+        300,
+        'translate',
+        req.userId,
+        req.headers['x-forwarded-for'] || null
       );
       
       if (aiResponse) {
@@ -280,7 +317,7 @@ Product description: "${description}"
 
 Generate name, description, category, price in INR, and keywords.`;
 
-      const aiResponse = await callPerplexity(systemPrompt, userPrompt, 500);
+      const aiResponse = await callAI(systemPrompt, userPrompt, 500, 'analyze-image', req.userId, req.headers['x-forwarded-for'] || null);
       
       if (aiResponse) {
         try {
@@ -373,7 +410,7 @@ Examples of commands:
 
 If command is unclear, return {"action":"unknown","confidence":0.3}`;
 
-      const aiResponse = await callPerplexity(systemPrompt, `Parse this voice command: "${transcript}"`, 200);
+      const aiResponse = await callAI(systemPrompt, `Parse this voice command: "${transcript}"`, 200, 'parse-voice-update', req.userId, req.headers['x-forwarded-for'] || null);
       
       if (aiResponse) {
         try {
@@ -441,10 +478,13 @@ router.post('/read-page', async (req, res) => {
     const targetLang = languageNames[language] || 'English';
 
     if (hasApiKey()) {
-      const aiResponse = await callPerplexity(
+      const aiResponse = await callAI(
         `Summarize this page for a visually impaired user in ${targetLang}. Keep under 80 words. Be conversational.`,
         `Page "${pageName}": ${pageContent.substring(0, 1500)}`,
-        150
+        150,
+        'read-page',
+        req.userId,
+        req.headers['x-forwarded-for'] || null
       );
       
       if (aiResponse) {
@@ -497,7 +537,7 @@ Context about current page: ${context}
 Answer in ${targetLang}. Be concise (2-3 sentences max). Be helpful and friendly.
 If asked about features, explain what the user can do on that page.`;
 
-      const aiResponse = await callPerplexity(systemPrompt, message, 200);
+      const aiResponse = await callAI(systemPrompt, message, 200, 'chat', req.userId, req.headers['x-forwarded-for'] || null);
       
       if (aiResponse) {
         return res.json({
@@ -564,7 +604,7 @@ Available actions:
 - readPage: read this page, what's on screen, describe page
 - unknown: if unclear`;
 
-      const aiResponse = await callPerplexity(systemPrompt, `Interpret this ${targetLang} voice command: "${transcript}"`, 100);
+      const aiResponse = await callAI(systemPrompt, `Interpret this ${targetLang} voice command: "${transcript}"`, 100, 'interpret-command', req.userId, req.headers['x-forwarded-for'] || null);
       
       if (aiResponse) {
         try {
@@ -624,10 +664,13 @@ router.post('/enhance-description', async (req, res) => {
     const targetLang = languageNames[language] || 'English';
 
     if (hasApiKey()) {
-      const aiResponse = await callPerplexity(
+      const aiResponse = await callAI(
         `Enhance this product description for e-commerce in ${targetLang}. Keep it 2-3 sentences. Professional and appealing.`,
         `Product: ${productName}, Category: ${category}, Description: "${description}"`,
-        200
+        200,
+        'enhance-description',
+        req.userId,
+        req.headers['x-forwarded-for'] || null
       );
       
       if (aiResponse) {
@@ -651,6 +694,608 @@ router.post('/enhance-description', async (req, res) => {
     console.error('Enhancement error:', error);
     res.status(500).json({ error: 'Enhancement failed.' });
   }
+});
+
+/**
+ * Who is asking?
+ *
+ * The `/api/ai` helpers are open (several are usable before sign-in), so this
+ * only ever *probes* identity: a missing or malformed token returns null rather
+ * than a 401. The orchestrator behaves differently for an administrator, who
+ * runs no store — for them "add a blue saree" must never become a product.
+ */
+async function resolveAdminUser(req) {
+  const header = req.headers.authorization || '';
+  if (!header.startsWith('Bearer ')) return null;
+  const secret = process.env.JWT_SECRET;
+  if (!secret) return null;
+
+  let decoded;
+  try {
+    decoded = jwt.verify(header.slice(7), secret);
+  } catch {
+    return null;
+  }
+
+  const user = await db.findUserById(decoded.userId).catch(() => null);
+  if (!user) return null;
+
+  const adminEmails = (process.env.ADMIN_EMAILS || '')
+    .split(',')
+    .map(e => e.trim().toLowerCase())
+    .filter(Boolean);
+  const isAdmin = user.role === 'admin' || adminEmails.includes(String(user.email || '').toLowerCase());
+  return isAdmin ? user : null;
+}
+
+/**
+ * The administrator's orchestrator.
+ *
+ * Seller intents are deliberately absent from this prompt: there is nothing for
+ * an admin to create, price or publish. What an admin *can* usefully do by voice
+ * is open a console section and ask what the platform's numbers are — so those
+ * two are the whole vocabulary, and the numbers come from the database rather
+ * than from the model's imagination.
+ */
+async function orchestrateForAdmin({ promptText, language, targetLang, canUseAi, req }) {
+  const [users, products, requests] = await Promise.all([
+    db.findAllUsers ? db.findAllUsers().catch(() => []) : Promise.resolve([]),
+    db.findAllProducts().catch(() => []),
+    db.findAccessRequests ? db.findAccessRequests('all').catch(() => []) : Promise.resolve([])
+  ]);
+
+  const sellers = (users || []).filter(u => u.role !== 'admin');
+  const pending = (requests || []).filter(r => r.status === 'pending');
+  const facts = {
+    sellers: sellers.length,
+    products: (products || []).length,
+    pendingAccessRequests: pending.length,
+    shopifyLinked: (products || []).filter(p => p.shopifyUrl).length
+  };
+
+  const navigateTo = (destination, title, explanation) => ({
+    promptText,
+    intent: 'NAVIGATE',
+    actionTitle: title,
+    explanation,
+    requiresConfirmation: false,
+    data: { destination },
+    source: 'local'
+  });
+
+  const lower = promptText.toLowerCase().trim();
+  const asksForNumbers = /how many|how much|count|total|number of|kitne|evlo|enni|koto/.test(lower);
+
+  if (canUseAi) {
+    const systemPrompt = `You are the platform orchestrator for the administrator of a multi-seller commerce platform in India.
+The administrator does NOT sell anything: never propose creating, editing, pricing or publishing a product.
+Live platform facts — use these exact numbers, never invent: sellers=${facts.sellers}, products=${facts.products}, pendingAccessRequests=${facts.pendingAccessRequests}, shopifyLinked=${facts.shopifyLinked}.
+
+Allowed intents:
+1. "NAVIGATE": open a console section. destination must be one of: admin (overview), sellers, access (access requests), ai (AI providers), audit (activity log), channels (channel integrations).
+2. "GENERAL_QUERY": answer a question about the platform or commerce, in ${targetLang}.
+3. "READ_PAGE": read the current screen aloud.
+
+Respond ONLY with valid JSON (no markdown):
+{
+  "intent": "NAVIGATE|GENERAL_QUERY|READ_PAGE",
+  "actionTitle": "Short human readable summary",
+  "explanation": "Why this was identified",
+  "requiresConfirmation": true only if the action changes data,
+  "confirmationPrompt": "Clear question in ${targetLang}, or null",
+  "data": {
+    "destination": "admin|sellers|access|ai|audit|channels",
+    "answer": "Answer in ${targetLang} when the intent is GENERAL_QUERY"
+  }
+}`;
+
+    const aiResponse = await callAI(systemPrompt, `Administrator said: "${promptText}"`, 500, 'orchestrate-admin', req.userId, req.headers['x-forwarded-for'] || null);
+    if (aiResponse) {
+      const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          const parsed = JSON.parse(jsonMatch[0]);
+          return { ...parsed, promptText, platformFacts: facts, source: 'perplexity' };
+        } catch (e) {
+          console.error('Admin orchestrator JSON parse error:', e.message);
+        }
+      }
+    }
+  }
+
+  // Local fallback: keyword routing to a console section, and real numbers for
+  // counting questions. Deterministic beats guessing when no provider is set up.
+  if (asksForNumbers) {
+    return {
+      promptText,
+      intent: 'GENERAL_QUERY',
+      actionTitle: 'Platform summary',
+      explanation: 'Counting question answered from live platform data.',
+      requiresConfirmation: false,
+      confirmationPrompt: null,
+      data: {
+        answer: `${facts.sellers} sellers · ${facts.products} products · ${facts.shopifyLinked} linked to Shopify · ${facts.pendingAccessRequests} access requests awaiting review`
+      },
+      platformFacts: facts,
+      source: 'local'
+    };
+  }
+
+  const sections = [
+    ['access', ['access request', 'request access', 'approve', 'pending', 'invite', 'onboard']],
+    ['sellers', ['seller', 'merchant', 'vendor', 'account', 'store owner']],
+    ['ai', ['provider', 'model', 'api key', 'ai chain', 'ai setting']],
+    ['audit', ['log', 'activity', 'audit', 'event', 'history']],
+    ['channels', ['channel', 'shopify', 'marketplace', 'integration', 'ondc', 'gem']]
+  ];
+
+  for (const [destination, words] of sections) {
+    if (words.some(w => lower.includes(w))) {
+      const titles = {
+        access: 'Open access requests',
+        sellers: 'Open sellers',
+        ai: 'Open AI providers',
+        audit: 'Open the activity log',
+        channels: 'Open channel integrations'
+      };
+      return navigateTo(destination, titles[destination], `Administrator asked for the ${destination} section.`);
+    }
+  }
+
+  if (lower.includes('console') || lower.includes('admin') || lower.includes('portal') || lower.includes('overview') || lower.includes('dashboard')) {
+    return navigateTo('admin', 'Open the admin console', 'Administrator asked for the console overview.');
+  }
+
+  if (lower.includes('read') || lower.includes('screen') || lower.includes('page')) {
+    return {
+      promptText,
+      intent: 'READ_PAGE',
+      actionTitle: 'Read Current Screen',
+      explanation: 'Audio overview of the current view requested.',
+      requiresConfirmation: false,
+      data: {},
+      platformFacts: facts,
+      source: 'local'
+    };
+  }
+
+  return {
+    promptText,
+    intent: 'GENERAL_QUERY',
+    actionTitle: 'Platform assistant',
+    explanation: 'No provider is configured, so this is answered from platform facts.',
+    requiresConfirmation: false,
+    confirmationPrompt: null,
+    data: {
+      answer: `I can open the console for you. Right now: ${facts.sellers} sellers, ${facts.products} products, ${facts.pendingAccessRequests} access requests awaiting review. Try "open the activity log" or "show sellers".`
+    },
+    platformFacts: facts,
+    source: 'local'
+  };
+}
+
+// POST /api/ai/orchestrate - Central AI Assistant Intent Router
+router.post('/orchestrate', async (req, res) => {
+  try {
+    const { promptText, currentContext = 'dashboard', language = 'en', existingProducts = [] } = req.body;
+
+    if (!promptText || promptText.trim() === '') {
+      return res.status(400).json({ error: 'Prompt text is required' });
+    }
+
+    const targetLang = languageNames[language] || 'English';
+
+    // An administrator never reaches the seller prompts below: they are given a
+    // console section to open or a platform number to quote, and nothing that
+    // would try to write a product into an account that has none.
+    const adminUser = await resolveAdminUser(req).catch(() => null);
+    if (adminUser) {
+      req.userId = adminUser.id;
+      const proposal = await orchestrateForAdmin({
+        promptText,
+        language,
+        targetLang,
+        canUseAi: hasApiKey(),
+        req
+      });
+      return res.json(proposal);
+    }
+
+    // If Perplexity API key is available, leverage it for smart multi-field intent understanding
+    if (hasApiKey()) {
+      const productListSnippet = existingProducts.slice(0, 10).map(p => `ID:${p.id} Name:"${p.name}" Category:"${p.category}" Price:${p.price}`).join('; ');
+      const systemPrompt = `You are a central AI business orchestrator for small retailers and artisans in India.
+The seller may speak in English, Hindi, Tamil, Telugu, Kannada, Bengali or mixed languages (Hinglish/Tanglish).
+Existing products in store: [${productListSnippet}].
+
+Analyze the seller's input and determine their exact business intent:
+1. "CREATE_PRODUCT": Seller wants to add or list a product (e.g., "Add blue silk saree for 1800 in sarees").
+2. "UPDATE_PRODUCT": Seller wants to edit price, name or category of existing item (e.g., "Change price of basmati rice to 160").
+3. "CALCULATE_PRICING": Seller wants pricing advice based on costs (e.g., "Material 300, labour 200, suggest price").
+4. "ENHANCE_IMAGE": Seller wants to clean up, enhance, or frame a product photo.
+5. "NAVIGATE": Seller wants to visit dashboard, add product, export catalog, or payment settings.
+6. "READ_PAGE": Seller wants audio read of current page.
+7. "GENERAL_QUERY": Seller asks question about app or commerce.
+
+Respond ONLY with valid JSON (no markdown):
+{
+  "intent": "CREATE_PRODUCT|UPDATE_PRODUCT|CALCULATE_PRICING|ENHANCE_IMAGE|NAVIGATE|READ_PAGE|GENERAL_QUERY",
+  "actionTitle": "Short human readable summary",
+  "explanation": "Why this action was identified",
+  "requiresConfirmation": true/false (TRUE for any create, update, or price change),
+  "confirmationPrompt": "Clear question asking seller to confirm in ${targetLang}",
+  "data": {
+    "name": "Product name in English if creating/updating",
+    "category": "Grocery/Clothing/Handicraft/Electronics/Other",
+    "price": number or null,
+    "description": "Short description if creating",
+    "matchedProductId": number or null,
+    "destination": "dashboard/products/export/payment if navigate",
+    "materialCost": number or null,
+    "labourCost": number or null,
+    "packagingCost": number or null,
+    "answer": "Answer if general query in ${targetLang}"
+  }
+}`;
+
+      const aiResponse = await callAI(systemPrompt, `Input: "${promptText}" | Current Page: ${currentContext}`, 500, 'orchestrate', req.userId, req.headers['x-forwarded-for'] || null);
+
+      if (aiResponse) {
+        try {
+          const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0]);
+            return res.json({
+              promptText,
+              ...parsed,
+              source: 'perplexity'
+            });
+          }
+        } catch (e) {
+          console.error('Orchestrator JSON parse error:', e.message);
+        }
+      }
+    }
+
+    // Heuristic Fallback Orchestrator
+    const lower = promptText.toLowerCase().trim();
+
+    // 1. Check for Price Calculation intent
+    const hasMaterial = lower.includes('material') || lower.includes('raw') || lower.includes('सामग्री') || lower.includes('பொருள்');
+    const hasLabour = lower.includes('labour') || lower.includes('labor') || lower.includes('मजदूरी') || lower.includes('கூலி');
+    if (hasMaterial || hasLabour || lower.includes('cost') || lower.includes('margin') || lower.includes('calculate price')) {
+      const numbers = promptText.match(/\d+/g) || [];
+      const mat = numbers[0] ? parseInt(numbers[0]) : 200;
+      const lab = numbers[1] ? parseInt(numbers[1]) : 150;
+      return res.json({
+        promptText,
+        intent: 'CALCULATE_PRICING',
+        actionTitle: 'Calculate Explainable Price',
+        explanation: 'Detected cost estimation query with material and labor inputs.',
+        requiresConfirmation: false,
+        confirmationPrompt: 'Would you like to calculate the recommended selling price?',
+        data: { materialCost: mat, labourCost: lab, packagingCost: 30, desiredMarginPct: 25 },
+        source: 'local'
+      });
+    }
+
+    // 2. Check for Image Enhancement intent
+    if (lower.includes('photo') || lower.includes('image') || lower.includes('enhance') || lower.includes('picture') || lower.includes('तस्वीर') || lower.includes('படம்') || lower.includes('camera')) {
+      return res.json({
+        promptText,
+        intent: 'ENHANCE_IMAGE',
+        actionTitle: 'Open AI Image Studio',
+        explanation: 'Detected request to enhance or frame a product photograph.',
+        requiresConfirmation: false,
+        confirmationPrompt: 'Open AI Image Studio to enhance this product photo?',
+        data: {},
+        source: 'local'
+      });
+    }
+
+    // 3. Check for Navigation / Read Page intents
+    if (lower.includes('read') || lower.includes('padho') || lower.includes('padi') || lower.includes('screen') || lower.includes('batao')) {
+      return res.json({
+        promptText,
+        intent: 'READ_PAGE',
+        actionTitle: 'Read Current Screen',
+        explanation: 'Audio overview of current view requested.',
+        requiresConfirmation: false,
+        data: {},
+        source: 'local'
+      });
+    }
+
+    if (lower.includes('export') || lower.includes('publish') || lower.includes('shopify') || lower.includes('whatsapp catalog')) {
+      return res.json({
+        promptText,
+        intent: 'NAVIGATE',
+        actionTitle: 'Navigate to Export Hub',
+        explanation: 'Request to publish or export catalog items.',
+        requiresConfirmation: false,
+        data: { destination: '/export' },
+        source: 'local'
+      });
+    }
+
+    if (lower.includes('payment') || lower.includes('upi') || lower.includes('bank') || lower.includes('qr')) {
+      return res.json({
+        promptText,
+        intent: 'NAVIGATE',
+        actionTitle: 'Navigate to Payment Settings',
+        explanation: 'Request to manage UPI or bank payment details.',
+        requiresConfirmation: false,
+        data: { destination: '/payment' },
+        source: 'local'
+      });
+    }
+
+    // 4. Check for Update Product intent
+    const isUpdate = lower.includes('update') || lower.includes('change') || lower.includes('badlo') || lower.includes('edit');
+    if (isUpdate) {
+      const priceMatch = lower.match(/(?:price|daam|kimat|to|rate|₹|rs)?\s*(\d+)/);
+      const newPrice = priceMatch ? parseInt(priceMatch[1]) : null;
+      
+      // Match against existing products
+      let matched = null;
+      for (const prod of existingProducts) {
+        if (lower.includes(prod.name.toLowerCase())) {
+          matched = prod;
+          break;
+        }
+      }
+
+      return res.json({
+        promptText,
+        intent: 'UPDATE_PRODUCT',
+        actionTitle: `Update ${matched ? matched.name : 'Product'}`,
+        explanation: `Update requested for ${matched ? matched.name : 'product'}.`,
+        requiresConfirmation: true,
+        confirmationPrompt: `Shall I update ${matched ? `"${matched.name}"` : 'the product'}${newPrice ? ` price to ₹${newPrice}` : ''}?`,
+        data: {
+          matchedProductId: matched ? matched.id : null,
+          name: matched ? matched.name : null,
+          price: newPrice
+        },
+        source: 'local'
+      });
+    }
+
+    // 5. Default to Create Product intent
+    const detectedCat = detectCategory(promptText);
+    const priceNum = (promptText.match(/(?:for|at|rs|₹|price|daam)?\s*(\d{2,6})/i) || [])[1];
+    const fallbackPrice = priceNum ? parseInt(priceNum) : 499;
+
+    // Clean up name from prompt
+    let cleanName = promptText
+      .replace(/add\s+(?:a|an)?/i, '')
+      .replace(/for\s+\d+/i, '')
+      .replace(/in\s+[a-z]+/i, '')
+      .replace(/₹\s*\d+/i, '')
+      .replace(/rs\.?\s*\d+/i, '')
+      .trim();
+    if (cleanName.length < 3) cleanName = 'Handcrafted Item';
+    cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+
+    res.json({
+      promptText,
+      intent: 'CREATE_PRODUCT',
+      actionTitle: `Add "${cleanName}"`,
+      explanation: 'Extracted product details from your voice command.',
+      requiresConfirmation: true,
+      confirmationPrompt: `Shall I add "${cleanName}" for ₹${fallbackPrice} in ${detectedCat} to your catalog?`,
+      data: {
+        name: cleanName,
+        category: detectedCat,
+        price: fallbackPrice,
+        description: `Authentic ${cleanName.toLowerCase()}. Quality crafted and available for direct order.`
+      },
+      source: 'local'
+    });
+  } catch (error) {
+    console.error('Orchestration error:', error);
+    res.status(500).json({ error: 'Orchestration failed.' });
+  }
+});
+
+// POST /api/ai/enhance-image - AI Image Studio Processing
+router.post('/enhance-image', async (req, res) => {
+  try {
+    const { imageBase64, mode = 'studio_white' } = req.body;
+
+    if (!imageBase64) {
+      return res.status(400).json({ error: 'Image data is required' });
+    }
+
+    // If sharp is available, perform genuine non-destructive product enhancement
+    if (sharp) {
+      try {
+        const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+        const inputBuffer = Buffer.from(base64Data, 'base64');
+
+        // Color backgrounds for framing
+        const bgColors = {
+          studio_white: { r: 255, g: 255, b: 255, alpha: 1 },
+          warm_studio: { r: 250, g: 247, b: 242, alpha: 1 },
+          neutral_gray: { r: 243, g: 244, b: 246, alpha: 1 },
+          sharpen: { r: 255, g: 255, b: 255, alpha: 1 }
+        };
+        const bg = bgColors[mode] || bgColors.studio_white;
+
+        // Step 1: Normalize lighting, contrast, and sharpen product surface
+        let pipeline = sharp(inputBuffer)
+          .rotate() // Auto-orient from EXIF
+          .modulate({
+            brightness: 1.07, // Slight exposure lift
+            saturation: 1.05  // Richer artisan colors
+          })
+          .sharpen({
+            sigma: 1.2,
+            m1: 1.4,
+            m2: 0.6
+          });
+
+        // Step 2: Resize maintaining aspect ratio to high-res standard 800x800 with studio padding
+        const resizedBuffer = await pipeline
+          .resize(760, 760, {
+            fit: 'inside',
+            withoutEnlargement: false
+          })
+          .toBuffer();
+
+        // Step 3: Embed inside a clean 800x800 square studio frame
+        const finalBuffer = await sharp({
+          create: {
+            width: 800,
+            height: 800,
+            channels: 4,
+            background: bg
+          }
+        })
+          .composite([{ input: resizedBuffer, gravity: 'center' }])
+          .jpeg({ quality: 88, mozjpeg: true })
+          .toBuffer();
+
+        const enhancedDataUrl = `data:image/jpeg;base64,${finalBuffer.toString('base64')}`;
+
+        return res.json({
+          originalImage: imageBase64,
+          enhancedImage: enhancedDataUrl,
+          mode,
+          enhancementsApplied: [
+            'Auto-exposure & contrast balanced',
+            'Texture & craft weave clarity sharpened',
+            '1:1 Centered professional studio framing'
+          ],
+          source: 'sharp_studio'
+        });
+      } catch (sharpError) {
+        console.error('Sharp processing error:', sharpError);
+      }
+    }
+
+    // Fallback if sharp unavailable
+    res.json({
+      originalImage: imageBase64,
+      enhancedImage: imageBase64,
+      mode,
+      enhancementsApplied: ['Studio framing active (browser normalized)'],
+      source: 'fallback'
+    });
+  } catch (error) {
+    console.error('Image enhancement error:', error);
+    res.status(500).json({ error: 'Failed to enhance image.' });
+  }
+});
+
+// POST /api/ai/calculate-pricing - Explainable Dynamic Pricing Engine
+router.post('/calculate-pricing', async (req, res) => {
+  try {
+    const {
+      materialCost = 0,
+      labourCost = 0,
+      packagingCost = 0,
+      otherCost = 0,
+      desiredMarginPct = 25,
+      category = 'Other',
+      productName = '',
+      language = 'en'
+    } = req.body;
+
+    const mat = Math.max(0, parseFloat(materialCost) || 0);
+    const lab = Math.max(0, parseFloat(labourCost) || 0);
+    const pkg = Math.max(0, parseFloat(packagingCost) || 0);
+    const oth = Math.max(0, parseFloat(otherCost) || 0);
+    const margin = Math.max(5, Math.min(80, parseFloat(desiredMarginPct) || 25));
+
+    const totalCost = mat + lab + pkg + oth;
+    const effectiveTotal = totalCost > 0 ? totalCost : 200;
+
+    // Desired profit amount
+    const profitAmount = Math.round(effectiveTotal * (margin / 100));
+    const rawPrice = effectiveTotal + profitAmount;
+
+    // Attractive merchant retail rounding (e.g. ending in 99, 49, 9)
+    let recommendedPrice = rawPrice;
+    if (recommendedPrice > 200) {
+      const remainder = recommendedPrice % 50;
+      if (remainder < 25) {
+        recommendedPrice = recommendedPrice - remainder - 1; // e.g. 480 -> 499 or 449
+        if (recommendedPrice < rawPrice * 0.98) recommendedPrice += 50;
+      } else {
+        recommendedPrice = recommendedPrice + (50 - remainder) - 1;
+      }
+    }
+
+    // Competitive market price range
+    const minViablePrice = Math.round(effectiveTotal * 1.10); // 10% bottom threshold
+    const maxViablePrice = Math.round(effectiveTotal * (1 + (margin + 20) / 100)); // upper benchmark
+
+    const actualProfit = Math.max(1, recommendedPrice - effectiveTotal);
+    const actualMarginPct = Math.round((actualProfit / recommendedPrice) * 100);
+
+    const targetLang = languageNames[language] || 'English';
+
+    // Formulate a transparent, reassuring explanation for artisans & micro-retailers
+    let explanation = `With ₹${effectiveTotal} total input cost (₹${mat} materials + ₹${lab} labour + ₹${pkg + oth} packaging/other), selling at ₹${recommendedPrice} secures ₹${actualProfit} profit per unit (${actualMarginPct}% margin). This stays within the recommended market range of ₹${minViablePrice} to ₹${maxViablePrice}, ensuring your product remains attractive to buyers while protecting your fair wages.`;
+
+    // If Perplexity API is available, generate localized and nuanced market insight
+    if (hasApiKey() && productName) {
+      const prompt = `Give a 2-sentence pricing rationale in ${targetLang} for a seller in India: Product: "${productName}", Category: "${category}", Total cost: ₹${effectiveTotal}, Target margin: ${margin}%, Recommended price: ₹${recommendedPrice}. Keep it encouraging, simple, and realistic.`;
+      const aiNote = await callAI('You are an encouraging Indian commerce advisor for small artisans.', prompt, 150, 'calculate-pricing-note', req.userId, req.headers['x-forwarded-for'] || null);
+      if (aiNote) {
+        explanation = aiNote;
+      }
+    }
+
+    res.json({
+      productName: productName || 'Product',
+      category,
+      recommendedPrice,
+      priceRange: {
+        min: minViablePrice,
+        max: maxViablePrice
+      },
+      costBreakdown: {
+        materialCost: mat,
+        labourCost: lab,
+        packagingCost: pkg,
+        otherCost: oth,
+        totalCost: effectiveTotal,
+        profitAmount: actualProfit,
+        marginPct: actualMarginPct
+      },
+      explanation,
+      source: 'explainable_engine'
+    });
+  } catch (error) {
+    console.error('Pricing calculation error:', error);
+    res.status(500).json({ error: 'Failed to calculate pricing.' });
+  }
+});
+
+// Root dispatcher for ?action= query parameter support
+router.post('/', (req, res) => {
+  const action = req.query.action;
+  const actionMap = {
+    'generate-product': '/generate-product',
+    'translate': '/translate',
+    'analyze-image': '/analyze-image',
+    'parse-voice-update': '/parse-voice-update',
+    'read-page': '/read-page',
+    'enhance-description': '/enhance-description',
+    'interpret-command': '/interpret-command',
+    'chat': '/chat',
+    'orchestrate': '/orchestrate',
+    'enhance-image': '/enhance-image',
+    'calculate-pricing': '/calculate-pricing'
+  };
+
+  if (action && actionMap[action]) {
+    req.url = actionMap[action];
+    return router(req, res);
+  }
+  res.status(404).json({ error: 'AI action not supported' });
 });
 
 module.exports = router;

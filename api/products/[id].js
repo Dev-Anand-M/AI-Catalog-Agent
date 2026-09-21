@@ -34,6 +34,18 @@ async function handler(req, res) {
 
     if (!product) return res.status(404).json({ error: 'Product not found' });
 
+    // Audit: product updated (non-blocking)
+    db.insertAuditLog({
+      userId: req.userId,
+      action: 'PRODUCT_UPDATE',
+      entityType: 'PRODUCT',
+      entityId: String(id),
+      details: JSON.stringify({ name: name || undefined, category: category || undefined, price: price || undefined }),
+      ip: req.headers['x-forwarded-for'] || null,
+      userAgent: req.headers['user-agent'] || null,
+      createdAt: new Date().toISOString()
+    }).catch(() => {});
+
     // Auto-sync updates to Shopify in background (don't block response)
     if (product.shopifyProductId) {
       updateProductInShopify(product.shopifyProductId, product).catch(err =>
@@ -45,8 +57,22 @@ async function handler(req, res) {
   }
 
   if (req.method === 'DELETE') {
+    const existing = await db.findProductById(id, req.userId);
     const deleted = await db.deleteProduct(id, req.userId);
     if (!deleted) return res.status(404).json({ error: 'Product not found' });
+
+    // Audit: product deleted (non-blocking)
+    db.insertAuditLog({
+      userId: req.userId,
+      action: 'PRODUCT_DELETE',
+      entityType: 'PRODUCT',
+      entityId: String(id),
+      details: JSON.stringify({ name: existing?.name || null }),
+      ip: req.headers['x-forwarded-for'] || null,
+      userAgent: req.headers['user-agent'] || null,
+      createdAt: new Date().toISOString()
+    }).catch(() => {});
+
     return res.json({ message: 'Product deleted successfully' });
   }
 

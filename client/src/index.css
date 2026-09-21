@@ -2,61 +2,728 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-}
-
-/* Animations for Voice Commands and UI */
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slide-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes pulse-ring {
-  0% { transform: scale(1); opacity: 1; }
-  100% { transform: scale(1.5); opacity: 0; }
-}
-
-.animate-fade-in {
-  animation: fade-in 0.2s ease-out;
-}
-
-.animate-slide-up {
-  animation: slide-up 0.3s ease-out;
-}
-
-/* Accessibility - Focus visible styles */
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: 2px solid #0d9488;
-  outline-offset: 2px;
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-  .bg-primary-500 {
-    background-color: #0f766e;
+@layer base {
+  :root {
+    color-scheme: light;
+    /* One easing + three durations keep every hover, press and panel the same
+       rhythm instead of each component inventing its own. */
+    --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+    --dur-fast: 120ms;
+    --dur-base: 180ms;
+    --dur-slow: 260ms;
+    /* Height of the sticky navbar — used by sticky sub-headers so they never
+       float over the nav. */
+    --nav-h: 4rem;
   }
-  .text-gray-600 {
-    color: #374151;
+
+  html {
+    /* Smooth anchor scrolling is an enhancement, never a requirement. */
+    scroll-behavior: smooth;
+    /* Persian/Arabic-style numerals aside, this keeps inline SVG icons from
+       sitting on the text baseline and nudging labels off-centre. */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Optical alignment: icons inside flex rows should not add descender space. */
+  svg {
+    flex-shrink: 0;
+  }
+
+  body {
+    background-color: #f4f5f7;
+    color: #0a0a0b;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  /* Readable focus rings for keyboard navigation */
+  :focus-visible {
+    outline: 2px solid #0a0a0b;
+    outline-offset: 2px;
+    border-radius: 8px;
   }
 }
 
-/* Reduced motion support */
+/* ============================================================
+   MOTION
+   ============================================================ */
+/* Figures in cards and tables are compared by eye, so they must not shuffle
+   horizontally when the digits change. */
+.num,
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* Page-level entrance, replayed on every route change (see App.jsx).
+
+   FADE ONLY — deliberately no transform. `animation-fill-mode: both` keeps the
+   final keyframe applied forever, and a keyframe that mentions `transform`
+   resolves to an identity matrix rather than `none`. A non-`none` transform on
+   an ancestor makes that ancestor the containing block for `position: fixed`
+   descendants, so `<main class="page-enter">` was silently re-anchoring EVERY
+   modal in the app to the height of the whole document instead of the viewport:
+   the "Direct Payment Details" dialog was centred on ~4400px of page, which put
+   it far below the fold and made the top and bottom unreachable. The 6px slide
+   is not worth that. (Long-term, dialogs should render through a portal onto
+   document.body, which is immune to this class of bug.) */
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.page-enter {
+  animation: pageFadeIn var(--dur-slow) var(--ease-out-soft) both;
+}
+
+/* Respect the OS setting: no sliding, no scaling, no shimmer. Opacity-only
+   feedback is kept so state changes are still visible. */
 @media (prefers-reduced-motion: reduce) {
-  .animate-fade-in,
-  .animate-slide-up,
-  .animate-pulse,
-  .animate-bounce,
-  .animate-spin {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .skeleton {
     animation: none;
   }
 }
+
+/* Subtle, clean scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1aa;
+}
+
+/* ============================================================
+   COMPONENT LAYER
+
+   Everything below lives in Tailwind's `components` layer, and that is a
+   correctness fix rather than tidiness. Unlayered CSS outranks layered CSS,
+   so while these were plain rules any utility applied on top of one was
+   silently ignored: `input pl-9` on the sign-in form kept the 0.85rem
+   padding and the at-sign icon sat on top of the typed address,
+   `btn-primary px-3.5` kept a full 1rem of padding, `input mb-6` kept the
+   field's own margin. Inside the layer the utilities win, which is what
+   every call site already assumed.
+   ============================================================ */
+@layer components {
+
+/* ============================================================
+   SURFACES
+   ============================================================ */
+.surface-card {
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  border-radius: 14px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.surface-card:hover {
+  border-color: #d4d4d8;
+  box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.04), 0 1px 3px -1px rgba(0, 0, 0, 0.02);
+}
+
+.surface-card-interactive {
+  cursor: pointer;
+}
+
+.surface-card-interactive:hover {
+  border-color: #c4c4c7;
+  box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.06), 0 2px 6px -2px rgba(0, 0, 0, 0.02);
+}
+
+/* Landing page feature/showcase card — used by Landing.jsx */
+.card-enterprise {
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  border-radius: 16px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  transition: border-color var(--dur-base) ease, box-shadow var(--dur-base) ease,
+    transform var(--dur-base) var(--ease-out-soft);
+}
+
+.card-enterprise:hover {
+  border-color: #c4c4c7;
+  box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.08), 0 2px 8px -2px rgba(0, 0, 0, 0.03);
+  transform: translateY(-2px);
+}
+
+/* Dense/merchant card variant used by catalog grids */
+.merchant-card {
+  background-color: #ffffff;
+  border: 1px solid #e4e4e7;
+  border-radius: 14px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+  transition: border-color var(--dur-fast) ease, box-shadow var(--dur-fast) ease;
+}
+
+.merchant-card:hover {
+  border-color: #d4d4d8;
+  box-shadow: 0 6px 16px -6px rgba(0, 0, 0, 0.05);
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+/* One shape for every button: the base class *and* each colour variant.
+   Call sites have always used a variant on its own (`btn-secondary text-xs
+   flex-1`), and `.btn-secondary` only ever set colours — so those buttons fell
+   back to the browser's default button box (2px outset border, 1px of padding)
+   and never matched the link-button sitting next to them. */
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-ghost,
+.btn-success,
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 42px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  /* Wrapped labels are the norm in Tamil, Telugu and Kannada — give them air. */
+  line-height: 1.2;
+  text-align: center;
+  border-radius: 10px;
+  transition: background-color var(--dur-fast) ease-in-out,
+    border-color var(--dur-fast) ease-in-out, color var(--dur-fast) ease-in-out,
+    box-shadow var(--dur-fast) ease-in-out, transform var(--dur-fast) ease-in-out,
+    opacity var(--dur-fast) ease-in-out;
+  border: 1px solid transparent;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Short, predictable labels stay on one line. Long localised ones are allowed
+   to wrap, which is why nowrap lives here and not in the shared rule. */
+.btn {
+  white-space: nowrap;
+}
+
+/* A .btn rendered as a react-router <Link> must not keep text-link metrics.
+   NOTE: this rule must never set `color`. `a.btn:hover` (0,2,1) outranks
+   `a.btn-primary` (0,1,1), so `color: inherit` here used to win ON HOVER and
+   the white label on the near-black primary button inherited the page's dark
+   text colour — the label vanished exactly while the cursor was on the button
+   ("Request Access" in the navbar was the visible casualty). Each variant now
+   declares its own hover colour below. */
+a.btn,
+a.btn:focus {
+  text-decoration: none;
+}
+
+a.btn-primary,
+a.btn-primary:hover,
+a.btn-success,
+a.btn-success:hover,
+a.btn-danger,
+a.btn-danger:hover {
+  color: #ffffff;
+}
+
+a.btn-secondary,
+a.btn-secondary:hover,
+a.btn-ghost,
+a.btn-ghost:hover {
+  color: #0a0a0b;
+}
+
+.btn-primary {
+  background-color: #0a0a0b;
+  border-color: #0a0a0b;
+  color: #ffffff;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #1c1c1f;
+  border-color: #1c1c1f;
+  color: #ffffff;
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: #ffffff;
+  border-color: #e4e4e7;
+  color: #0a0a0b;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #f4f5f7;
+  border-color: #d4d4d8;
+  color: #0a0a0b;
+}
+
+.btn-secondary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-ghost {
+  background-color: transparent;
+  border-color: transparent;
+  color: #0a0a0b;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background-color: #f4f5f7;
+  color: #0a0a0b;
+}
+
+.btn-ghost:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-success {
+  background-color: #059669;
+  border-color: #059669;
+  color: #ffffff;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.btn-success:hover:not(:disabled) {
+  background-color: #047857;
+  border-color: #047857;
+  color: #ffffff;
+}
+
+.btn-success:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-success:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-danger {
+  background-color: #be123c;
+  border-color: #be123c;
+  color: #ffffff;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #9f1239;
+  border-color: #9f1239;
+  color: #ffffff;
+}
+
+.btn-danger:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-danger:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   STATUS BADGES — confirmed / ai / review states
+   ============================================================ */
+.badge-confirmed {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: #047857;
+  background-color: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  transition: background-color 0.15s ease;
+}
+
+button.badge-confirmed:hover {
+  background-color: #d1fae5;
+}
+
+.badge-ai {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: #1d4ed8;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  transition: background-color 0.15s ease;
+}
+
+button.badge-ai:hover {
+  background-color: #dbeafe;
+}
+
+.badge-review {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: #b45309;
+  background-color: #fffbeb;
+  border: 1px solid #fde68a;
+  transition: background-color 0.15s ease;
+}
+
+button.badge-review:hover {
+  background-color: #fef3c7;
+}
+
+/* Generic badge variants */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.badge-neutral {
+  color: #3f3f46;
+  background-color: #f4f5f7;
+  border: 1px solid #e4e4e7;
+}
+
+.badge-primary {
+  color: #2563eb;
+  background-color: #eff6ff;
+  border: 1px solid #dbeafe;
+}
+
+.badge-success {
+  color: #059669;
+  background-color: #ecfdf5;
+  border: 1px solid #a7f3d0;
+}
+
+.badge-warning {
+  color: #b45309;
+  background-color: #fffbeb;
+  border: 1px solid #fde68a;
+}
+
+.badge-rose {
+  color: #be123c;
+  background-color: #fff1f2;
+  border: 1px solid #fecdd3;
+}
+
+.badge-emerald-solid {
+  color: #ffffff;
+  background-color: #059669;
+}
+
+/* ============================================================
+   FORM INPUTS
+   ============================================================ */
+.field {
+  margin-bottom: 0.875rem;
+}
+
+.field-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #3f3f46;
+  margin-bottom: 0.35rem;
+  letter-spacing: 0.01em;
+}
+
+.field-label.required::after {
+  content: '*';
+  color: #be123c;
+  margin-left: 0.15rem;
+}
+
+.input {
+  background-color: #ffffff;
+  border: 1px solid #e4e4e7;
+  color: #0a0a0b;
+  border-radius: 10px;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.875rem;
+  min-height: 42px;
+  width: 100%;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.input:hover:not(:disabled) {
+  border-color: #d4d4d8;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #0a0a0b;
+  box-shadow: 0 0 0 3px rgba(10, 10, 11, 0.08);
+}
+
+.input:disabled {
+  background-color: #f4f5f7;
+  color: #71717a;
+  cursor: not-allowed;
+}
+
+.input-error {
+  border-color: #be123c;
+  background-color: #fff1f2;
+}
+
+.input-error:focus {
+  box-shadow: 0 0 0 3px rgba(190, 18, 60, 0.12);
+}
+
+.field-error {
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  color: #be123c;
+  font-weight: 500;
+}
+
+.select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233f3f46' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+  padding-right: 2.25rem;
+}
+
+/* ============================================================
+   MISC UTILITIES
+   ============================================================ */
+/* Price text */
+.price {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* Category/brand chip */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  border-radius: 6px;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+/* Product image container */
+.image-well {
+  background-color: #f4f5f7;
+  border: 1px solid #e4e4e7;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* Skeleton shimmer for loading cards */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f4f5f7 25%, #eaeaea 50%, #f4f5f7 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 8px;
+}
+
+/* Subtle entrance for modals, drawers, toasts */
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.overlay-enter {
+  animation: fadeSlideIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* tailwindcss-animate style utilities (used without the plugin) */
+@keyframes enterFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromBottom {
+  from {
+    transform: translateY(8px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInFromTop {
+  from {
+    transform: translateY(-8px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation-duration: 0.2s;
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-in.fade-in {
+  animation-name: enterFadeIn;
+}
+
+.animate-in.slide-in-from-bottom-2 {
+  animation-name: slideInFromBottom;
+}
+
+.animate-in.slide-in-from-top-2 {
+  animation-name: slideInFromTop;
+}
+
+/* Status dot */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+}
+
+.status-dot-active {
+  background-color: #059669;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.18);
+}
+
+/* Backdrop */
+.backdrop-overlay {
+  background-color: rgba(10, 10, 11, 0.5);
+  backdrop-filter: blur(3px);
+}
+
+/* ============================================================
+   MODAL SHELL
+
+   Centre a dialog without ever trapping content off-screen. A plain
+   `fixed inset-0 flex items-center justify-center` clips the top AND the
+   bottom of any panel taller than the viewport — a fixed overlay cannot be
+   scrolled, so the cut-off half (the Direct Payment Details UPI list) was
+   simply unreachable. Scrolling the overlay and centring the panel inside a
+   `min-h-full` wrapper keeps short dialogs perfectly centred while long ones
+   scroll the whole panel into reach.
+   ============================================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.modal-overlay-inner {
+  display: flex;
+  min-height: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-panel {
+  width: 100%;
+  background-color: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e4e4e7;
+  box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.25);
+  animation: fadeSlideIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Sticky rail backgrounds */
+.rail-sticky {
+  background-color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid #e4e4e7;
+}
+
+/* Empty state illustration placeholder */
+.empty-illustration {
+  opacity: 0.35;
+}
+
+} /* end @layer components */

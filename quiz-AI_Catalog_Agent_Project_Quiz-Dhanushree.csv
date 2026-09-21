@@ -1,0 +1,63 @@
+Quiz Export Report
+
+Student Name,Dhanushree
+Quiz Title,AI Catalog Agent Project Quiz
+Quiz Category,Full Stack
+Difficulty,medium
+Score,92%
+Status,PASSED
+Correct Answers,46/50
+Completed At,17/6/2026, 11:11:55 pm
+Finalized,No
+
+Question #,Question,Question Type,Your Answer,Correct Answer,Result
+1,What is the primary purpose of the AI Catalog Agent?,multiple,To help retailers create product catalogs using AI and voice,To help retailers create product catalogs using AI and voice,Correct
+2,Which database is used in this project?,multiple,Supabase PostgreSQL,Supabase PostgreSQL,Correct
+3,What is the main frontend framework used?,multiple,React,React,Correct
+4,Which AI service is primarily integrated for product generation?,multiple,Perplexity AI,Perplexity AI,Correct
+5,The project supports voice input in multiple Indian languages,boolean,true,true,Correct
+6,What authentication method is used?,multiple,JWT (JSON Web Tokens),JWT (JSON Web Tokens),Correct
+7,Which of these languages is NOT supported by the voice input feature?,multiple,French,French,Correct
+8,What is Prisma in this project?,multiple,A database ORM,A database ORM,Correct
+9,Users can upload product images using their camera,boolean,true,true,Correct
+10,What is the purpose of the .env file?,multiple,To store environment variables and secrets,To store environment variables and secrets,Correct
+11,Which payment methods can retailers configure?,multiple,UPI and Bank Account,UPI and Bank Account,Correct
+12,The project allows exporting catalogs to Shopify,boolean,true,true,Correct
+13,What does CRUD stand for in Product Management?,multiple,"Create, Read, Update, Delete","Create, Read, Update, Delete",Correct
+14,Which port does the backend server run on by default?,multiple,5000,3001,Incorrect
+15,What is Row Level Security (RLS)?,multiple,Database-level access control,Database-level access control,Correct
+16,The AI can generate product descriptions from voice input,boolean,true,true,Correct
+17,What is the purpose of bcrypt in this project?,multiple,To hash passwords,To hash passwords,Correct
+18,Which feature helps visually impaired users?,multiple,Page reading with AI,Page reading with AI,Correct
+19,What does JWT stand for?,multiple,JSON Web Token,JSON Web Token,Correct
+20,Which cloud service is recommended for image storage?,multiple,Cloudinary or AWS S3,Cloudinary or AWS S3,Correct
+21,The project supports Hinglish and Tanglish input,boolean,false,true,Incorrect
+22,What is the purpose of Vercel in the deployment?,multiple,To host the frontend,To host the frontend,Correct
+23,Which tool is used for API testing?,multiple,Postman,Postman,Correct
+24,What format can catalogs be exported to?,multiple,PDF and CSV,PDF and CSV,Correct
+25,Users need to write code to add products,boolean,false,false,Correct
+26,What is the main advantage of using Supabase?,multiple,PostgreSQL with built-in auth and RLS,PostgreSQL with built-in auth and RLS,Correct
+27,Which middleware is used for authentication in Express?,multiple,Custom authMiddleware,Custom authMiddleware,Correct
+28,The project uses Docker for containerization,boolean,true,true,Correct
+29,What is the purpose of Prisma migrations?,multiple,To update the database schema,To update the database schema,Correct
+30,Which React hook is used for state management in components?,multiple,useState and useEffect,useState and useEffect,Correct
+31,The AI can detect product categories automatically,boolean,true,true,Correct
+32,What does API stand for?,multiple,Application Programming Interface,Application Programming Interface,Correct
+33,Which feature allows retailers to accept payments?,multiple,Payment Settings with UPI/Bank/QR,Payment Settings with UPI/Bank/QR,Correct
+34,What is the purpose of CORS middleware?,multiple,To allow cross-origin requests,To allow cross-origin requests,Correct
+35,The project requires users to know SQL,boolean,false,false,Correct
+36,Which component handles camera capture?,multiple,CameraCapture.jsx,CameraCapture.jsx,Correct
+37,What is the purpose of Context API in React?,multiple,To manage global state,To manage global state,Correct
+38,Products can be synced to Shopify stores,boolean,true,true,Correct
+39,What is the recommended Node.js version?,multiple,18.x or higher,18.x or higher,Correct
+40,Which feature makes this project accessible to low-literacy users?,multiple,Voice input and AI assistance,Voice input and AI assistance,Correct
+41,The database uses connection pooling for better performance,boolean,true,true,Correct
+42,What is the main target audience for this project?,multiple,Small retailers and artisans,Small retailers and artisans,Correct
+43,Which HTTP status code indicates successful resource creation?,multiple,200 OK,201 Created,Incorrect
+44,Users can update products using voice commands,boolean,true,true,Correct
+45,What is the purpose of Rate Limiting?,multiple,To prevent abuse and overload,To prevent abuse and overload,Correct
+46,Which feature distinguishes this project from competitors?,multiple,Multi-language voice input for Indian languages,Multi-language voice input for Indian languages,Correct
+47,The project uses Tailwind CSS for styling,boolean,false,true,Incorrect
+48,What happens if AI services are unavailable?,multiple,Fallback to local generation,Fallback to local generation,Correct
+49,The project stores passwords in plain text,boolean,false,false,Correct
+50,What is the main innovation of this project?,multiple,AI-powered catalog creation with voice input in Indian languages,AI-powered catalog creation with voice input in Indian languages,Correct

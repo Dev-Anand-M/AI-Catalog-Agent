@@ -1,0 +1,612 @@
+FINAL YEAR PROJECT & STARTUP REVIEW WORKBOOK
+EXTREME PITCH
+A Simple, High-Impact Methodology to Stress-Test Projects Before Real-World Users Test Them
+Student-Friendly Toolkit Edition  |  Includes Step-by-Step Guide, Real Example & Ready-to-Use Templates
+
+[PHILOSOPHY] WHAT IS THE PHILOSOPHY OF EXTREME PITCH?
+"Question the project before the world questions it."Extreme Pitch is NOT created to judge or fail you. Its goal is to help your team find weak assumptions, security bugs, scaling bottlenecks, and UX issues on paper BEFORE your external college examiners or real users find them!
+
+PART 1: HOW EXTREME PITCH WORKS (SIMPLE GUIDE)
+Forget long academic theory. Extreme Pitch is a 3-person structured review game. You sit with your team or class, pick roles, ask tough questions, and log decisions so your project gets 10x better.
+1.1 The 3-Participant Rotation System
+You need exactly 3 participants: Person A, Person B, and Person C. In each round, 1 person defends their project (Product Owner), while the other 2 challenge them (Challengers).
+Round
+Product Owner (Defends Project)
+Challenger 1 (Asks Questions)
+Challenger 2 (Asks Questions)
+Round 1 (45 mins)
+Person A (e.g., Dev)
+Person B (e.g., Rahul)
+Person C (e.g., Priya)
+Round 2 (45 mins)
+Person B (e.g., Rahul)
+Person A (e.g., Dev)
+Person C (e.g., Priya)
+Round 3 (45 mins)
+Person C (e.g., Priya)
+Person A (e.g., Dev)
+Person B (e.g., Rahul)
+
+1.2 Stakeholder Cards & Core Rules
+• Stakeholder Cards belong to YOU, not the product: Before starting, each person picks 3 to 5 roles (e.g., Security Engineer, Investor, Database Admin, QA Tester, UI Designer). You keep these cards for the whole session!
+• The Hidden Role Rule: The Product Owner does NOT know which role card you are using until you ask your question! Start your question by revealing your role: 'I am asking as a Security Engineer...'
+• The Role Retirement Rule: You can use a specific card against a project only ONCE. Once 'Investor' challenges Project Zenith, it is retired for Zenith (but you can use it against another project in the next round).
+• Concept-Level Technical Depth: You don't need to write code or open IDEs. Discuss logic, databases, security, cloud, monetization, scaling, and privacy at a high technical level.
+• Fast & Simple Logging: The Facilitator records short signal logs: Question, Answer, Agreed Decision, Priority (P1/P2), and Status Badge (ACCEPTED / NEEDS IMPROVEMENT / REJECTED / RESEARCH REQUIRED). Never write long essays!
+
+PART 2: WHO FILLS WHICH PAGE & TABLE? (ROLES CHEATSHEET)
+To avoid confusion during your review session, here is the exact responsibility breakdown for each section and table in this workbook:
+Section #
+Section / Table Name
+Who Fills It?
+When To Fill It?
+Section 1
+Session Information Table
+Facilitator
+At the very start of the round
+Section 2
+Product Overview Table
+Product Owner
+Before the session starts (Pre-session)
+Section 3
+Challenge Log Table
+Facilitator
+Live during questioning 
+Section 4
+Key Insights Table
+Whole Team Together
+Right after questioning ends 
+Section 5
+Recommendations Table
+Whole Team Together
+Post-questioning synthesis
+Section 6
+Action Items Table
+Product Owner
+Wrap-up phase (Assigning tasks)
+Section 7
+Scorecard Table & Justifications
+Challenger A & Challenger B
+Independently after questioning (5 mins)
+Section 8
+Session Outcome & Final Verdict
+Facilitator + Challengers
+Final wrap-up (5 mins)
+
+PART 3: FULL COMPLETED EXAMPLE (PROJECT ZENITH)
+[EXAMPLE] REFERENCE BENCHMARK
+Here is a complete, simple example of how a college Final Year Project ('Zenith') fills every single table, log, score, and recommendation in this workbook.
+
+Section 1: Session Information (Filled Example)
+Project Name
+Zenith AI Triage Platform
+Date & Time
+2026-10-14 | 14:00
+Version
+v1.0 (Final Year Project Build)
+Duration
+60 Minutes
+Product Owner
+Dev Shah (Student Defender)
+Facilitator
+Prof. Marcus Vance
+Challenger A
+Rahul Verma
+Role A
+Security Engineer & Investor
+Challenger B
+Priya Nair
+Role B
+Cloud Architect & Privacy Officer
+
+Section 2: Product Overview (Filled Example)
+Product Summary
+Zenith is a mobile PWA that uses lightweight AI models to triage emergency room patients in rural clinics and syncs patient records back to hospital servers even during internet outages.
+Target Users & Market
+Rural hospital emergency clinics, triage nurses, and medical staff in low-bandwidth areas.
+Tech Stack & Architecture
+React PWA (Frontend), Go microservices + NATS event bus (Backend), PostgreSQL + Edge SQLite (Database), Local XGBoost / Llama-3 (AI Triage).
+Key Differentiator
+Sub-second offline patient intake with automatic background data sync upon network reconnect.
+
+Section 3: Challenge Log (Filled Example)
+#
+Raised By
+Role
+Question
+Response
+Decision
+Pri
+Follow-up
+Status
+Q1
+Rahul V.
+Security Eng
+What if someone enters prompt injection text in the patient symptoms field to trick the AI score?
+We sanitize input text and pass symptoms through a strict regex validator before AI scoring.
+Add hard deterministic rule limit on triage scores for suspicious text.
+P1
+Regex-Check
+  ACCEPTED  
+Q2
+Priya N.
+Cloud Architect
+What happens if a rural clinic is offline for 4 hours and syncs 500 patient records all at once?
+Edge SQLite stores transactions in a local queue and replays them to NATS bus when online.
+Switch to Conflict-Free Replicated Data Types (CRDT) to prevent DB lock bugs.
+P1
+Sync-Refactor
+  NEEDS IMPROVEMENT  
+Q3
+Rahul V.
+Investor
+How will rural clinics afford your software subscription fee?
+We offer a freemium tier for basic triage and charge premium for automated EHR integrations.
+Build free self-service onboarding portal to lower sales costs.
+P2
+Pricing-Doc
+  RESEARCH REQUIRED  
+Q4
+Priya N.
+Privacy Officer
+How do you protect patient names and SSNs from being leaked to cloud AI APIs?
+We run a local SpaCy NER model on the phone/tablet to strip names/SSNs before cloud calls.
+Enforce strict local data scrubbing before any cloud API call.
+P1
+Privacy-Audit
+  ACCEPTED  
+Q5
+Rahul V.
+QA Tester
+What if cloud AI latency spikes to 5 seconds during emergency intake?
+A circuit breaker trips and switches to a 10MB local XGBoost decision tree model.
+Add automatic fallback mechanism and test latency under fake network throttling.
+P1
+Fallback-Test
+  ACCEPTED  
+Q6
+Priya N.
+Lawyer
+If AI misclassifies a serious patient and causes injury, who is legally responsible?
+Zenith is a Decision Support tool under FDA rules. A certified nurse must confirm all triage scores.
+Show a clear mandatory 'Nurse Sign-off' button before finalizing patient priority queue.
+P1
+UI-Signoff
+  ACCEPTED  
+
+Section 4: Key Insights (Filled Example)
+#
+Category
+Core Discovery / Insight
+Strategic Implication
+Severity
+INS-01
+Security & AI
+Raw LLM output must NEVER directly control medical queue priority integers.
+Rule-based safety bounds are mandatory to prevent prompt manipulation.
+HIGH
+INS-02
+Architecture
+Relational database locks fail when replaying 4 hours of offline data at once.
+Edge offline apps require CRDT sync models rather than standard SQL transactions.
+HIGH
+INS-03
+Legal & UI
+Medical software must enforce human-in-the-loop sign-off to remain legally exempt as CDS software.
+UI must make nurse confirmation mandatory before saving triage priority.
+MEDIUM
+
+Section 5: Recommendations (Filled Example)
+ID
+Pri
+Recommendation
+Justification / Reason
+Origin
+Impact
+Diff
+Status
+REC-01
+P1
+Add deterministic rule guardrail to AI triage engine
+Prevents prompt injection attacks from hacking queue priorities.
+Security Eng
+High
+Med
+  ACCEPTED  
+REC-02
+P1
+Refactor edge offline sync to CRDTs
+Prevents database lock crashes when reconnecting after long outages.
+Cloud Arch
+High
+High
+  ACCEPTED  
+REC-03
+P1
+Add mandatory Nurse Sign-Off UI button
+Keeps product legally compliant with medical software regulations.
+Lawyer
+High
+Low
+  ACCEPTED  
+REC-04
+P1
+Add local XGBoost fallback model on edge devices
+Guarantees sub-second triage speed even when cloud AI is unreachable.
+QA Tester
+High
+Med
+  ACCEPTED  
+
+Section 6: Action Items (Filled Example)
+Task ID
+Action Task Description
+Owner
+Deadline
+Priority
+Dependencies
+Status
+ACT-01
+Build input regex sanitizer in Go backend service.
+Dev 
+2026-10-25
+P1
+None
+  ACCEPTED  
+ACT-02
+Upgrade SQLite offline sync logic to Automerge CRDT library.
+Priya
+2026-11-05
+P1
+ACT-01
+  ACCEPTED  
+ACT-03
+Add nurse sign-off modal dialog component in React frontend.
+Rahul 
+2026-10-28
+P1
+None
+  ACCEPTED  
+ACT-04
+Train 10MB C++ XGBoost decision tree model for edge fallback.
+Dev 
+2026-11-12
+P1
+ACT-01
+  ACCEPTED  
+
+Section 7: Scorecard (Filled Example)
+Evaluation Criteria (Evaluating Product Owner: Dev)
+Challenger A (Rahul)
+Challenger B (Priya)
+Average
+1. Problem Understanding (Grasp of core domain & real-world pain points)
+9.0
+9.5
+9.25
+2. Solution Clarity (Architectural precision and structural elegance)
+8.5
+9.0
+8.75
+3. Technical Knowledge (Depth in security, scaling, DB, cloud infra)
+8.5
+8.0
+8.25
+4. Business Thinking (Monetization, unit economics, market viability)
+7.5
+8.0
+7.75
+5. Communication (Structure, clarity, conciseness, non-defensiveness)
+9.0
+9.0
+9.00
+6. Confidence & Composure (Poise under intense adversarial questioning)
+8.5
+9.0
+8.75
+7. Handling Difficult Questions (Graceful navigation of blindspots)
+8.0
+8.5
+8.25
+8. Openness To Feedback (Willingness to adapt architecture based on data)
+9.5
+9.0
+9.25
+9. Overall Pitch Execution (Synthesis, conviction, and professionalism)
+9.0
+8.5
+8.75
+GRAND FINAL SCORECARD AVERAGE (Out of 10.0)
+8.61 / 10
+8.67 / 10
+8.64 / 10
+
+Section 8: Session Outcome & Verdict (Filled Example)
+Biggest Technical Strength
+Great offline sync architecture and clear understanding of hospital emergency workflows.
+Biggest Vulnerability
+Database transaction lock risks during long offline reconnections, and potential prompt injection vulnerabilities.
+Most Valuable Insight
+AI outputs must never directly set triage priority numbers without rule guardrails and nurse sign-off.
+Key Lessons Learned
+1. Technical features must fit legal regulations.2. Always build a local fallback model on edge devices when relying on cloud APIs.
+Final Recommendation
+Ready for final project submission once Action Items ACT-01 (Regex Sanitizer) and ACT-03 (Nurse Sign-off UI) are built.
+FINAL SESSION VERDICT
+  APPROVED WITH CHANGES  
+
+PART 4: ALL BLANK WORKBOOK TEMPLATES (READY TO USE)
+Print or fill out these blank tables during your team's live Extreme Pitch review session. Each section clearly lists who fills it and when!
+SECTION 1: SESSION INFORMATION
+📌 WHO FILLS THIS PAGE: FACILITATOR
+📌 WHEN TO FILL IT: At the start of the session (First 5 mins)
+📌 HOW TO FILL IT: Write down the project title, date, version tag, facilitator name, PO name, and revealed challenger roles.
+📌 QUICK TIP: Make sure everyone agrees on the exact 10-minute timer before starting!
+
+Project Name
+
+Date & Time
+
+Version / Tag
+
+Duration
+
+Product Owner
+
+Facilitator
+
+Challenger A
+
+Stakeholder Role A
+
+Challenger B
+
+Stakeholder Role B
+
+
+SECTION 2: PRODUCT OVERVIEW
+📌 WHO FILLS THIS PAGE: PRODUCT OWNER (Defender)
+📌 WHEN TO FILL IT: BEFORE the session starts (Pre-session setup)
+📌 HOW TO FILL IT: Write a 2-sentence summary of your project, target users, tech stack, and key differentiator.
+📌 QUICK TIP: Keep it short! Don't write code syntax--just describe the architecture and main features.
+
+Product Summary
+
+Target Users & Market
+
+Tech Stack & Architecture
+
+Key Differentiator
+
+
+SECTION 3: CHALLENGE LOG
+📌 WHO FILLS THIS PAGE: FACILITATOR
+📌 WHEN TO FILL IT: LIVE during questioning (45-minute main round)
+📌 HOW TO FILL IT: Record each question raised, PO response, agreed decision, priority (P1/P2), follow-up, and status badge.
+📌 QUICK TIP: Do NOT write word-for-word essays! Just write the main question and the exact fix agreed upon.
+
+#
+Raised By
+Role
+Question
+Response
+Decision
+Pri
+Follow-up
+Status
+Q1
+
+
+
+
+
+
+
+  ACCEPTED  
+Q2
+
+
+
+
+
+
+
+  ACCEPTED  
+Q3
+
+
+
+
+
+
+
+  ACCEPTED  
+Q4
+
+
+
+
+
+
+
+  ACCEPTED  
+Q5
+
+
+
+
+
+
+
+  ACCEPTED  
+
+SECTION 4: KEY INSIGHTS
+📌 WHO FILLS THIS PAGE: WHOLE TEAM TOGETHER
+📌 WHEN TO FILL IT: Right after questioning ends (5 mins)
+📌 HOW TO FILL IT: Document big architectural, security, or business discoveries made during the session.
+📌 QUICK TIP: Insights are discoveries, not tasks. Example: 'Offline database replays crash if we use relational locks.'
+
+#
+Category
+Core Discovery / Insight
+Strategic Implication
+Severity
+INS-01
+
+
+
+
+INS-02
+
+
+
+
+INS-03
+
+
+
+
+
+SECTION 5: RECOMMENDATIONS
+📌 WHO FILLS THIS PAGE: WHOLE TEAM TOGETHER
+📌 WHEN TO FILL IT: Post-questioning synthesis phase (5 mins)
+📌 HOW TO FILL IT: Convert key insights into actionable improvement proposals with priority, impact, and difficulty.
+📌 QUICK TIP: Prioritize P1 items (critical fixes) over P2 items (nice-to-have enhancements).
+
+ID
+Pri
+Recommendation
+Justification / Reason
+Origin
+Impact
+Diff
+Status
+REC-01
+P1
+
+
+
+
+
+  ACCEPTED  
+REC-02
+P1
+
+
+
+
+
+  ACCEPTED  
+REC-03
+P1
+
+
+
+
+
+  ACCEPTED  
+
+SECTION 6: ACTION ITEMS
+📌 WHO FILLS THIS PAGE: PRODUCT OWNER (Assigning tasks)
+📌 WHEN TO FILL IT: Wrap-up phase (5 mins)
+📌 HOW TO FILL IT: Turn accepted recommendations into concrete tasks with ONE assigned owner and a strict deadline.
+📌 QUICK TIP: Never assign tasks to 'everyone'. Every single task must have exactly ONE owner!
+
+Task ID
+Action Task Description
+Owner
+Deadline
+Priority
+Dependencies
+Status
+ACT-01
+
+
+
+
+
+  ACCEPTED  
+ACT-02
+
+
+
+
+
+  ACCEPTED  
+ACT-03
+
+
+
+
+
+  ACCEPTED  
+
+SECTION 7: EXTREME PITCH SCORECARD
+📌 WHO FILLS THIS PAGE: CHALLENGER A & CHALLENGER B (Independently)
+📌 WHEN TO FILL IT: Right after questioning ends (Before final verdict)
+📌 HOW TO FILL IT: Score the Product Owner's defense from 1.0 (Low) to 10.0 (High) across all 9 criteria and average them.
+📌 QUICK TIP: Score the Product Owner's technical defense and composure--NOT how pretty their slides look!
+
+Evaluation Criteria (1.0 - 10.0 Scale)
+Challenger A Score
+Challenger B Score
+Average
+1. Problem Understanding (Grasp of core domain & real-world pain points)
+
+
+
+2. Solution Clarity (Architectural precision and structural elegance)
+
+
+
+3. Technical Knowledge (Depth in security, scaling, DB, cloud infra)
+
+
+
+4. Business Thinking (Monetization, unit economics, market viability)
+
+
+
+5. Communication (Structure, clarity, conciseness, non-defensiveness)
+
+
+
+6. Confidence & Composure (Poise under intense adversarial questioning)
+
+
+
+7. Handling Difficult Questions (Graceful navigation of blindspots)
+
+
+
+8. Openness To Feedback (Willingness to adapt architecture based on data)
+
+
+
+9. Overall Pitch Execution (Synthesis, conviction, and professionalism)
+
+
+
+GRAND FINAL SCORECARD AVERAGE (Out of 10.0)
+
+
+[ SCORE ]
+
+SECTION 8: SESSION OUTCOME & FINAL VERDICT
+📌 WHO FILLS THIS PAGE: FACILITATOR + BOTH CHALLENGERS
+📌 WHEN TO FILL IT: Final 5 minutes wrap-up
+📌 HOW TO FILL IT: Summarize the biggest technical strength, biggest vulnerability, key lesson learned, and pick ONE verdict badge.
+📌 QUICK TIP: Pick 'APPROVED WITH CHANGES' if there are fixes needed before final project submission!
+
+Biggest Technical Strength
+
+Biggest Vulnerability
+
+Most Valuable Insight
+
+Key Lessons Learned
+
+Final Recommendation
+
+FINAL SESSION VERDICT
+  APPROVED WITH CHANGES  

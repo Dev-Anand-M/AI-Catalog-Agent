@@ -95,6 +95,16 @@ const commands = {
     'ಡೆಮೊ', 'demo togo',
     'ডেমো', 'demo dekhao'
   ],
+  // Admin console destinations. Phrased as longer phrases so they cannot be
+  // matched by accident inside an ordinary sentence.
+  admin: [
+    'admin panel', 'admin portal', 'open admin', 'administration', 'go to admin',
+    'admin kholo', 'admin खोलो', 'admin panel kholo'
+  ],
+  audit: [
+    'activity log', 'audit log', 'platform log', 'open log', 'show activity',
+    'activity record', 'audit trail'
+  ],
   help: [
     'help me', 'show commands', 'what can i say', 'voice commands',
     'मदद', 'help karo', 'kya bol sakta', 'madad',
@@ -154,6 +164,7 @@ const responses = {
     export: 'Opening export', payment: 'Opening payment',
     home: 'Going home', login: 'Opening login', logout: 'Logging out',
     demo: 'Opening demo', help: 'Say: dashboard, add, export, payment, read',
+    admin: 'Opening the admin console', audit: 'Opening the activity log',
     readPage: 'Reading...', thinking: 'Thinking...',
     notRecognized: 'Did not understand', listening: 'Listening...',
   },
@@ -162,6 +173,7 @@ const responses = {
     export: 'निर्यात खोल रहे हैं', payment: 'भुगतान खोल रहे हैं',
     home: 'होम जा रहे हैं', login: 'लॉगिन खोल रहे हैं', logout: 'लॉगआउट',
     demo: 'डेमो खोल रहे हैं', help: 'बोलें: डैशबोर्ड, जोड़ो, निर्यात, भुगतान',
+    admin: 'एडमिन कंसोल खोल रहे हैं', audit: 'गतिविधि लॉग खोल रहे हैं',
     readPage: 'पढ़ रहे हैं...', thinking: 'सोच रहे हैं...',
     notRecognized: 'समझ नहीं आया', listening: 'सुन रहे हैं...',
   },
@@ -170,6 +182,7 @@ const responses = {
     export: 'ஏற்றுமதி திறக்கிறது', payment: 'கட்டணம் திறக்கிறது',
     home: 'முகப்பு செல்கிறது', login: 'உள்நுழைவு', logout: 'வெளியேறுகிறது',
     demo: 'டெமோ திறக்கிறது', help: 'சொல்லுங்கள்: டாஷ்போர்டு, சேர், ஏற்றுமதி',
+    admin: 'நிர்வாக பலகத்தைத் திறக்கிறது', audit: 'செயல்பாட்டு பதிவைத் திறக்கிறது',
     readPage: 'படிக்கிறது...', thinking: 'யோசிக்கிறது...',
     notRecognized: 'புரியவில்லை', listening: 'கேட்கிறது...',
   },
@@ -178,6 +191,7 @@ const responses = {
     export: 'ఎగుమతి తెరుస్తోంది', payment: 'చెల్లింపు తెరుస్తోంది',
     home: 'హోమ్ వెళ్తోంది', login: 'లాగిన్', logout: 'లాగౌట్',
     demo: 'డెమో తెరుస్తోంది', help: 'చెప్పండి: డాష్‌బోర్డ్, జోడించు, ఎగుమతి',
+    admin: 'అడ్మిన్ కన్సోల్ తెరుస్తోంది', audit: 'యాక్టివిటీ లాగ్ తెరుస్తోంది',
     readPage: 'చదువుతోంది...', thinking: 'ఆలోచిస్తోంది...',
     notRecognized: 'అర్థం కాలేదు', listening: 'వింటోంది...',
   },
@@ -186,6 +200,7 @@ const responses = {
     export: 'ರಫ್ತು ತೆರೆಯುತ್ತಿದೆ', payment: 'ಪಾವತಿ ತೆರೆಯುತ್ತಿದೆ',
     home: 'ಮುಖಪುಟಕ್ಕೆ', login: 'ಲಾಗಿನ್', logout: 'ಲಾಗೌಟ್',
     demo: 'ಡೆಮೊ ತೆರೆಯುತ್ತಿದೆ', help: 'ಹೇಳಿ: ಡ್ಯಾಶ್‌ಬೋರ್ಡ್, ಸೇರಿಸು, ರಫ್ತು',
+    admin: 'ಅಡ್ಮಿನ್ ಕನ್ಸೋಲ್ ತೆರೆಯುತ್ತಿದೆ', audit: 'ಚಟುವಟಿಕೆ ಲಾಗ್ ತೆರೆಯುತ್ತಿದೆ',
     readPage: 'ಓದುತ್ತಿದೆ...', thinking: 'ಯೋಚಿಸುತ್ತಿದೆ...',
     notRecognized: 'ಅರ್ಥವಾಗಲಿಲ್ಲ', listening: 'ಕೇಳುತ್ತಿದೆ...',
   },
@@ -194,6 +209,7 @@ const responses = {
     export: 'রপ্তানি খুলছে', payment: 'পেমেন্ট খুলছে',
     home: 'হোম যাচ্ছে', login: 'লগইন', logout: 'লগআউট',
     demo: 'ডেমো খুলছে', help: 'বলুন: ড্যাশবোর্ড, যোগ করো, রপ্তানি',
+    admin: 'অ্যাডমিন কনসোল খুলছে', audit: 'কার্যক্রম লগ খুলছে',
     readPage: 'পড়ছে...', thinking: 'ভাবছে...',
     notRecognized: 'বুঝতে পারিনি', listening: 'শুনছে...',
   },
@@ -202,7 +218,7 @@ const responses = {
 export function useVoiceCommands() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout: authLogout } = useAuth();
+  const { user, isAdmin, logout: authLogout } = useAuth();
   const { language } = useLanguage();
   
   const [isListening, setIsListening] = useState(false);
@@ -348,13 +364,18 @@ export function useVoiceCommands() {
     
     switch (action) {
       case 'dashboard': user ? nav('/dashboard') : navigate('/login'); break;
-      case 'addProduct': user ? nav('/products/new') : navigate('/login'); break;
+      // An administrator runs no store of their own, so seller-only destinations
+      // (the product form, payment setup) resolve to the console instead of
+      // dropping them on a page about someone else's shop.
+      case 'addProduct': user ? nav(isAdmin ? '/admin' : '/products/new') : navigate('/login'); break;
       case 'export': user ? nav('/export') : navigate('/login'); break;
-      case 'payment': user ? nav('/payment') : navigate('/login'); break;
+      case 'payment': user ? nav(isAdmin ? '/admin?tab=ai' : '/payment') : navigate('/login'); break;
       case 'home': nav('/'); break;
       case 'login': nav('/login'); break;
       case 'logout': if (user) { authLogout(); nav('/'); } break;
       case 'demo': nav('/demo'); break;
+      case 'admin': user ? nav('/admin') : navigate('/login'); break;
+      case 'audit': user ? nav('/admin?tab=audit') : navigate('/login'); break;
       case 'help': break;
       case 'readPage':
         try {
@@ -366,7 +387,7 @@ export function useVoiceCommands() {
         } catch (e) { speak(msgs.notRecognized); }
         break;
     }
-  }, [language, user, authLogout, navigate, speak, location.pathname]);
+  }, [language, user, isAdmin, authLogout, navigate, speak, location.pathname]);
 
   const startListening = useCallback(() => {
     if (!isSupported || isListening) return;

@@ -1,0 +1,52 @@
+"Digital Catalog Agent - Conceptual Understanding Quiz","Educational quiz testing WHY and HOW, not just WHAT - designed to teach while testing","Deep Learning","medium",40
+"Type","Question","Opt1","Opt2","Opt3","Opt4","Correct"
+"mcq","Why did we choose to target small Indian retailers specifically?","They have the most money","They face digital literacy and language barriers","They don't use technology","They requested this application",1
+"mcq","Why is voice input critical for this project's target audience?","It's trendy and modern","Many users have low literacy and can't type easily","Voice is faster than typing","It saves database storage",1
+"mcq","Why do we support 5 regional Indian languages instead of just English?","To make the project complex","English-only tools exclude millions of potential users","Regional languages are easier","It's a project requirement",1
+"mcq","Why did we choose React over other frameworks?","It's the easiest","Component reusability, huge ecosystem, and fast performance","It's the newest framework","Professor recommended it",1
+"mcq","Why use Vite instead of Create React App?","Vite is newer","Vite is 10-100x faster in development with HMR and ES modules","CRA is deprecated","Vite has better documentation",1
+"mcq","Why does the backend run on port 3001 instead of 3000?","Random choice","Port 3000 is often occupied by other dev servers","3001 is faster","Security reasons",1
+"mcq","Why use Tailwind CSS instead of traditional CSS?","Less code to write","Utility-first approach ensures consistency and faster development","Tailwind is more powerful","Better colors",2
+"mcq","Why is Prisma chosen as the ORM?","It's free","Type-safe queries, auto-completion, and excellent DX","It's the only ORM","Fastest performance",1
+"mcq","Why host on Supabase instead of setting up our own PostgreSQL?","Cheaper","Managed database with built-in auth, RLS, and zero DevOps","Supabase is faster","No other options",1
+"mcq","Why use bcrypt for password hashing instead of storing plain text?","Industry standard","Prevents password theft if database is compromised","Faster login","Reduces storage",1
+"mcq","What security benefit does JWT provide over session cookies?","JWTs are encrypted","Stateless authentication, no server-side session storage needed","JWTs are smaller","Faster validation",1
+"mcq","Why use Multer for file uploads?","It's the only option","Handles multipart/form-data and provides file filtering","Fastest upload speed","Automatic image compression",1
+"mcq","Why deploy to Vercel instead of traditional hosting?","It's free","Automatic scaling, edge deployment, and zero configuration","Faster servers","Better UI",1
+"mcq","Why have separate User, Product, and PaymentSettings tables?","Database requirement","Normalization: reduces redundancy and maintains data integrity","Looks professional","Faster queries",1
+"mcq","What problem does the One-to-Many relationship between User and Product solve?","None","Each user owns multiple products but products belong to one user","Makes queries faster","Database requirement",1
+"mcq","Why use CASCADE delete on the User-Product relationship?","Sounds good","When user deletes account, orphaned products are auto-removed","Faster deletion","Saves storage",1
+"mcq","Why store payment data as JSON strings instead of separate tables?","Easier to code","Flexible schema for varying payment methods without multiple columns","JSON is faster","Database limitation",1
+"mcq","Why use the Web Speech API instead of a third-party service?","It's free","Native browser support, no API costs, works offline","Better accuracy","Easier integration",1
+"mcq","Why implement the Speech Synthesis API for text-to-speech?","Cool feature","Accessibility for visually impaired users","Impresses users","Reduces screen reading",1
+"mcq","Why does Tamil STT mistake 'cancel' for 'cancer'?","Bug in browser","Phonetic similarity in Tamil pronunciation confuses the STT model","Bad microphone","Network issue",1
+"mcq","Why implement local keyword fallbacks when AI APIs fail?","Save money","Ensures app works even with no internet or API downtime","Faster response","Backup storage",1
+"mcq","Why use Perplexity instead of ChatGPT for product generation?","Cheaper","Perplexity has web access and better structured outputs","Faster API","Better accuracy",1
+"mcq","Why have Gemini as a fallback instead of just one AI service?","Redundancy looks good","High availability: if primary AI fails, app continues working","Double AI power","Gemini is free",1
+"mcq","Why does AI always output in English regardless of input language?","AI limitation","Standardized database schema, easier exports to international platforms","English is faster","Project requirement",1
+"mcq","Why implement cleanAiResponse() to remove <think> tags?","Clean code practice","LLM reasoning pollutes product descriptions meant for customers","Reduces size","Faster processing",1
+"mcq","Why limit image uploads to 5MB?","Random limit","Balance between quality and storage costs, prevents abuse","Server limitation","Database constraint",1
+"mcq","Why use Base64 encoding for images?","It's standard","Embeds images directly in database without external file storage","Smaller size","Faster loading",1
+"mcq","Why support 5 different export formats instead of just one CSV?","More features","Each platform (Amazon, Flipkart, Google) requires specific column formats","Looks impressive","User requested",1
+"mcq","What business problem does Shopify Auto-Sync solve?","None","Merchants can sell both on their catalog site AND Shopify without double entry","Faster uploads","Free hosting",1
+"mcq","Why trigger Shopify sync on product creation automatically?","Automation is cool","Real-time inventory sync prevents overselling and outdated listings","Saves clicks","Database requirement",1
+"mcq","Why use fuzzy matching for voice product search?","Sounds cool","STT errors mean exact search fails, fuzzy matching handles typos","Faster search","Better UX",1
+"mcq","Why implement local command translation arrays instead of AI?","Faster","Instant navigation without API latency, works offline","Cheaper","Easier code",1
+"mcq","What problem does the useVoiceCommands hook solve?","Code organization","Centralizes voice logic, reusable across all pages","Looks professional","Faster loading",1
+"mcq","Why support Hinglish and Tanglish mixing?","Fun feature","Real Indian users naturally mix languages, ignoring this breaks UX","AI limitation","Regional preference",1
+"boolean","Cascade deletion prevents orphaned data in the database","True"
+"boolean","Storing passwords in plain text is secure if the database has a firewall","False"
+"boolean","Using JWT means we must store session data on the server","False"
+"boolean","Base64 encoding compresses images to save storage space","False"
+"boolean","Web Speech API requires an internet connection to work","False"
+"boolean","Supporting multiple languages increases the app's potential user base","True"
+"boolean","AI fallback mechanisms improve application reliability","True"
+"short","What is the main advantage of voice-first design for low-literacy users?","They can speak naturally without typing"
+"short","Why is Prisma considered type-safe?","Generates TypeScript types from schema"
+"short","What does normalization achieve in database design?","Reduces data redundancy"
+"short","Why use environment variables for API keys?","Security - prevents exposing secrets in code"
+"short","What problem does connection pooling solve?","Reuses database connections for better performance"
+"short","Why is Row Level Security important in multi-tenant apps?","Ensures users only access their own data"
+"short","What is the purpose of the cleanAiResponse function?","Remove LLM artifacts from customer-facing text"
+"mcq","Why implement authentication middleware for product APIs?","Looks professional","Prevents unauthorized users from accessing/modifying others' products","Required by Express","Database requirement",1
+"mcq","What advantage does serverless deployment on Vercel provide?","Cheaper hosting","Auto-scales with traffic, pay only for actual usage","Faster servers","Easier setup",1

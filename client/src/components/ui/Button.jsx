@@ -1,26 +1,30 @@
-export function Button({ 
-  children, 
-  variant = 'primary', 
+export function Button({
+  children,
+  variant = 'primary',
   size = 'md',
   disabled = false,
   type = 'button',
+  icon,
   onClick,
   className = ''
 }) {
-  const baseStyles = 'inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 min-h-[44px] min-w-[44px]';
-  
+  const baseStyles = 'inline-flex items-center justify-center font-medium gap-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2 min-h-[42px] min-w-[42px] active:scale-[0.98]';
+
   const variants = {
-    primary: 'bg-primary-500 hover:bg-primary-600 text-white focus:ring-primary-500 disabled:bg-primary-300',
-    secondary: 'bg-gray-100 hover:bg-gray-200 text-gray-900 focus:ring-gray-500 disabled:bg-gray-50',
-    outline: 'border-2 border-primary-500 text-primary-600 hover:bg-primary-50 focus:ring-primary-500 disabled:border-gray-300 disabled:text-gray-400',
-    accent: 'bg-accent-500 hover:bg-accent-600 text-white focus:ring-accent-500 disabled:bg-accent-300',
-    danger: 'bg-red-500 hover:bg-red-600 text-white focus:ring-red-500 disabled:bg-red-300'
+    primary: 'btn-primary',
+    secondary: 'btn-secondary',
+    ghost: 'btn-ghost',
+    success: 'btn-success',
+    danger: 'btn-danger',
+    emerald: 'bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white border border-emerald-700 shadow-xs focus-visible:ring-emerald-600 disabled:bg-emerald-300',
+    outline: 'border border-zinc-300 hover:border-zinc-400 text-zinc-800 hover:bg-zinc-50 focus-visible:ring-zinc-500 disabled:border-zinc-200 disabled:text-zinc-400',
+    accent: 'bg-amber-600 hover:bg-amber-700 text-white border border-amber-600 focus-visible:ring-amber-500 disabled:bg-amber-300',
   };
 
   const sizes = {
     sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg'
+    md: 'px-4 py-2 text-sm',
+    lg: 'px-6 py-3 text-base',
   };
 
   return (
@@ -28,8 +32,9 @@ export function Button({
       type={type}
       disabled={disabled}
       onClick={onClick}
-      className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
+      className={`${baseStyles} ${variants[variant] || variants.primary} ${sizes[size]} ${className}`}
     >
+      {icon && <span className="shrink-0">{icon}</span>}
       {children}
     </button>
   );

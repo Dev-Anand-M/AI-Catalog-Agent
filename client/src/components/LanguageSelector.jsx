@@ -30,20 +30,25 @@ export function LanguageSelector({ variant = 'dropdown' }) {
 
   if (variant === 'buttons') {
     return (
-      <div className="flex flex-wrap gap-2">
-        {languages.map((lang) => (
-          <button
-            key={lang.code}
-            onClick={() => setLanguage(lang.code)}
-            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-              language === lang.code
-                ? 'bg-primary-500 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            {lang.nativeName}
-          </button>
-        ))}
+      <div className="inline-flex items-center p-1 bg-zinc-100/90 border border-zinc-200/80 rounded-xl overflow-x-auto max-w-full">
+        {languages.map((lang) => {
+          const isActive = language === lang.code;
+          return (
+            <button
+              key={lang.code}
+              type="button"
+              onClick={() => setLanguage(lang.code)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all min-h-[36px] whitespace-nowrap flex items-center gap-1.5 ${
+                isActive
+                  ? 'bg-white text-zinc-950 shadow-2xs border border-zinc-200/80 font-bold'
+                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200/50'
+              }`}
+            >
+              {isActive && <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>}
+              <span>{lang.nativeName}</span>
+            </button>
+          );
+        })}
       </div>
     );
   }
@@ -52,16 +57,19 @@ export function LanguageSelector({ variant = 'dropdown' }) {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 hover:bg-zinc-100 text-zinc-800 transition-colors text-xs font-semibold min-h-[38px]"
         aria-label="Select language"
       >
-        <Globe className="w-4 h-4 text-gray-600" />
-        <span className="text-sm font-medium text-gray-700">{currentLang.nativeName}</span>
-        <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <Globe className="w-3.5 h-3.5 text-zinc-500" />
+        <span className="text-xs font-medium text-zinc-900">{currentLang.nativeName}</span>
+        <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-150 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border py-2 z-50 animate-fade-in">
+        <div className="absolute right-0 mt-1.5 w-48 bg-white rounded-xl shadow-lg border border-zinc-200 py-1.5 z-50">
+          <div className="px-3 py-1 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+            Select Language
+          </div>
           {languages.map((lang) => (
             <button
               key={lang.code}
@@ -69,14 +77,16 @@ export function LanguageSelector({ variant = 'dropdown' }) {
                 setLanguage(lang.code);
                 setIsOpen(false);
               }}
-              className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center justify-between"
+              className={`w-full px-3 py-2 text-left hover:bg-zinc-100 flex items-center justify-between transition-colors ${
+                language === lang.code ? 'bg-zinc-100 text-zinc-900 font-semibold' : 'text-zinc-600'
+              }`}
             >
-              <div>
-                <span className="text-sm font-medium text-gray-900">{lang.nativeName}</span>
-                <span className="text-xs text-gray-500 ml-2">{lang.name}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium">{lang.nativeName}</span>
+                <span className="text-[11px] text-zinc-400">({lang.name})</span>
               </div>
               {language === lang.code && (
-                <Check className="w-4 h-4 text-primary-500" />
+                <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[2.5]" />
               )}
             </button>
           ))}

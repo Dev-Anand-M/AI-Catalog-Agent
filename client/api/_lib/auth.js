@@ -1,9 +1,13 @@
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+// Fail fast: never fall back to a guessable secret (token forgery risk).
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET is not set. Add it to the deployment environment variables.');
+}
 
-export function generateToken(user) {
-  return jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+export function signToken(userId) {
+  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' });
 }
 
 export function verifyToken(token) {
@@ -14,19 +18,6 @@ export function verifyToken(token) {
   }
 }
 
-export async function hashPassword(password) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password + JWT_SECRET);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-export async function comparePassword(password, hash) {
-  const newHash = await hashPassword(password);
-  return newHash === hash;
-}
-
 export function getUserIdFromRequest(req) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -35,4 +26,15 @@ export function getUserIdFromRequest(req) {
   const token = authHeader.substring(7);
   const decoded = verifyToken(token);
   return decoded?.userId || null;
+}
+
+export function requireAuth(handler) {
+  return async (req, res) => {
+    const userId = getUserIdFromRequest(req);
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    req.userId = userId;
+    return handler(req, res);
+  };
 }

@@ -1,0 +1,86 @@
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset="utf-8">
+<title>Week 1 Announcement: Core Storefront</title>
+<style>
+  body { font-family: 'Calibri', 'Segoe UI', Arial, sans-serif; margin: 35px; color: #0f172a; background-color: #ffffff; line-height: 1.6; }
+  .header-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #ffffff; padding: 25px; border-radius: 10px; text-align: center; margin-bottom: 20px; }
+  h1 { font-size: 24pt; margin: 0 0 8px 0; color: #38bdf8; text-transform: uppercase; }
+  .subtitle { font-size: 13pt; color: #94a3b8; font-weight: bold; }
+  .badge-bar { margin-top: 15px; }
+  .badge { display: inline-block; padding: 6px 14px; background: #1e3a8a; border-radius: 6px; color: #93c5fd; font-size: 10pt; font-weight: bold; margin: 0 5px; }
+  .badge-gold { background: #78350f; color: #fde047; }
+  h2 { color: #1e40af; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; font-size: 15pt; text-transform: uppercase; margin-top: 25px; }
+  table { border-collapse: collapse; width: 100%; margin: 15px 0; font-size: 11pt; }
+  th, td { border: 1px solid #cbd5e1; padding: 12px; text-align: left; }
+  th { background-color: #f1f5f9; color: #0f172a; font-weight: bold; text-transform: uppercase; font-size: 10pt; }
+  tr:nth-child(even) { background-color: #f8fafc; }
+  .rubric-box { background: #f0fdf4; border-left: 4px solid #16a34a; padding: 15px; margin-top: 20px; border-radius: 4px; }
+  ul { margin: 8px 0 0 0; padding-left: 20px; }
+  li { margin-bottom: 6px; }
+</style>
+</head>
+<body>
+
+<div class="header-card">
+  <h1>📢 WEEK 1: CORE STOREFRONT</h1>
+  <div class="subtitle">AI CATALOG AGENT — TEAM SPRINT ANNOUNCEMENT</div>
+  <div class="badge-bar">
+    <span class="badge badge-gold">📅 2026-08-05 ➔ 2026-08-12</span>
+    <span class="badge">⚙️ STAGE: STOREFRONT FOUNDATION</span>
+    <span class="badge">🌟 SHOWCASE: NO</span>
+  </div>
+</div>
+
+<h2>👥 TEAM MEMBER ROLES & SPECIFIC RESPONSIBILITIES</h2>
+<table>
+  <thead>
+    <tr>
+      <th style="width: 25%;">Team Member</th>
+      <th style="width: 25%;">Role</th>
+      <th style="width: 30%;">Assigned Task</th>
+      <th style="width: 20%;">Target Component</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Hemanth</strong></td>
+      <td>Finance Lead</td>
+      <td>UPI Settings & Bank Details Configuration</td>
+      <td><code>PaymentSettings.jsx</code></td>
+    </tr>
+    <tr>
+      <td><strong>Dhanushree</strong></td>
+      <td>UI/UX Code Lead</td>
+      <td>Public Catalog Layout & Product Grid System</td>
+      <td><code>PublicCatalog.jsx</code></td>
+    </tr>
+    <tr>
+      <td><strong>Dev Anand</strong></td>
+      <td>Tech Lead</td>
+      <td>Voice Input Engine & Express API Routes Setup</td>
+      <td><code>routes/ai.js</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>📋 WEEK 1 DELIVERABLES</h2>
+<ul>
+  <li>UPI payment details form fully functional in seller settings.</li>
+  <li>Public catalog grid rendering responsive product cards.</li>
+  <li>Backend API route accepting voice STT input payloads.</li>
+  <li>15-Minute Sunday Demo & Score Logging completed.</li>
+</ul>
+
+<h2>⭐ 40-POINT EVALUATION RUBRIC</h2>
+<div class="rubric-box">
+  <ul>
+    <li><strong>Task Ownership (10 pts):</strong> Read, tested, and contributed to assigned features.</li>
+    <li><strong>Code Quality & Mobile UX (10 pts):</strong> Clean code, responsive UI, zero console errors.</li>
+    <li><strong>Demo & Understanding (10 pts):</strong> Clear explanation during Sunday demo.</li>
+    <li><strong>Autonomy & Integration (10 pts):</strong> Solved blockers independently without delays.</li>
+  </ul>
+</div>
+
+</body>
+</html>

@@ -1,9 +1,9 @@
 const express = require('express');
-const { PrismaClient } = require('@prisma/client');
+const db = require('../db');
 const authMiddleware = require('../middleware/auth');
+const { logAudit } = require('../lib/audit');
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // All routes require authentication
 router.use(authMiddleware);
@@ -11,9 +11,7 @@ router.use(authMiddleware);
 // GET /api/payment - Get user's payment settings
 router.get('/', async (req, res) => {
   try {
-    const settings = await prisma.paymentSettings.findUnique({
-      where: { userId: req.userId }
-    });
+    const settings = await db.findPaymentByUserId(req.userId);
 
     if (!settings) {
       return res.json({
@@ -24,8 +22,8 @@ router.get('/', async (req, res) => {
     }
 
     res.json({
-      upi: settings.upiData ? JSON.parse(settings.upiData) : [{ id: 1, upiId: '', name: '' }],
-      bank: settings.bankAccount ? JSON.parse(settings.bankAccount) : { accountName: '', accountNumber: '', ifsc: '', bankName: '' },
+      upi: settings.upiData ? (typeof settings.upiData === 'string' ? JSON.parse(settings.upiData) : settings.upiData) : [{ id: 1, upiId: '', name: '' }],
+      bank: settings.bankAccount ? (typeof settings.bankAccount === 'string' ? JSON.parse(settings.bankAccount) : settings.bankAccount) : { accountName: '', accountNumber: '', ifsc: '', bankName: '' },
       qr: settings.qrCodeUrl
     });
   } catch (error) {
@@ -39,26 +37,27 @@ router.put('/', async (req, res) => {
   try {
     const { upi, bank, qr } = req.body;
 
-    const settings = await prisma.paymentSettings.upsert({
-      where: { userId: req.userId },
-      update: {
-        upiData: upi ? JSON.stringify(upi) : null,
-        bankAccount: bank ? JSON.stringify(bank) : null,
-        qrCodeUrl: qr || null
-      },
-      create: {
-        userId: req.userId,
-        upiData: upi ? JSON.stringify(upi) : null,
-        bankAccount: bank ? JSON.stringify(bank) : null,
-        qrCodeUrl: qr || null
-      }
+    const settings = await db.upsertPayment(req.userId, {
+      upiData: upi ? JSON.stringify(upi) : null,
+      bankAccount: bank ? JSON.stringify(bank) : null,
+      qrCodeUrl: qr || null
+    });
+
+    logAudit({
+      userId: req.userId,
+      action: 'PAYMENT_SAVE',
+      entityType: 'PAYMENT',
+      entityId: req.userId,
+      details: { upiCount: Array.isArray(upi) ? upi.length : 0, hasBank: !!bank, hasQr: !!qr },
+      ip: req.headers['x-forwarded-for'] || req.socket?.remoteAddress || null,
+      userAgent: req.headers['user-agent'] || null
     });
 
     res.json({
       message: 'Payment settings saved successfully',
-      upi: settings.upiData ? JSON.parse(settings.upiData) : [],
-      bank: settings.bankAccount ? JSON.parse(settings.bankAccount) : {},
-      qr: settings.qrCodeUrl
+      upi: upi || [],
+      bank: bank || {},
+      qr: qr || null
     });
   } catch (error) {
     console.error('Save payment settings error:', error);

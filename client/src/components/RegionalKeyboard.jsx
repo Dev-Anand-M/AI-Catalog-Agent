@@ -49,18 +49,28 @@ const CATEGORY_LABELS = {
   bn: { vowels: 'স্বরবর্ণ', consonants: 'ব্যঞ্জনবর্ণ', modifiers: 'কার', numbers: 'সংখ্যা', common: 'সাধারণ' }
 };
 
-export function RegionalKeyboard({ language, onCharacter, onClose }) {
+export function RegionalKeyboard({ language, onCharacter, onCharClick, onClose }) {
   const [activeCategory, setActiveCategory] = useState('consonants');
-  
-  // Map language names to codes
-  const langCodeMap = {
-    'Tamil': 'ta', 'Hindi': 'hi', 'Telugu': 'te', 'Kannada': 'kn', 'Bengali': 'bn'
+
+  const handleKeyPress = (char) => {
+    (onCharacter || onCharClick)(char);
   };
-  
-  const langCode = langCodeMap[language] || 'en';
-  const layout = KEYBOARD_LAYOUTS[language];
+
+  // Accept both display names ('Hindi', 'Tamil', ...) and locale codes ('hi-IN', 'ta-IN', ...)
+  const codeToName = {
+    hi: 'Hindi', ta: 'Tamil', te: 'Telugu', kn: 'Kannada', bn: 'Bengali'
+  };
+  const nameToCode = {
+    Tamil: 'ta', Hindi: 'hi', Telugu: 'te', Kannada: 'kn', Bengali: 'bn'
+  };
+
+  // 'hi-IN' -> 'hi', 'hi' -> 'Hindi'
+  const baseCode = String(language || '').split('-')[0].toLowerCase();
+  const langName = KEYBOARD_LAYOUTS[language] ? language : codeToName[baseCode];
+  const langCode = nameToCode[langName] || baseCode;
+  const layout = KEYBOARD_LAYOUTS[langName];
   const labels = CATEGORY_LABELS[langCode] || CATEGORY_LABELS.en;
-  
+
   if (!layout) {
     return null; // No keyboard for English
   }
@@ -73,17 +83,13 @@ export function RegionalKeyboard({ language, onCharacter, onClose }) {
     { id: 'common', label: labels.common }
   ];
 
-  const handleKeyPress = (char) => {
-    onCharacter(char);
-  };
-
   return (
     <div className="bg-white border-2 border-primary-200 rounded-xl shadow-lg p-3 mt-2">
       {/* Header */}
       <div className="flex items-center justify-between mb-3 pb-2 border-b">
         <div className="flex items-center gap-2">
           <Keyboard className="w-5 h-5 text-primary-500" />
-          <span className="font-medium text-gray-700">{language} Keyboard</span>
+          <span className="font-medium text-gray-700">{langName} Keyboard</span>
         </div>
         <button
           onClick={onClose}
@@ -132,7 +138,7 @@ export function RegionalKeyboard({ language, onCharacter, onClose }) {
           Space
         </button>
         <button
-          onClick={() => onCharacter('BACKSPACE')}
+          onClick={() => handleKeyPress('BACKSPACE')}
           className="px-4 py-2 bg-red-50 hover:bg-red-100 rounded-lg text-sm font-medium text-red-600 transition-colors"
         >
           ⌫ Delete

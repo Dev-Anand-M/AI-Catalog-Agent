@@ -32,6 +32,18 @@ async function handler(req, res) {
       imageUrl: imageUrl || null
     });
 
+    // Audit: product created (non-blocking)
+    db.insertAuditLog({
+      userId: req.userId,
+      action: 'PRODUCT_CREATE',
+      entityType: 'PRODUCT',
+      entityId: product?.id || null,
+      details: JSON.stringify({ name: name.trim(), category: category.trim(), price: parseFloat(price) }),
+      ip: req.headers['x-forwarded-for'] || null,
+      userAgent: req.headers['user-agent'] || null,
+      createdAt: new Date().toISOString()
+    }).catch(() => {});
+
     // Auto-sync to Shopify in background and update product with Shopify details
     syncProductToShopify(product)
       .then(async (shopifyProduct) => {

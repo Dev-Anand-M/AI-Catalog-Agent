@@ -1,9 +1,26 @@
 import { useEffect } from 'react';
 import { Mic, MicOff, Volume2, AlertCircle } from 'lucide-react';
 import { useVoiceInput } from '../hooks/useVoiceInput';
+import { useLanguage } from '../context/LanguageContext';
 import { Button, Alert } from './ui';
 
-export function VoiceInput({ language, onTranscript, placeholder }) {
+const LANG_NAMES = {
+  'en-IN': 'English',
+  'hi-IN': 'हिन्दी',
+  'ta-IN': 'தமிழ்',
+  'te-IN': 'తెలుగు',
+  'kn-IN': 'ಕನ್ನಡ',
+  'bn-IN': 'বাংলা',
+  'en': 'English',
+  'hi': 'हिन्दी',
+  'ta': 'தமிழ்',
+  'te': 'తెలుగు',
+  'kn': 'ಕನ್ನಡ',
+  'bn': 'বাংলা'
+};
+
+export function VoiceInput({ language, onTranscript, placeholder, className = '' }) {
+  const { t } = useLanguage();
   const {
     isListening,
     transcript,
@@ -14,6 +31,8 @@ export function VoiceInput({ language, onTranscript, placeholder }) {
     isSupported
   } = useVoiceInput(language);
 
+  const langLabel = LANG_NAMES[language] || language;
+
   useEffect(() => {
     if (transcript && onTranscript) {
       onTranscript(transcript);
@@ -22,13 +41,13 @@ export function VoiceInput({ language, onTranscript, placeholder }) {
 
   if (!isSupported) {
     return (
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <div className="flex items-center gap-2 text-yellow-700">
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
+        <div className="flex items-center justify-center gap-2 text-amber-800">
           <AlertCircle className="w-5 h-5" />
-          <span className="font-medium">Voice input not supported</span>
+          <span className="font-bold text-xs">Voice input not supported in this browser</span>
         </div>
-        <p className="text-sm text-yellow-600 mt-1">
-          Please use Chrome, Edge, or Safari browser for voice input.
+        <p className="text-xs text-amber-700 mt-1">
+          Please use Chrome, Edge, or Safari browser for voice features.
         </p>
       </div>
     );
@@ -37,32 +56,33 @@ export function VoiceInput({ language, onTranscript, placeholder }) {
   return (
     <div className="space-y-4">
       {/* Voice Button */}
-      <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col items-center gap-3">
         <button
           type="button"
           onClick={isListening ? stopListening : startListening}
-          className={`w-24 h-24 rounded-full flex items-center justify-center transition-all transform hover:scale-105 ${
+          className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center transition-all transform hover:scale-105 active:scale-95 ${
             isListening 
-              ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
-              : 'bg-primary-500 hover:bg-primary-600'
-          } text-white shadow-lg`}
+              ? 'bg-rose-600 hover:bg-rose-700 animate-pulse ring-4 ring-rose-200' 
+              : 'bg-emerald-600 hover:bg-emerald-700 shadow-md hover:shadow-lg'
+          } text-white`}
+          aria-label={isListening ? 'Stop listening' : 'Start speaking'}
         >
           {isListening ? (
-            <MicOff className="w-10 h-10" />
+            <MicOff className="w-8 h-8 sm:w-10 sm:h-10" />
           ) : (
-            <Mic className="w-10 h-10" />
+            <Mic className="w-8 h-8 sm:w-10 sm:h-10" />
           )}
         </button>
         
         <div className="text-center">
           {isListening ? (
-            <div className="flex items-center gap-2 text-red-600">
-              <Volume2 className="w-5 h-5 animate-pulse" />
-              <span className="font-medium">Listening in {language}...</span>
+            <div className="flex items-center justify-center gap-2 text-rose-600 font-bold text-xs">
+              <Volume2 className="w-4 h-4 animate-pulse" />
+              <span>{t('listening_text') || 'Listening...'} ({langLabel})</span>
             </div>
           ) : (
-            <p className="text-gray-600">
-              Tap to start speaking in {language}
+            <p className="text-slate-600 text-xs font-semibold">
+              {t('tap_to_start')} <span className="font-bold text-emerald-700">{langLabel}</span>
             </p>
           )}
         </div>
@@ -75,27 +95,27 @@ export function VoiceInput({ language, onTranscript, placeholder }) {
 
       {/* Transcript Display */}
       {transcript && (
-        <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-          <div className="flex justify-between items-start mb-2">
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Your Voice Input
+        <div className={`bg-emerald-50/60 rounded-xl p-3.5 border border-emerald-200 text-left ${className}`}>
+          <div className="flex justify-between items-start mb-1">
+            <span className="text-xs font-bold text-emerald-800 uppercase tracking-wide">
+              {t('product_description_input') || 'Voice Transcript'}
             </span>
             <button
               type="button"
               onClick={resetTranscript}
-              className="text-xs text-primary-600 hover:text-primary-700 font-medium"
+              className="text-xs text-emerald-700 hover:text-emerald-900 font-bold underline"
             >
-              Clear
+              {t('cancel') || 'Clear'}
             </button>
           </div>
-          <p className="text-gray-800 text-lg">{transcript}</p>
+          <p className="text-zinc-900 text-sm font-medium leading-relaxed">{transcript}</p>
         </div>
       )}
 
       {/* Help Text */}
       {!transcript && !isListening && !error && (
-        <p className="text-sm text-gray-500 text-center">
-          {placeholder || `Click the microphone and describe your product in ${language}`}
+        <p className="text-xs text-slate-500 text-center max-w-sm mx-auto">
+          {placeholder || `${t('click_mic_describe')} (${langLabel})`}
         </p>
       )}
     </div>

@@ -1,0 +1,72 @@
+{
+  "users": [
+    {
+      "id": "demo-artisan-1",
+      "name": "Ramesh Kumar (कारीगर)",
+      "email": "demo@store.com",
+      "passwordHash": "$2b$10$G6NXb9ORrDuh47j0wwYO0eu8boGg2hmjiLqzC7RXNNb/ix8oXqgkK"
+    },
+    {
+      "id": "demo-artisan-2",
+      "name": "Lakshmi Weaves (हथकरघा)",
+      "email": "artisan@store.com",
+      "passwordHash": "$2b$10$G6NXb9ORrDuh47j0wwYO0eu8boGg2hmjiLqzC7RXNNb/ix8oXqgkK"
+    }
+  ],
+  "products": [
+    {
+      "id": "prod-1",
+      "userId": "demo-artisan-1",
+      "name": "Terracotta Chai Kulhad (Set of 6)",
+      "description": "Handmade clay tea cups with natural earthy aroma. Eco-friendly and washable. <!--META:{\"confirmationState\":\"seller_confirmed\",\"costBreakdown\":{\"rawMaterials\":50,\"labor\":60,\"packaging\":20,\"marginPercent\":30},\"attributes\":{\"craft\":\"Mitti / Pottery\",\"material\":\"Clay\"},\"tags\":[\"Clay\",\"Chai\",\"Handmade\"],\"media\":[],\"language\":\"en\",\"status\":\"active\"}-->",
+      "price": 170,
+      "category": "Handicrafts",
+      "imageUrl": "https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=600&q=80",
+      "language": "en",
+      "createdAt": "2026-03-01T10:00:00.000Z"
+    },
+    {
+      "id": "prod-2",
+      "userId": "demo-artisan-1",
+      "name": "Pure Khadi Handloom Cotton Kurta",
+      "description": "Comfortable handspun khadi kurta dyed with traditional indigo colors. <!--META:{\"confirmationState\":\"seller_confirmed\",\"costBreakdown\":{\"rawMaterials\":350,\"labor\":250,\"packaging\":40,\"marginPercent\":35},\"attributes\":{\"fabric\":\"100% Khadi\",\"weave\":\"Handloom\"},\"tags\":[\"Khadi\",\"Kurta\",\"Handloom\"],\"media\":[],\"language\":\"en\",\"status\":\"active\"}-->",
+      "price": 860,
+      "category": "Clothing",
+      "imageUrl": "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=600&q=80",
+      "language": "en",
+      "createdAt": "2026-03-02T11:30:00.000Z"
+    },
+    {
+      "id": "prod-3",
+      "userId": "demo-artisan-1",
+      "name": "Hand-Carved Sheesham Wooden Bowl",
+      "description": "Traditional carved wooden bowl polished with organic beeswax for food safety. <!--META:{\"confirmationState\":\"ai_suggested\",\"costBreakdown\":{\"rawMaterials\":180,\"labor\":150,\"packaging\":30,\"marginPercent\":30},\"attributes\":{\"wood\":\"Sheesham\",\"finish\":\"Organic Wax\"},\"tags\":[\"Wood\",\"Carved\",\"Kitchen\"],\"media\":[],\"language\":\"en\",\"status\":\"active\"}-->",
+      "price": 470,
+      "category": "Home & Kitchen",
+      "imageUrl": "https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=600&q=80",
+      "language": "en",
+      "createdAt": "2026-03-03T14:00:00.000Z"
+    }
+  ],
+  "payment": {
+    "demo-artisan-1": {
+      "id": "pay-1",
+      "userId": "demo-artisan-1",
+      "upiData": [
+        {
+          "id": 1,
+          "upiId": "ramesh.artisan@upi",
+          "name": "Ramesh Kumar"
+        }
+      ],
+      "bankAccount": {
+        "accountName": "Ramesh Kumar",
+        "accountNumber": "912345678901",
+        "ifsc": "SBIN0001234",
+        "bankName": "State Bank of India"
+      },
+      "phoneNumber": "+919876543210"
+    }
+  },
+  "accessRequests": []
+}

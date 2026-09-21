@@ -43,3 +43,12 @@ server/uploads/*
 # Docs
 GEMINI_SETUP.md
 PROJECT_REPORT.md
+
+# Private / No-Push Contribution Logs
+*CONTRIBUTIONS*
+*NO_PUSH*
+*my_contribs*
+*.zip
+.freebuff/
+
+

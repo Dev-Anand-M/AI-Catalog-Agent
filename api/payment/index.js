@@ -28,6 +28,19 @@ async function handler(req, res) {
       qrCodeUrl: qr || null,
       whatsappNumber: whatsappNumber || null
     });
+
+    // Audit: payment settings saved (non-blocking)
+    db.insertAuditLog({
+      userId: req.userId,
+      action: 'PAYMENT_SAVE',
+      entityType: 'PAYMENT',
+      entityId: req.userId,
+      details: JSON.stringify({ upiCount: Array.isArray(upi) ? upi.length : 0, hasBank: !!bank, hasQr: !!qr }),
+      ip: req.headers['x-forwarded-for'] || null,
+      userAgent: req.headers['user-agent'] || null,
+      createdAt: new Date().toISOString()
+    }).catch(() => {});
+
     return res.json({ message: 'Payment settings saved successfully', upi, bank, qr, whatsappNumber });
   }
 
