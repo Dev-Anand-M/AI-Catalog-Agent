@@ -29,8 +29,7 @@
     "lint:fix": "npm run lint:fix --workspaces --if-present",
     "format": "npm run format --workspaces --if-present",
     "install:all": "npm install && npm install --workspace=client && npm install --workspace=server",
-    "clean": "rm -rf node_modules client/node_modules server/node_modules client/dist server/dist",
-    "postinstall": "npm run db:generate --workspace=server || true"
+    "clean": "rm -rf node_modules client/node_modules server/node_modules client/dist server/dist"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
