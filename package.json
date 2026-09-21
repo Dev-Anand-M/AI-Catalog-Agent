@@ -30,7 +30,7 @@
     "format": "npm run format --workspaces --if-present",
     "install:all": "npm install && npm install --workspace=client && npm install --workspace=server",
     "clean": "rm -rf node_modules client/node_modules server/node_modules client/dist server/dist",
-    "postinstall": "npm run db:generate --workspace=server"
+    "postinstall": "npm run db:generate --workspace=server || true"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
