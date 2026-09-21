@@ -2,6 +2,7 @@
   "name": "api",
   "type": "module",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",
     "postgres": "^3.4.3"
   }
