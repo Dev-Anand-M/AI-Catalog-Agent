@@ -106,17 +106,40 @@ export default async function handler(req, res) {
       const approveMatch = pathname.match(/^\/admin\/access-requests\/([^/]+)\/approve$/);
       if (approveMatch) {
         req.query.id = approveMatch[1];
-        return handleAdminApprove(req, res);
+        return await handleAdminApprove(req, res);
       }
       const rejectMatch = pathname.match(/^\/admin\/access-requests\/([^/]+)\/reject$/);
       if (rejectMatch) {
         req.query.id = rejectMatch[1];
-        return handleAdminReject(req, res);
+        return await handleAdminReject(req, res);
       }
       if (pathname === '/admin/access-requests') {
-        return handleAdminAccessRequests(req, res);
+        return await handleAdminAccessRequests(req, res);
       }
-      return handleAdmin(req, res);
+
+      const sellerIdMatch = pathname.match(/^\/admin\/sellers\/([^/]+)$/);
+      if (sellerIdMatch) {
+        req.query.resource = 'sellers';
+        req.query.id = sellerIdMatch[1];
+      } else if (pathname === '/admin/sellers') {
+        req.query.resource = 'sellers';
+      } else if (pathname === '/admin/stats') {
+        req.query.resource = 'stats';
+      } else if (pathname === '/admin/products') {
+        req.query.resource = 'products';
+      } else if (pathname === '/admin/audit') {
+        req.query.resource = 'audit';
+      } else if (pathname === '/admin/ai-providers/custom-model') {
+        req.query.resource = 'ai-providers';
+        req.query.action = 'custom-model';
+      } else if (pathname === '/admin/ai-providers') {
+        req.query.resource = 'ai-providers';
+      } else if (pathname === '/admin/ai-test') {
+        req.query.resource = 'ai-providers';
+        req.query.action = 'test';
+      }
+
+      return await handleAdmin(req, res);
     }
 
     return res.status(404).json({ error: `Not found: ${pathname}` });
