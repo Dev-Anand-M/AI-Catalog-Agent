@@ -298,7 +298,8 @@ async function handler(req, res) {
         const result = await generateWithFallback({
           systemPrompt: 'You are a connection test. Reply with exactly: OK',
           userPrompt: 'Reply with exactly: OK',
-          maxTokens: 10
+          maxTokens: 10,
+          auditContext: 'admin-connectivity-test'
         });
         return res.json({
           ok: !!result.text,

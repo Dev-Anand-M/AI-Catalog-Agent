@@ -24,7 +24,12 @@ import {
   Plus,
   UserPlus,
   Copy,
-  Check
+  Check,
+  MessageSquare,
+  Phone,
+  RotateCcw,
+  FileText,
+  KeyRound
 } from 'lucide-react';
 import { Container, Alert } from '../components/ui';
 import { useLanguage } from '../context/LanguageContext';
@@ -43,6 +48,8 @@ const PROVIDER_BADGE = {
 
 const STATUS_BADGE = {
   pending: 'bg-amber-50 text-amber-700 border-amber-200',
+  under_review: 'bg-blue-50 text-blue-700 border-blue-200',
+  needs_info: 'bg-purple-50 text-purple-700 border-purple-200',
   approved: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   rejected: 'bg-zinc-100 text-zinc-500 border-zinc-200'
 };
@@ -90,6 +97,9 @@ export function Admin() {
   const [rejectNote, setRejectNote] = useState('');
   const [provisioned, setProvisioned] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [editingNoteId, setEditingNoteId] = useState(null);
+  const [noteText, setNoteText] = useState('');
+  const [updatingStatusId, setUpdatingStatusId] = useState(null);
 
   const loadAll = useCallback(async () => {
     setLoading(true);
@@ -246,11 +256,11 @@ export function Admin() {
     setError('');
     try {
       const res = await adminApi.approveAccessRequest(request.id);
-      setProvisioned({ request, ...res.data });
-      setToast(res.data?.message || 'Store account created');
+      setProvisioned({ request, isPasswordReset: request.source === 'password_reset', ...res.data });
+      setToast(res.data?.message || (request.source === 'password_reset' ? 'Password reset approved' : 'Store account created'));
       await loadAll();
     } catch (err) {
-      setError(err.response?.data?.error || 'Could not create the store account');
+      setError(err.response?.data?.error || 'Could not process the request');
     } finally {
       setApprovingId(null);
     }
@@ -267,6 +277,34 @@ export function Admin() {
       await loadAll();
     } catch (err) {
       setError(err.response?.data?.error || 'Could not decline the request');
+    }
+  };
+
+  const handleUpdateStatus = async (request, newStatus) => {
+    setUpdatingStatusId(request.id);
+    setError('');
+    try {
+      await adminApi.updateAccessRequest(request.id, { status: newStatus });
+      setToast(`Request status updated to ${newStatus.replace('_', ' ')}`);
+      setTimeout(() => setToast(''), 2500);
+      await loadAll();
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to update request');
+    } finally {
+      setUpdatingStatusId(null);
+    }
+  };
+
+  const handleSaveNote = async (requestId) => {
+    try {
+      await adminApi.updateAccessRequest(requestId, { reviewNote: noteText });
+      setEditingNoteId(null);
+      setNoteText('');
+      setToast('Review note saved');
+      setTimeout(() => setToast(''), 2500);
+      await loadAll();
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to save review note');
     }
   };
 
@@ -554,10 +592,14 @@ export function Admin() {
                       </span>
                       <div className="flex-1 min-w-0">
                         <h3 className="text-sm font-bold text-zinc-950">
-                          {t('admin_creds_title', 'Store account created')}
+                          {provisioned.isPasswordReset || provisioned.request?.source === 'password_reset'
+                            ? 'Password reset approved — temporary credentials ready'
+                            : t('admin_creds_title', 'Store account created')}
                         </h3>
                         <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
-                          {t('admin_creds_once', 'Share these details with the merchant now — the temporary password is never shown again, and they will be asked to choose their own on first sign-in.')}
+                          {provisioned.isPasswordReset || provisioned.request?.source === 'password_reset'
+                            ? 'Share these temporary credentials with the merchant now via WhatsApp or Email. They will be required to choose a new password on sign-in.'
+                            : t('admin_creds_once', 'Share these details with the merchant now — the temporary password is never shown again, and they will be asked to choose their own on first sign-in.')}
                         </p>
                         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3">
@@ -585,7 +627,9 @@ export function Admin() {
                           {provisioned.user?.phone && (
                             <a
                               href={`https://wa.me/${(provisioned.user.phone).replace(/\D/g, '')}?text=${encodeURIComponent(
-                                `Namaste ${provisioned.user?.name || ''}, your CatalogAI store is ready.\nLogin: ${provisioned.credentials?.identifier}\nTemporary password: ${provisioned.credentials?.temporaryPassword}\nPlease change the password after signing in.`
+                                provisioned.isPasswordReset || provisioned.request?.source === 'password_reset'
+                                  ? `Namaste ${provisioned.user?.name || ''}, your CatalogAI temporary password has been reset.\nLogin: ${provisioned.credentials?.identifier}\nTemporary password: ${provisioned.credentials?.temporaryPassword}\nPlease log in at https://client-nine-mocha-57.vercel.app/login and set your private password.`
+                                  : `Namaste ${provisioned.user?.name || ''}, your CatalogAI store is ready.\nLogin: ${provisioned.credentials?.identifier}\nTemporary password: ${provisioned.credentials?.temporaryPassword}\nPlease change the password after signing in.`
                               )}`}
                               target="_blank"
                               rel="noreferrer"
@@ -597,8 +641,14 @@ export function Admin() {
                           )}
                           {provisioned.user?.email && (
                             <a
-                              href={`mailto:${provisioned.user.email}?subject=${encodeURIComponent('Your Store Workspace is Ready')}&body=${encodeURIComponent(
-                                `Hello ${provisioned.user?.name || ''},\n\nYour store workspace is ready.\nLogin: ${provisioned.credentials?.identifier}\nTemporary password: ${provisioned.credentials?.temporaryPassword}\n\nPlease sign in and set your new password.`
+                              href={`mailto:${provisioned.user.email}?subject=${encodeURIComponent(
+                                provisioned.isPasswordReset || provisioned.request?.source === 'password_reset'
+                                  ? 'Your CatalogAI Password Reset Credentials'
+                                  : 'Your Store Workspace is Ready'
+                              )}&body=${encodeURIComponent(
+                                provisioned.isPasswordReset || provisioned.request?.source === 'password_reset'
+                                  ? `Hello ${provisioned.user?.name || ''},\n\nYour password reset request has been approved.\nLogin: ${provisioned.credentials?.identifier}\nTemporary password: ${provisioned.credentials?.temporaryPassword}\n\nPlease sign in and set your new password immediately.`
+                                  : `Hello ${provisioned.user?.name || ''},\n\nYour store workspace is ready.\nLogin: ${provisioned.credentials?.identifier}\nTemporary password: ${provisioned.credentials?.temporaryPassword}\n\nPlease sign in and set your new password.`
                               )}`}
                               className="btn-secondary text-xs py-2 px-3.5 flex items-center gap-1.5"
                             >
@@ -682,8 +732,14 @@ export function Admin() {
                                   <p className="font-semibold text-zinc-900 text-sm">
                                     {r.businessName || r.name}
                                   </p>
+                                  {r.source === 'password_reset' && (
+                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200 flex items-center gap-1">
+                                      <KeyRound className="w-3 h-3 text-purple-600" />
+                                      Password Reset
+                                    </span>
+                                  )}
                                   <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${STATUS_BADGE[r.status] || STATUS_BADGE.pending}`}>
-                                    {r.status}
+                                    {r.status?.replace('_', ' ')}
                                   </span>
                                   {r.category && (
                                     <span className="text-[11px] font-medium text-zinc-500">{r.category}</span>
@@ -703,40 +759,155 @@ export function Admin() {
                                   <p className="text-xs text-zinc-600 mt-2 italic">“{r.message}”</p>
                                 )}
                                 {r.reviewNote && (
-                                  <p className="text-[11px] text-zinc-500 mt-1">
-                                    {t('admin_review_note', 'Note')}: {r.reviewNote}
-                                  </p>
+                                  <div className="mt-2 text-[11px] text-zinc-600 bg-amber-50/70 border border-amber-200/80 rounded-md px-2.5 py-1.5 inline-block">
+                                    <span className="font-semibold text-amber-900">{t('admin_review_note', 'Review Note')}:</span> {r.reviewNote}
+                                  </div>
+                                )}
+
+                                {/* Quick Contact & Note Toolbar */}
+                                <div className="mt-3 flex flex-wrap items-center gap-2">
+                                  {r.phone && (
+                                    <a
+                                      href={`https://wa.me/${r.phone.replace(/\D/g, '')}?text=${encodeURIComponent(
+                                        `Namaste ${r.name}, regarding your store "${r.businessName || 'CatalogAI'}" onboarding:`
+                                      )}`}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-colors"
+                                    >
+                                      <MessageSquare className="w-3 h-3 text-emerald-600" />
+                                      <span>WhatsApp</span>
+                                    </a>
+                                  )}
+                                  {r.email && (
+                                    <a
+                                      href={`mailto:${r.email}?subject=${encodeURIComponent(`CatalogAI Store Onboarding - ${r.businessName || r.name}`)}`}
+                                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-colors"
+                                    >
+                                      <Mail className="w-3 h-3 text-blue-600" />
+                                      <span>Email</span>
+                                    </a>
+                                  )}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setEditingNoteId(editingNoteId === r.id ? null : r.id);
+                                      setNoteText(r.reviewNote || '');
+                                    }}
+                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium bg-zinc-100 text-zinc-700 hover:bg-zinc-200 transition-colors"
+                                  >
+                                    <FileText className="w-3 h-3 text-zinc-500" />
+                                    <span>{r.reviewNote ? 'Edit Note' : 'Add Note'}</span>
+                                  </button>
+                                </div>
+
+                                {/* Inline Note Editor */}
+                                {editingNoteId === r.id && (
+                                  <div className="mt-2.5 p-3 bg-zinc-50 border border-zinc-200 rounded-lg space-y-2 max-w-lg">
+                                    <textarea
+                                      value={noteText}
+                                      onChange={(e) => setNoteText(e.target.value)}
+                                      placeholder="Add review notes, follow-up remarks, or verification details..."
+                                      className="input text-xs resize-y"
+                                      rows={2}
+                                      autoFocus
+                                    />
+                                    <div className="flex items-center gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleSaveNote(r.id)}
+                                        className="btn-primary text-xs py-1.5 px-3"
+                                      >
+                                        Save Note
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => { setEditingNoteId(null); setNoteText(''); }}
+                                        className="btn-secondary text-xs py-1.5 px-3"
+                                      >
+                                        Cancel
+                                      </button>
+                                    </div>
+                                  </div>
                                 )}
                               </div>
 
-                              <div className="flex items-center gap-2 shrink-0">
-                                {r.status === 'pending' ? (
+                              <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+                                {r.status === 'pending' || r.status === 'under_review' || r.status === 'needs_info' ? (
                                   <>
                                     <button
                                       type="button"
                                       onClick={() => approveRequest(r)}
                                       disabled={approvingId === r.id}
-                                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors disabled:opacity-60"
+                                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors disabled:opacity-60"
                                     >
                                       {approvingId === r.id ? (
                                         <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                                      ) : r.source === 'password_reset' ? (
+                                        <KeyRound className="w-3.5 h-3.5" />
                                       ) : (
                                         <UserPlus className="w-3.5 h-3.5" />
                                       )}
-                                      {t('admin_approve', 'Approve & create store')}
+                                      {r.source === 'password_reset' ? 'Reset & Issue Pass' : (t('admin_approve', 'Approve store'))}
                                     </button>
+
+                                    {r.status === 'pending' && (
+                                      <button
+                                        type="button"
+                                        disabled={updatingStatusId === r.id}
+                                        onClick={() => handleUpdateStatus(r, 'under_review')}
+                                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors"
+                                      >
+                                        Reviewing
+                                      </button>
+                                    )}
+
+                                    {r.status !== 'needs_info' ? (
+                                      <button
+                                        type="button"
+                                        disabled={updatingStatusId === r.id}
+                                        onClick={() => handleUpdateStatus(r, 'needs_info')}
+                                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 transition-colors"
+                                      >
+                                        Needs Info
+                                      </button>
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        disabled={updatingStatusId === r.id}
+                                        onClick={() => handleUpdateStatus(r, 'under_review')}
+                                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors"
+                                      >
+                                        In Review
+                                      </button>
+                                    )}
+
                                     <button
                                       type="button"
                                       onClick={() => { setRejectTarget(r); setRejectNote(''); }}
-                                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-zinc-600 bg-zinc-100 hover:bg-zinc-200 transition-colors"
+                                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors"
                                     >
                                       {t('admin_decline', 'Decline')}
                                     </button>
                                   </>
+                                ) : r.status === 'rejected' ? (
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-[11px] text-zinc-400">Declined</span>
+                                    <button
+                                      type="button"
+                                      disabled={updatingStatusId === r.id}
+                                      onClick={() => handleUpdateStatus(r, 'pending')}
+                                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-zinc-700 bg-zinc-100 hover:bg-zinc-200 transition-colors"
+                                    >
+                                      <RotateCcw className="w-3 h-3 text-zinc-500" />
+                                      <span>Reopen</span>
+                                    </button>
+                                  </div>
                                 ) : (
-                                  <span className="text-[11px] text-zinc-400 text-right">
-                                    {r.reviewedBy ? `${t('admin_reviewed_by', 'Reviewed by')} ${r.reviewedBy}` : ''}
-                                  </span>
+                                  <div className="flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg">
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                    <span>{r.source === 'password_reset' ? 'Password Reset Issued' : 'Store Created'}</span>
+                                  </div>
                                 )}
                               </div>
                             </div>
@@ -985,7 +1156,7 @@ export function Admin() {
                   <div className={`rounded-xl border p-4 text-xs space-y-2 ${testResult.ok ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'}`}>
                     <p className="font-bold flex items-center gap-1.5">
                       {testResult.ok
-                        ? <><CheckCircle2 className="w-4 h-4 text-emerald-600" /> {t('admin_test_ok') || 'Chain OK'} — {testResult.provider} ({testResult.model})</>
+                        ? <><CheckCircle2 className="w-4 h-4 text-emerald-600" /> {t('admin_test_ok') || 'Chain OK'} — {testResult.provider} ({testResult.model}){testResult.reply ? ` · Response: "${testResult.reply.trim()}"` : ''}</>
                         : <><XCircle className="w-4 h-4 text-rose-600" /> {t('admin_test_fail') || 'All providers failed'}</>}
                     </p>
                     <ul className="space-y-1 text-zinc-600">

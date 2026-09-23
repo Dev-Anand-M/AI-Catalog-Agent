@@ -1,4 +1,5 @@
 const express = require('express');
+const bcrypt = require('bcryptjs');
 const db = require('../db');
 const { requireAdmin, isAdminUser } = require('../middleware/admin');
 const { logAudit, getAuditLogs, getAllAuditLogs } = require('../lib/audit');
@@ -171,11 +172,78 @@ router.get('/access-requests', requireAdmin, async (req, res) => {
   }
 });
 
+// PATCH /api/admin/access-requests — update review note or status
+router.patch('/access-requests', requireAdmin, async (req, res) => {
+  try {
+    const { id, status, reviewNote } = req.body || {};
+    if (!id) return res.status(400).json({ error: 'Request id is required' });
+
+    const updateData = {};
+    if (status) updateData.status = status;
+    if (reviewNote !== undefined) updateData.reviewNote = reviewNote;
+    updateData.reviewedAt = new Date().toISOString();
+    updateData.reviewedBy = req.userEmail || String(req.userId);
+
+    const updated = await db.updateAccessRequest(id, updateData);
+    res.json({ ok: true, request: updated });
+  } catch (error) {
+    console.error('Admin update access-request error:', error);
+    res.status(500).json({ error: 'Failed to update access request' });
+  }
+});
+
 // POST /api/admin/access-requests/:id/approve — provision the merchant's account
 router.post('/access-requests/:id/approve', requireAdmin, async (req, res) => {
   try {
     const request = await db.findAccessRequestById(req.params.id);
     if (!request) return res.status(404).json({ error: 'Access request not found' });
+
+    // Handle password reset approval
+    if (request.source === 'password_reset') {
+      const existingUser = (request.provisionedUserId ? await db.findUserById(request.provisionedUserId) : null)
+        || (request.email ? await db.findUserByEmail(request.email) : null)
+        || (request.phone ? await db.findUserByPhone(request.phone) : null);
+
+      if (!existingUser) {
+        return res.status(404).json({ error: 'Matching user account for password reset was not found' });
+      }
+
+      const temporaryPassword = 'Seller' + Math.floor(1000 + Math.random() * 9000);
+      const passwordHash = await bcrypt.hash(temporaryPassword, 10);
+
+      await db.updateUser(existingUser.id, {
+        passwordHash,
+        mustChangePassword: true
+      });
+
+      await db.updateAccessRequest(request.id, {
+        status: 'approved',
+        reviewedBy: req.userEmail || String(req.userId),
+        reviewedAt: new Date().toISOString()
+      });
+
+      await logAudit({
+        userId: req.userId,
+        action: 'PASSWORD_RESET_APPROVED',
+        entityType: 'USER',
+        entityId: existingUser.id,
+        details: {
+          what: `Admin ${req.userEmail || req.userId} approved password reset for "${existingUser.name}" (${existingUser.email || existingUser.phone})`,
+          when: new Date().toISOString()
+        }
+      });
+
+      return res.status(200).json({
+        ok: true,
+        user: { id: existingUser.id, name: existingUser.name, email: existingUser.email, phone: existingUser.phone, role: existingUser.role },
+        credentials: {
+          identifier: existingUser.email || existingUser.phone,
+          temporaryPassword,
+          mustChangePassword: true
+        },
+        message: `Temporary password generated for ${existingUser.name}. Share it with them via WhatsApp or Email.`
+      });
+    }
 
     const { user, temporaryPassword } = await provisionAccountFromRequest(request, req.body || {});
 

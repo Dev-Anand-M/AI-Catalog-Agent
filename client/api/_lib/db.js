@@ -14,24 +14,26 @@ export function getDb() {
   return sqlInstance;
 }
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+const getSupabaseUrl = () => process.env.SUPABASE_URL || '';
+const getSupabaseKey = () => process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || '';
 
 const headers = () => ({
   'Content-Type': 'application/json',
-  'apikey': SUPABASE_KEY,
-  'Authorization': `Bearer ${SUPABASE_KEY}`,
+  'apikey': getSupabaseKey(),
+  'Authorization': `Bearer ${getSupabaseKey()}`,
   'Prefer': 'return=representation'
 });
 
-const q = (table) => `${SUPABASE_URL}/rest/v1/${table}`;
+const q = (table) => `${getSupabaseUrl()}/rest/v1/${table}`;
 
 /**
  * A Supabase call that throws with the response body attached. Silent failures here
  * are what make "the database is unreachable" look like "the feature is broken".
  */
 async function request(label, url, init = {}) {
-  if (!SUPABASE_URL || !SUPABASE_KEY) {
+  const urlBase = getSupabaseUrl();
+  const key = getSupabaseKey();
+  if (!urlBase || !key) {
     const error = new Error('SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY are not configured');
     error.status = 503;
     throw error;
@@ -294,7 +296,8 @@ export const db = {
         category: data.category || null,
         message: data.message || null,
         source: data.source || 'website',
-        status: 'pending',
+        status: data.status || 'pending',
+        provisionedUserId: data.provisionedUserId || null,
         createdAt: new Date().toISOString()
       })
     });

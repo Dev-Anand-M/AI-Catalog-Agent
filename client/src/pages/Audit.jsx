@@ -23,7 +23,8 @@ import {
   Cpu,
   Layers,
   CheckCircle2,
-  Code
+  Code,
+  Sparkles
 } from 'lucide-react';
 import { Container, Alert } from '../components/ui';
 import { useLanguage } from '../context/LanguageContext';
@@ -41,6 +42,7 @@ const ACTION_META = {
   LANGUAGE_CHANGE: { icon: Globe,       color: 'bg-cyan-50 text-cyan-700 border-cyan-200',          key: 'audit_language_changed', tag: 'Language Switch' },
   EXPORT_CSV:      { icon: Download,    color: 'bg-indigo-50 text-indigo-700 border-indigo-200',    key: 'audit_export_csv',      tag: 'Catalog Export' },
   SHOPIFY_SYNC:    { icon: RefreshCw,   color: 'bg-emerald-100 text-emerald-800 border-emerald-300', key: 'audit_shopify_sync',  tag: 'Shopify Sync' },
+  AI_RUN: { icon: Sparkles, color: 'bg-emerald-50 text-emerald-700 border-emerald-200', key: null, tag: 'AI Call' },
   AI_PROVIDER_FALLBACK: { icon: AlertTriangle, color: 'bg-amber-50 text-amber-700 border-amber-200', key: null,                   tag: 'AI Fallback' },
   AI_CHAIN_FAILED: { icon: XCircle, color: 'bg-rose-50 text-rose-700 border-rose-200',             key: null,                   tag: 'AI Chain Outage' },
   ADMIN_AI_CONFIG_UPDATE: { icon: Cpu, color: 'bg-blue-50 text-blue-700 border-blue-200',         key: null,                   tag: 'AI Agent Config' },
@@ -62,7 +64,7 @@ const CATEGORIES = [
   { id: 'AUTH', labelKey: 'audit_cat_auth', fallback: 'Auth & Access', actions: ['LOGIN', 'SIGNUP', 'PASSWORD_CHANGE', 'PHONE_LINK'] },
   { id: 'ONBOARDING', labelKey: 'audit_cat_onboarding', fallback: 'Onboarding', actions: ['ACCESS_REQUEST_SUBMIT', 'ACCESS_REQUEST_APPROVE', 'ACCESS_REQUEST_REJECT'] },
   { id: 'INTEGRATIONS', labelKey: 'audit_cat_integrations', fallback: 'Shopify & Channels', actions: ['SHOPIFY_SYNC', 'EXPORT_CSV', 'PAYMENT_SAVE', 'LANGUAGE_CHANGE'] },
-  { id: 'AI', labelKey: 'audit_cat_ai', fallback: 'AI & System', actions: ['AI_PROVIDER_FALLBACK', 'AI_CHAIN_FAILED', 'ADMIN_AI_CONFIG_UPDATE', 'ADMIN_DELETE_SELLER'] }
+  { id: 'AI', labelKey: 'audit_cat_ai', fallback: 'AI & System', actions: ['AI_RUN', 'AI_PROVIDER_FALLBACK', 'AI_CHAIN_FAILED', 'ADMIN_AI_CONFIG_UPDATE', 'ADMIN_DELETE_SELLER'] }
 ];
 
 function formatPreciseTime(iso) {

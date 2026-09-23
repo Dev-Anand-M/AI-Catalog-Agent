@@ -50,11 +50,14 @@ export default async function handler(req, res) {
       else if (pathname === '/auth/signup') req.query.action = 'signup';
       else if (pathname === '/auth/me') req.query.action = 'me';
       else if (pathname === '/auth/change-password') req.query.action = 'change-password';
+      else if (pathname === '/auth/forgot-password') req.query.action = 'forgot-password';
       return handleAuth(req, res);
     }
 
     // AI
     if (pathname === '/ai' || pathname.startsWith('/ai/')) {
+      const sub = pathname.replace(/^\/ai\/?/, '');
+      if (sub && !req.query.action) req.query.action = sub;
       return handleAi(req, res);
     }
 
@@ -134,7 +137,7 @@ export default async function handler(req, res) {
         req.query.action = 'custom-model';
       } else if (pathname === '/admin/ai-providers') {
         req.query.resource = 'ai-providers';
-      } else if (pathname === '/admin/ai-test') {
+      } else if (pathname === '/admin/ai-test' || pathname === '/admin/ai/test' || pathname === '/admin/ai-providers/test') {
         req.query.resource = 'ai-providers';
         req.query.action = 'test';
       }

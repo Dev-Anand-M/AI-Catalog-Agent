@@ -3,17 +3,19 @@ import { Mic, MicOff, Sparkles, X } from 'lucide-react';
 import { useVoiceCommands } from '../hooks/useVoiceCommands';
 import { useAssistantActions } from '../hooks/useAssistantActions';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { CentralAssistantModal } from './CentralAssistantModal';
 import { ImageStudioModal } from './ImageStudioModal';
 import { PricingCalculatorModal } from './PricingCalculatorModal';
 import { productsApi } from '../api/client';
 
 /**
- * The floating voice/AI dock. It is the only assistant available on pages that
- * do not mount their own (everything except the dashboard), so it owns a real
- * action handler — "Confirm & apply" used to have nothing behind it here.
+ * The floating voice/AI dock. Only shown to logged-in users (demo account, sellers, admin).
  */
 export function VoiceCommandButton() {
+  const { user } = useAuth();
+  if (!user) return null;
+
   const {
     isListening,
     lastCommand,

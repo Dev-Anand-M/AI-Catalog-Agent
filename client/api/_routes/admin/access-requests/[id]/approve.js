@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import { db } from '../../../_lib/db.js';
 import { requireAdmin } from '../../../_lib/adminGuard.js';
 import { provisionAccountFromRequest } from '../../../_lib/provisioning.js';
@@ -5,7 +6,8 @@ import { provisionAccountFromRequest } from '../../../_lib/provisioning.js';
 /**
  * POST /api/admin/access-requests/:id/approve
  *
- * Approving is what actually creates the merchant's store account.
+ * Approving creates a merchant store account OR approves a password reset
+ * request by issuing temporary credentials for the merchant.
  */
 async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -16,6 +18,55 @@ async function handler(req, res) {
     const id = req.query.id;
     const request = await db.findAccessRequestById(id);
     if (!request) return res.status(404).json({ error: 'Access request not found' });
+
+    // Handle password reset request
+    if (request.source === 'password_reset') {
+      const existingUser = (request.provisionedUserId ? await db.findUserById(request.provisionedUserId) : null)
+        || (request.email ? await db.findUserByEmail(request.email) : null)
+        || (request.phone ? await db.findUserByPhone(request.phone) : null);
+
+      if (!existingUser) {
+        return res.status(404).json({ error: 'Matching user account for password reset was not found' });
+      }
+
+      // Generate a clean memorable temporary password: e.g. Seller + 4 digits
+      const temporaryPassword = 'Seller' + Math.floor(1000 + Math.random() * 9000);
+      const passwordHash = await bcrypt.hash(temporaryPassword, 10);
+
+      await db.updateUser(existingUser.id, {
+        passwordHash,
+        mustChangePassword: true
+      });
+
+      await db.updateAccessRequest(id, {
+        status: 'approved',
+        reviewedBy: req.userEmail || String(req.userId),
+        reviewedAt: new Date().toISOString()
+      });
+
+      db.insertAuditLog({
+        userId: req.userId,
+        action: 'PASSWORD_RESET_APPROVED',
+        entityType: 'USER',
+        entityId: existingUser.id,
+        details: JSON.stringify({
+          what: `Admin ${req.userEmail || req.userId} approved password reset for "${existingUser.name}" (${existingUser.email || existingUser.phone})`,
+          when: new Date().toISOString()
+        }),
+        createdAt: new Date().toISOString()
+      }).catch(() => {});
+
+      return res.status(200).json({
+        ok: true,
+        user: { id: existingUser.id, name: existingUser.name, email: existingUser.email, phone: existingUser.phone, role: existingUser.role },
+        credentials: {
+          identifier: existingUser.email || existingUser.phone,
+          temporaryPassword,
+          mustChangePassword: true
+        },
+        message: `Temporary password generated for ${existingUser.name}. Share it with them via WhatsApp or Email.`
+      });
+    }
 
     const { user, temporaryPassword } = await provisionAccountFromRequest(request, req.body || {});
 

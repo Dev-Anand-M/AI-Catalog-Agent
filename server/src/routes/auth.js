@@ -268,6 +268,62 @@ router.post('/change-password', async (req, res) => {
   }
 });
 
+// POST /api/auth/forgot-password
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { identifier } = req.body || {};
+    if (!identifier) {
+      return res.status(400).json({ error: describeIdentifier() });
+    }
+
+    const normalized = normalizeIdentifier(identifier);
+    if (!normalized) {
+      return res.status(400).json({ error: describeIdentifier() });
+    }
+
+    const user = await db.findUserByIdentifier(identifier);
+    if (!user) {
+      return res.status(404).json({
+        error: 'No account found matching that email or mobile number. Please check for typos or request onboarding access.'
+      });
+    }
+
+    if (user.isActive === false || (user.status && user.status !== 'active')) {
+      return res.status(403).json({
+        error: 'This store account is currently deactivated. Please contact platform administration.'
+      });
+    }
+
+    const tempPassword = 'Seller1234';
+    const passwordHash = await bcrypt.hash(tempPassword, SALT_ROUNDS);
+
+    await db.updateUser(user.id, {
+      passwordHash,
+      mustChangePassword: true
+    });
+
+    logAudit({
+      userId: user.id,
+      action: 'PASSWORD_RESET',
+      entityType: 'USER',
+      entityId: user.id,
+      details: { what: `Password reset issued for ${maskIdentifier(identifier)}` },
+      ip: req.headers['x-forwarded-for'] || null,
+      userAgent: req.headers['user-agent'] || null
+    }).catch(() => {});
+
+    return res.json({
+      ok: true,
+      message: 'Temporary password set. Please sign in now with this password — you will be prompted to create your new personal password immediately.',
+      temporaryPassword: tempPassword,
+      identifier: user.email || user.phone
+    });
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    return res.status(500).json({ error: 'Failed to reset password. Please try again later.' });
+  }
+});
+
 // GET /api/auth/me - Get current user (protected)
 router.get('/me', async (req, res) => {
   try {
@@ -391,6 +447,86 @@ router.put('/me', async (req, res) => {
   }
 });
 
+// POST /api/auth/forgot-password — submit password reset request to admin
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const rawIdentifier = req.body?.identifier || req.body?.email || req.body?.phone;
+    const sellerNote = String(req.body?.note || req.body?.message || '').trim().slice(0, 300);
+
+    if (!rawIdentifier) {
+      return res.status(400).json({ error: describeIdentifier() });
+    }
+
+    const normalized = normalizeIdentifier(rawIdentifier);
+    if (!normalized) {
+      return res.status(400).json({ error: describeIdentifier() });
+    }
+
+    const user = await db.findUserByIdentifier(rawIdentifier);
+    if (!user) {
+      return res.status(404).json({
+        error: 'No account found matching that email or mobile number. Please check for typos or request onboarding access.'
+      });
+    }
+
+    if (user.isActive === false || (user.status && user.status !== 'active')) {
+      return res.status(403).json({
+        error: 'This store account is currently deactivated. Please contact platform administration.'
+      });
+    }
+
+    // Check if a pending reset already exists
+    const pending = await db.findAccessRequests ? await db.findAccessRequests('pending') : [];
+    const existing = pending.find(r => 
+      r.source === 'password_reset' && 
+      (r.provisionedUserId === user.id || (user.email && r.email === user.email))
+    );
+
+    if (existing) {
+      return res.status(200).json({
+        ok: true,
+        pending: true,
+        message: 'A password reset request for your account is already pending review with the administrator. They will share your temporary password soon.'
+      });
+    }
+
+    const requestRecord = await db.createAccessRequest({
+      name: user.name,
+      businessName: `${user.name} (Password Reset)`,
+      email: user.email || null,
+      phone: user.phone || null,
+      message: sellerNote ? `Password reset requested: "${sellerNote}"` : 'Seller requested password reset from login page.',
+      source: 'password_reset',
+      status: 'pending',
+      provisionedUserId: user.id
+    });
+
+    logAudit({
+      userId: user.id,
+      action: 'PASSWORD_RESET_REQUESTED',
+      entityType: 'ACCESS_REQUEST',
+      entityId: requestRecord?.id || user.id,
+      details: {
+        what: `Password reset request submitted for ${maskIdentifier(rawIdentifier)}`,
+        note: sellerNote || null,
+        when: new Date().toISOString()
+      },
+      ip: req.headers['x-forwarded-for'] || req.socket?.remoteAddress || null,
+      userAgent: req.headers['user-agent'] || null
+    });
+
+    res.status(201).json({
+      ok: true,
+      submitted: true,
+      message: 'Your password reset request has been sent to the store administrator. Once approved, the admin will share your temporary access credentials with you.',
+      identifier: user.email || user.phone
+    });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ error: 'Failed to submit password reset request. Please try again or contact support.' });
+  }
+});
+
 // Root handlers for ?action= query parameter support
 router.post('/', (req, res) => {
   const action = req.query.action;
@@ -400,6 +536,10 @@ router.post('/', (req, res) => {
   }
   if (action === 'login') {
     req.url = '/login';
+    return router(req, res);
+  }
+  if (action === 'forgot-password') {
+    req.url = '/forgot-password';
     return router(req, res);
   }
   res.status(404).json({ error: 'Action not supported' });

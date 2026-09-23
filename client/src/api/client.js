@@ -34,6 +34,8 @@ api.interceptors.response.use(
       // A wrong current password answers 401; that must surface in the form instead
       // of reloading the whole app back to the login screen.
       || url.includes('action=change-password')
+      || url.includes('action=forgot-password')
+      || url.includes('/auth/forgot-password')
       // Access requests are submitted anonymously — a 401 there must never bounce
       // a visitor to /login and throw away the form they just filled in.
       || url.includes('/access-requests');
@@ -59,7 +61,8 @@ export const authApi = {
   updateLanguage: (language) => api.put('/auth?action=me', { language }),
   // Linking a mobile number lets a merchant sign in with either credential.
   linkPhone: (phone) => api.put('/auth?action=me', { phone }),
-  changePassword: (data) => api.post('/auth?action=change-password', data)
+  changePassword: (data) => api.post('/auth?action=change-password', data),
+  forgotPassword: (data) => api.post('/auth?action=forgot-password', data)
 };
 
 // Public onboarding. Self-serve sign-up is intentionally gone: this only records a
@@ -113,6 +116,7 @@ export const adminApi = {
   addCustomModel: (data) => api.post('/admin/ai-providers/custom-model', data),
   testAi: () => api.post('/admin/ai-test'),
   accessRequests: (status = 'all') => api.get(`/admin/access-requests?status=${status}`),
+  updateAccessRequest: (id, data) => api.patch('/admin/access-requests', { id, ...data }),
   approveAccessRequest: (id, data = {}) => api.post(`/admin/access-requests/${id}/approve`, data),
   rejectAccessRequest: (id, reason = '') => api.post(`/admin/access-requests/${id}/reject`, { reason })
 };

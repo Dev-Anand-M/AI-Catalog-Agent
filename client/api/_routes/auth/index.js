@@ -2,6 +2,7 @@ import login from './login.js';
 import signup from './signup.js';
 import me from './me.js';
 import changePassword from './change-password.js';
+import forgotPassword from './forgot-password.js';
 
 /**
  * /api/auth?action=...
@@ -22,6 +23,8 @@ export default async function handler(req, res) {
       return me(req, res);
     case 'change-password':
       return changePassword(req, res);
+    case 'forgot-password':
+      return forgotPassword(req, res);
     default:
       return res.status(404).json({ error: 'Unsupported auth action' });
   }

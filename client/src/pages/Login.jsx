@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Store, Zap, ArrowRight, ShieldCheck, AtSign } from 'lucide-react';
+import { Store, Zap, ArrowRight, ShieldCheck, AtSign, KeyRound, X, CheckCircle2, Clock, Send } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { authApi } from '../api/client';
@@ -24,6 +25,12 @@ export function Login() {
     identifier: '',
     password: ''
   });
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotIdentifier, setForgotIdentifier] = useState('');
+  const [forgotNote, setForgotNote] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotError, setForgotError] = useState('');
+  const [forgotResult, setForgotResult] = useState(null);
   const errorKey = useRef(0);
 
   const from = location.state?.from?.pathname || '/dashboard';
@@ -66,10 +73,18 @@ export function Login() {
     setError('');
     setDemoLoading(true);
     try {
-      const response = await authApi.login({
-        email: 'demo@store.com',
-        password: 'password123'
-      });
+      let response;
+      try {
+        response = await authApi.login({
+          email: 'demo@store.com',
+          password: 'Seller1234'
+        });
+      } catch {
+        response = await authApi.login({
+          email: 'demo@store.com',
+          password: 'password123'
+        });
+      }
       login(response.data.token, response.data.user);
       navigate(from, { replace: true });
     } catch (err) {
@@ -77,6 +92,33 @@ export function Login() {
     } finally {
       setDemoLoading(false);
     }
+  };
+
+  const handleForgotSubmit = async (e) => {
+    e.preventDefault();
+    setForgotError('');
+    setForgotResult(null);
+    setForgotLoading(true);
+    try {
+      const res = await authApi.forgotPassword({ identifier: forgotIdentifier, note: forgotNote });
+      setForgotResult(res.data);
+    } catch (err) {
+      setForgotError(err.response?.data?.error || 'Could not find an account with that identifier.');
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
+  const handleUseTempPassword = () => {
+    if (forgotResult?.identifier) {
+      setFormData({
+        identifier: forgotResult.identifier,
+        password: forgotResult.temporaryPassword || 'Seller1234'
+      });
+    }
+    setShowForgotModal(false);
+    setForgotResult(null);
+    setForgotError('');
   };
 
   return (
@@ -167,9 +209,18 @@ export function Login() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-xs font-semibold text-zinc-700 mb-1.5 uppercase tracking-wide">
-                {t('password') || 'Password'}
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label htmlFor="password" className="block text-xs font-semibold text-zinc-700 uppercase tracking-wide">
+                  {t('password') || 'Password'}
+                </label>
+                <button
+                  type="button"
+                  onClick={() => { setShowForgotModal(true); setForgotResult(null); setForgotError(''); }}
+                  className="text-xs text-blue-600 hover:text-blue-700 font-medium hover:underline"
+                >
+                  {t('forgot_password', 'Forgot password?')}
+                </button>
+              </div>
               <input
                 type="password"
                 id="password"
@@ -218,6 +269,136 @@ export function Login() {
           <span>{t('login_trust', 'Encrypted sign-in · Your catalog data stays yours')}</span>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      {showForgotModal && typeof document !== 'undefined' && createPortal(
+        <div
+          className="modal-overlay !z-[9999]"
+          role="dialog"
+          aria-modal="true"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowForgotModal(false);
+              setForgotResult(null);
+              setForgotError('');
+              setForgotNote('');
+            }
+          }}
+        >
+          <div className="modal-overlay-inner">
+            <div className="modal-panel max-w-md w-full p-6 relative">
+            <button
+              type="button"
+              onClick={() => { setShowForgotModal(false); setForgotResult(null); setForgotError(''); setForgotNote(''); }}
+              className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-600 p-1 rounded-lg hover:bg-zinc-100 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center ring-1 ring-amber-100">
+                <KeyRound className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-zinc-950 font-heading">
+                  Request Password Reset
+                </h3>
+                <p className="text-xs text-zinc-500">
+                  Notify store administrator to issue temporary access credentials
+                </p>
+              </div>
+            </div>
+
+            {forgotError && (
+              <div className="mb-4">
+                <Alert type="error" message={forgotError} />
+              </div>
+            )}
+
+            {forgotResult ? (
+              <div className="space-y-4">
+                <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl space-y-2.5">
+                  <div className="flex items-center gap-2 text-emerald-800 font-semibold text-xs">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <span>Reset Request Sent to Administrator</span>
+                  </div>
+                  <p className="text-xs text-emerald-700 leading-relaxed">
+                    {forgotResult.message || 'Your password reset request has been received. Your store administrator will verify your identity and share your temporary access credentials via WhatsApp or Email.'}
+                  </p>
+                  <div className="text-[11px] text-emerald-700 bg-white/80 p-2.5 rounded-lg border border-emerald-200 flex items-center gap-2">
+                    <Clock className="w-3.5 h-3.5 shrink-0 text-emerald-600" />
+                    <span>Status: Pending admin review & credentials issue</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setShowForgotModal(false); setForgotResult(null); setForgotError(''); setForgotNote(''); }}
+                  className="w-full py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white font-semibold rounded-xl text-xs transition-colors flex items-center justify-center gap-2"
+                >
+                  <span>Back to Sign In</span>
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleForgotSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-700 mb-1.5 uppercase tracking-wide">
+                    Registered Email or Phone
+                  </label>
+                  <input
+                    type="text"
+                    value={forgotIdentifier}
+                    onChange={(e) => setForgotIdentifier(e.target.value)}
+                    placeholder="name@example.com or +91 98765 43210"
+                    required
+                    className="input"
+                    autoFocus
+                  />
+                  <p className="text-[11px] text-zinc-400 mt-1.5">
+                    Enter the phone number or email address registered with your store.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-700 mb-1.5 uppercase tracking-wide">
+                    Reason or Note <span className="text-zinc-400 font-normal lowercase">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={forgotNote}
+                    onChange={(e) => setForgotNote(e.target.value)}
+                    placeholder="e.g. Forgot password, please share new credentials via WhatsApp"
+                    className="input text-xs"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => { setShowForgotModal(false); setForgotResult(null); setForgotError(''); setForgotNote(''); }}
+                    className="btn-secondary text-xs py-2 px-3.5"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={forgotLoading || !forgotIdentifier.trim()}
+                    className="btn-primary text-xs py-2 px-4 flex items-center gap-1.5 disabled:opacity-60"
+                  >
+                    {forgotLoading ? (
+                      <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                    ) : (
+                      <Send className="w-3.5 h-3.5" />
+                    )}
+                    <span>{forgotLoading ? 'Submitting...' : 'Send Request to Admin'}</span>
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      </div>,
+        document.body
+      )}
     </div>
   );
 }

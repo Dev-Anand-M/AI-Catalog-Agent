@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { LanguageSelector } from '../LanguageSelector';
+import { LogoutConfirmModal } from './LogoutConfirmModal';
 
 export function Navbar() {
   const { user, logout, isAdmin } = useAuth();
@@ -11,11 +12,17 @@ export function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location]);
 
   const handleLogout = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const executeLogout = () => {
+    setShowLogoutConfirm(false);
     logout();
     navigate('/');
   };
@@ -319,6 +326,13 @@ export function Navbar() {
           )}
         </div>
       )}
+
+      {/* Logout Confirmation Modal */}
+      <LogoutConfirmModal
+        isOpen={showLogoutConfirm}
+        onConfirm={executeLogout}
+        onClose={() => setShowLogoutConfirm(false)}
+      />
     </nav>
   );
 }

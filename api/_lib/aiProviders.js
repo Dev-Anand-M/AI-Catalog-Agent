@@ -1,17 +1,20 @@
 // Multi-provider AI engine for Vercel serverless — mirrors server/src/lib/aiProviders.js
 // Admin-controlled precedence via DB config; env keys are the canonical secret source.
 
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://gzqqrgbwgqskgscpnqwr.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_ANON_KEY;
+const getSupabaseUrl = () => process.env.SUPABASE_URL || 'https://gzqqrgbwgqskgscpnqwr.supabase.co';
+const getSupabaseKey = () => process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_ANON_KEY;
 
-const headers = () => ({
-  'Content-Type': 'application/json',
-  'apikey': SUPABASE_KEY,
-  'Authorization': `Bearer ${SUPABASE_KEY}`,
-  'Prefer': 'return=representation'
-});
+const headers = () => {
+  const key = getSupabaseKey();
+  return {
+    'Content-Type': 'application/json',
+    'apikey': key,
+    'Authorization': `Bearer ${key}`,
+    'Prefer': 'return=representation'
+  };
+};
 
-const q = (table) => `${SUPABASE_URL}/rest/v1/${table}`;
+const q = (table) => `${getSupabaseUrl()}/rest/v1/${table}`;
 
 export const PROVIDER_REGISTRY = {
   gemini: {
@@ -80,11 +83,11 @@ export const PROVIDER_REGISTRY = {
 };
 
 export const DEFAULT_PROVIDER_ORDER = [
-  'gemini', 'openai', 'grok', 'sambanova', 'perplexity', 'groq', 'deepseek'
+  'groq', 'gemini', 'openai', 'grok', 'sambanova', 'perplexity', 'deepseek'
 ];
 
 export async function loadAiConfig() {
-  if (SUPABASE_KEY) {
+  if (getSupabaseKey()) {
     try {
       const res = await fetch(`${q('AiConfig')}?select=*&limit=1`, { headers: headers() });
       if (res.ok) {
@@ -101,7 +104,7 @@ export async function loadAiConfig() {
 export async function saveAiConfig(patch) {
   const current = (await loadAiConfig()) || {};
   const next = { ...current, ...patch, updatedAt: new Date().toISOString() };
-  if (SUPABASE_KEY) {
+  if (getSupabaseKey()) {
     try {
       const res = await fetch(q('AiConfig'), {
         method: 'POST',
@@ -198,7 +201,8 @@ async function executeGemini({ key, model, systemPrompt, userPrompt, maxTokens }
   return cleanAiResponse(content);
 }
 
-export async function generateWithFallback({ systemPrompt, userPrompt, maxTokens = 500 }) {
+export async function generateWithFallback({ systemPrompt, userPrompt, maxTokens = 500, auditContext = 'ai-request', userId = null, db = null, ip = null }) {
+  const startedAt = Date.now();
   const config = await loadAiConfig();
   const order = (Array.isArray(config?.providerOrder) && config.providerOrder.length > 0)
     ? config.providerOrder
@@ -220,37 +224,62 @@ export async function generateWithFallback({ systemPrompt, userPrompt, maxTokens
       const text = meta.kind === 'gemini'
         ? await executeGemini(params)
         : await executeOpenAICompatible(params);
-      attempts.push({ provider: providerId, model, ok: true });
-      return { text, provider: providerId, model, attempts };
+      const latencyMs = Date.now() - startedAt;
+      attempts.push({ provider: providerId, model, ok: true, latencyMs });
+      const result = { text, provider: providerId, model, attempts, latencyMs };
+      if (auditContext) {
+        await auditAiRun({ userId, purpose: auditContext, result, db, ip });
+      }
+      return result;
     } catch (err) {
       attempts.push({ provider: providerId, model, ok: false, why: err.message });
     }
   }
-  return { text: null, provider: null, model: null, attempts };
+  const latencyMs = Date.now() - startedAt;
+  const result = { text: null, provider: null, model: null, attempts, latencyMs };
+  if (auditContext) {
+    await auditAiRun({ userId, purpose: auditContext, result, db, ip });
+  }
+  return result;
 }
 
-// Precise WHAT/WHEN/WHY audit on fallback events
+// Log every AI run so the administrator has a complete record of provider, model, latency, and any fallbacks
 export async function auditAiRun({ userId, purpose, result, db, ip = null }) {
   try {
-    const failures = result.attempts.filter(a => !a.ok);
-    if (failures.length === 0) return; // first provider worked — silent
+    const failures = (result?.attempts || []).filter(a => !a.ok);
+    const action = !result?.provider
+      ? 'AI_CHAIN_FAILED'
+      : (failures.length > 0 ? 'AI_PROVIDER_FALLBACK' : 'AI_RUN');
 
     const record = {
       userId: userId || null,
-      action: result.provider ? 'AI_PROVIDER_FALLBACK' : 'AI_CHAIN_FAILED',
+      action,
       entityType: 'AI',
-      entityId: result.provider || 'none',
+      entityId: result?.provider || 'none',
       details: JSON.stringify({
-        what: result.provider
-          ? `AI call for "${purpose}" fell back from ${failures[0].provider} to ${result.provider}`
-          : `AI call for "${purpose}" failed on all ${result.attempts.length} configured providers`,
+        what: result?.provider
+          ? `AI call for "${purpose || 'ai'}" completed using ${result.provider} (${result.model}) in ${result.latencyMs || 0}ms`
+          : `AI call for "${purpose || 'ai'}" failed on all ${result?.attempts?.length || 0} configured providers`,
+        provider: result?.provider || null,
+        model: result?.model || null,
+        latencyMs: result?.latencyMs || null,
         when: new Date().toISOString(),
-        why: failures.map(f => `${f.provider}${f.model ? ` (${f.model})` : ''}: ${f.why}`)
+        why: failures.length > 0
+          ? failures.map(f => `${f.provider}${f.model ? ` (${f.model})` : ''}: ${f.why}`)
+          : ['Provider executed successfully']
       }),
       ip,
       createdAt: new Date().toISOString()
     };
-    if (db?.insertAuditLog) await db.insertAuditLog(record);
+    if (db?.insertAuditLog) {
+      await db.insertAuditLog(record);
+    } else if (getSupabaseKey()) {
+      await fetch(q('AuditLog'), {
+        method: 'POST',
+        headers: { ...headers(), 'Prefer': 'return=minimal' },
+        body: JSON.stringify(record)
+      }).catch(() => {});
+    }
   } catch {
     // never break AI flow
   }

@@ -18,13 +18,11 @@ import { useLanguage } from '../context/LanguageContext';
 import { LanguageSelector } from '../components/LanguageSelector';
 import { useAuth } from '../context/AuthContext';
 import { authApi } from '../api/client';
-import { CentralAssistantModal } from '../components/CentralAssistantModal';
 
 export function Landing() {
   const { t, language } = useLanguage();
   const { user, login, isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
-  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [demoLoading, setDemoLoading] = useState(false);
   const [isSpeakingIntro, setIsSpeakingIntro] = useState(false);
 
@@ -64,10 +62,18 @@ export function Landing() {
     }
     setDemoLoading(true);
     try {
-      const response = await authApi.login({
-        email: 'demo@store.com',
-        password: 'password123'
-      });
+      let response;
+      try {
+        response = await authApi.login({
+          email: 'demo@store.com',
+          password: 'Seller1234'
+        });
+      } catch {
+        response = await authApi.login({
+          email: 'demo@store.com',
+          password: 'password123'
+        });
+      }
       login(response.data.token, response.data.user);
       navigate('/dashboard');
     } catch (err) {
@@ -204,8 +210,8 @@ export function Landing() {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               {/* Card 1 — Voice */}
-              <div
-                onClick={() => setIsAssistantOpen(true)}
+              <Link
+                to={user ? "/dashboard" : "/demo"}
                 className="card-enterprise p-7 cursor-pointer group flex flex-col justify-between"
               >
                 <div>
@@ -222,7 +228,7 @@ export function Landing() {
                 <span className="text-sm font-semibold text-blue-600 inline-flex items-center gap-1.5 mt-6 group-hover:gap-2.5 transition-all">
                   {t('card_voice_cta', 'Try Voice Copilot')} <ArrowRight className="w-4 h-4" />
                 </span>
-              </div>
+              </Link>
 
               {/* Card 2 — Vision */}
               <Link
@@ -421,12 +427,6 @@ export function Landing() {
           </div>
         </Container>
       </section>
-
-      {/* Central AI Assistant Modal */}
-      <CentralAssistantModal
-        isOpen={isAssistantOpen}
-        onClose={() => setIsAssistantOpen(false)}
-      />
     </div>
   );
 }

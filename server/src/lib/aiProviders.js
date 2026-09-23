@@ -29,12 +29,12 @@ const DB_FILE = path.join(DATA_DIR, 'local_db.json');
 // Sensible precedence: Gemini first (best price/perf for Indic languages),
 // then OpenAI, Grok, SambaNova, Perplexity, Groq, DeepSeek.
 const DEFAULT_PROVIDER_ORDER = [
+  'groq',
   'gemini',
   'openai',
   'grok',
   'sambanova',
   'perplexity',
-  'groq',
   'deepseek'
 ];
 
@@ -385,23 +385,28 @@ async function generateWithFallback({ systemPrompt, userPrompt, maxTokens = 500,
 async function auditAiRun({ userId, purpose, result, ip = null }) {
   try {
     const { logAudit } = require('./audit');
-    const failures = result.attempts.filter(a => !a.ok);
-    const succeededOn = result.provider;
-
-    if (failures.length === 0) return; // first provider worked — no noise
+    const failures = (result?.attempts || []).filter(a => !a.ok);
+    const succeededOn = result?.provider;
+    const action = !succeededOn
+      ? 'AI_CHAIN_FAILED'
+      : (failures.length > 0 ? 'AI_PROVIDER_FALLBACK' : 'AI_RUN');
 
     await logAudit({
       userId,
-      action: succeededOn ? 'AI_PROVIDER_FALLBACK' : 'AI_CHAIN_FAILED',
+      action,
       entityType: 'AI',
       entityId: succeededOn || 'none',
       details: {
         what: succeededOn
-          ? `AI call for "${purpose}" fell back from ${failures[0].provider} to ${succeededOn}`
-          : `AI call for "${purpose}" failed on all ${result.attempts.length} configured providers`,
+          ? `AI call for "${purpose || 'ai'}" completed using ${succeededOn} (${result.model || 'default'})`
+          : `AI call for "${purpose || 'ai'}" failed on all ${result?.attempts?.length || 0} configured providers`,
+        provider: succeededOn || null,
+        model: result?.model || null,
         when: new Date().toISOString(),
-        why: failures.map(f => `${f.provider} (${f.model || 'default'}): ${f.why}`),
-        attempts: result.attempts.map(a => ({
+        why: failures.length > 0
+          ? failures.map(f => `${f.provider} (${f.model || 'default'}): ${f.why}`)
+          : ['Provider executed successfully'],
+        attempts: (result?.attempts || []).map(a => ({
           provider: a.provider,
           model: a.model || null,
           ok: a.ok,
