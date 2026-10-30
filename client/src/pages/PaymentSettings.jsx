@@ -26,14 +26,20 @@ export function PaymentSettings() {
   const loadPaymentSettings = async () => {
     try {
       const response = await paymentApi.get();
-      const data = response.data;
+      const data = response.data || {};
+
+      // The API returns `upi`/`bank`/`qr`; the older `upiData`/`bankAccount`
+      // shape is still accepted so an out-of-date server cannot blank the form.
+      const upi = data.upi ?? data.upiData;
+      const bank = data.bank ?? data.bankAccount;
+      const qr = data.qr ?? data.qrCodeUrl;
 
       setPaymentMethods({
-        upi: data.upiData && data.upiData.length > 0
-          ? data.upiData
+        upi: Array.isArray(upi) && upi.length > 0
+          ? upi
           : [{ id: 1, upiId: '', name: '' }],
-        bank: data.bankAccount || { accountName: '', accountNumber: '', ifsc: '', bankName: '' },
-        qr: data.qrCodeUrl || null
+        bank: bank || { accountName: '', accountNumber: '', ifsc: '', bankName: '' },
+        qr: qr || null
       });
       setPhoneNumber(data.phoneNumber || '');
     } catch (e) {
@@ -87,9 +93,9 @@ export function PaymentSettings() {
     setError('');
     try {
       await paymentApi.save({
-        upiData: paymentMethods.upi,
-        bankAccount: paymentMethods.bank,
-        qrCodeUrl: paymentMethods.qr,
+        upi: paymentMethods.upi,
+        bank: paymentMethods.bank,
+        qr: paymentMethods.qr,
         phoneNumber: phoneNumber
       });
       setSaved(true);
@@ -109,15 +115,15 @@ export function PaymentSettings() {
   ];
 
   return (
-    <div className="min-h-screen bg-zinc-50 py-8 text-zinc-900">
+    <div className="min-h-screen bg-gray-50 py-8 text-gray-900">
       <div className="mx-auto max-w-3xl">
         {/* Page Header */}
         <div className="mb-6">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-zinc-100 border border-zinc-200 rounded-md text-xs font-medium text-zinc-800 mb-2">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-gray-100 border border-gray-200 rounded-md text-xs font-medium text-gray-800 mb-2">
             {t('direct_buyer_settlement')}
           </div>
-          <h1 className="text-xl font-semibold text-zinc-900 tracking-tight mb-1">{t('payment_title') || 'Payment & Settlement Settings'}</h1>
-          <p className="text-zinc-500 text-xs sm:text-sm">
+          <h1 className="text-xl font-semibold text-gray-900 tracking-tight mb-1">{t('payment_title') || 'Payment & Settlement Settings'}</h1>
+          <p className="text-gray-500 text-xs sm:text-sm">
             {t('payment_subtitle') || 'Configure your UPI, Bank Transfer and WhatsApp contact for zero-commission direct customer payments.'}
           </p>
         </div>
@@ -132,20 +138,20 @@ export function PaymentSettings() {
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16">
-            <div className="animate-spin rounded-full h-7 w-7 border-2 border-zinc-900 border-t-transparent mb-2.5"></div>
-            <p className="text-xs text-zinc-500">{t('loading_payment')}</p>
+            <div className="animate-spin rounded-full h-7 w-7 border-2 border-primary-600 border-t-transparent mb-2.5"></div>
+            <p className="text-xs text-gray-500">{t('loading_payment')}</p>
           </div>
         ) : (
           <>
             {/* WhatsApp Phone Number Card */}
             <div className="merchant-card p-5 mb-5 space-y-3">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-zinc-900 rounded-md flex items-center justify-center text-white">
+                <div className="w-9 h-9 bg-primary-600 rounded-md flex items-center justify-center text-white">
                   <Phone className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-zinc-900 text-sm">{t('whatsapp_number') || 'WhatsApp Business Number'}</h3>
-                  <p className="text-xs text-zinc-500">{t('whatsapp_number_desc') || 'Buyers on your public storefront can send order inquiries to this number.'}</p>
+                  <h3 className="font-semibold text-gray-900 text-sm">{t('whatsapp_number') || 'WhatsApp Business Number'}</h3>
+                  <p className="text-xs text-gray-500">{t('whatsapp_number_desc') || 'Buyers on your public storefront can send order inquiries to this number.'}</p>
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row gap-2 pt-1">
@@ -155,7 +161,7 @@ export function PaymentSettings() {
                     onChange={(e) => setPhoneNumber(e.target.value.replace(/[^0-9+]/g, ''))}
                     placeholder="+91 9876543210"
                     type="tel"
-                    className="w-full px-3 py-2 rounded-md border border-zinc-200 text-zinc-900 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-900 focus:border-zinc-900 min-h-[40px]"
+                    className="w-full px-3 py-2 rounded-md border border-gray-200 text-gray-900 text-sm focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-600 min-h-[40px]"
                   />
                 </div>
                 <Button
@@ -168,11 +174,11 @@ export function PaymentSettings() {
                   <span>{saving ? t('saving_btn') : t('save_number')}</span>
                 </Button>
               </div>
-              <p className="text-[11px] text-zinc-400">{t('whatsapp_format') || 'Include country code (e.g., +91 for India)'}</p>
+              <p className="text-[11px] text-gray-400">{t('whatsapp_format') || 'Include country code (e.g., +91 for India)'}</p>
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-1.5 mb-5 bg-zinc-100 p-1 rounded-md border border-zinc-200/80">
+            <div className="flex gap-1.5 mb-5 bg-gray-100 p-1 rounded-md border border-gray-200/80">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -182,11 +188,11 @@ export function PaymentSettings() {
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded text-xs font-medium transition-all min-h-[38px] ${
                       isActive
-                        ? 'bg-white text-zinc-900 shadow-2xs font-semibold'
-                        : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50'
+                        ? 'bg-white text-gray-900 shadow-2xs font-semibold'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                     }`}
                   >
-                    <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-zinc-900' : 'text-zinc-500'}`} />
+                    <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-gray-900' : 'text-gray-500'}`} />
                     <span>{tab.label}</span>
                   </button>
                 );
@@ -197,15 +203,15 @@ export function PaymentSettings() {
             {activeTab === 'upi' && (
               <div className="merchant-card p-5 mb-5 space-y-4">
                 <div>
-                  <h3 className="font-semibold text-zinc-900 text-sm">{t('upi_id')} ({t('direct_upi_pay')})</h3>
-                  <p className="text-xs text-zinc-500 mt-0.5">{t('upi_sub')}</p>
+                  <h3 className="font-semibold text-gray-900 text-sm">{t('upi_id')} ({t('direct_upi_pay')})</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">{t('upi_sub')}</p>
                 </div>
 
                 <div className="space-y-3">
                   {paymentMethods.upi.map((upi, index) => (
-                    <div key={upi.id} className="p-3.5 bg-zinc-50/70 rounded-md border border-zinc-200/80 space-y-2.5">
+                    <div key={upi.id} className="p-3.5 bg-gray-50/70 rounded-md border border-gray-200/80 space-y-2.5">
                       <div className="flex justify-between items-center">
-                        <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">{t('upi')} #{index + 1}</span>
+                        <span className="text-[11px] font-semibold tracking-normal text-gray-500">{t('upi')} #{index + 1}</span>
                         {paymentMethods.upi.length > 1 && (
                           <button
                             type="button"
@@ -219,23 +225,23 @@ export function PaymentSettings() {
                       </div>
                       <div className="grid sm:grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-[11px] font-semibold text-zinc-600 uppercase mb-1">{t('upi_id') || 'UPI ID / VPA'}</label>
+                          <label className="block text-xs font-semibold text-gray-600 mb-1">{t('upi_id') || 'UPI ID / VPA'}</label>
                           <input
                             type="text"
                             value={upi.upiId}
                             onChange={(e) => handleUpiChange(index, 'upiId', e.target.value)}
                             placeholder="merchant@okhdfcbank"
-                            className="w-full px-3 py-2 rounded-md border border-zinc-200 text-sm text-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900 focus:border-zinc-900 min-h-[40px]"
+                            className="w-full px-3 py-2 rounded-md border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-600 min-h-[40px]"
                           />
                         </div>
                         <div>
-                          <label className="block text-[11px] font-semibold text-zinc-600 uppercase mb-1">{t('upi_name') || 'Payee Name'}</label>
+                          <label className="block text-xs font-semibold text-gray-600 mb-1">{t('upi_name') || 'Payee Name'}</label>
                           <input
                             type="text"
                             value={upi.name}
                             onChange={(e) => handleUpiChange(index, 'name', e.target.value)}
                             placeholder="Store or Artisan Name"
-                            className="w-full px-3 py-2 rounded-md border border-zinc-200 text-sm text-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900 focus:border-zinc-900 min-h-[40px]"
+                            className="w-full px-3 py-2 rounded-md border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-600 min-h-[40px]"
                           />
                         </div>
                       </div>
@@ -245,7 +251,7 @@ export function PaymentSettings() {
                   <button
                     type="button"
                     onClick={addUpi}
-                    className="w-full py-2.5 border border-dashed border-zinc-300 rounded-md text-zinc-600 hover:border-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 flex items-center justify-center gap-1.5 text-xs font-medium transition-colors min-h-[40px]"
+                    className="w-full py-2.5 border border-dashed border-gray-300 rounded-md text-gray-600 hover:border-gray-400 hover:text-gray-900 hover:bg-gray-50 flex items-center justify-center gap-1.5 text-xs font-medium transition-colors min-h-[40px]"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>{t('add_upi') || '+ Add Another UPI ID'}</span>
@@ -258,50 +264,50 @@ export function PaymentSettings() {
             {activeTab === 'bank' && (
               <div className="merchant-card p-5 mb-5 space-y-4">
                 <div>
-                  <h3 className="font-semibold text-zinc-900 text-sm">{t('bank_account_details') || 'Direct Bank Account Details'}</h3>
-                  <p className="text-xs text-zinc-500 mt-0.5">For NEFT / RTGS / IMPS payments from bulk buyers and institutional customers</p>
+                  <h3 className="font-semibold text-gray-900 text-sm">{t('bank_account_details') || 'Direct Bank Account Details'}</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">For NEFT / RTGS / IMPS payments from bulk buyers and institutional customers</p>
                 </div>
 
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-[11px] font-semibold text-zinc-600 uppercase mb-1">{t('account_name') || 'Account Holder Name'}</label>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1">{t('account_name') || 'Account Holder Name'}</label>
                     <input
                       type="text"
                       value={paymentMethods.bank.accountName}
                       onChange={(e) => handleBankChange('accountName', e.target.value)}
                       placeholder="e.g. Anand Handicrafts"
-                      className="w-full px-3 py-2 rounded-md border border-zinc-200 text-sm text-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900 focus:border-zinc-900 min-h-[40px]"
+                      className="w-full px-3 py-2 rounded-md border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-600 min-h-[40px]"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-semibold text-zinc-600 uppercase mb-1">{t('account_number') || 'Account Number'}</label>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1">{t('account_number') || 'Account Number'}</label>
                     <input
                       type="text"
                       value={paymentMethods.bank.accountNumber}
                       onChange={(e) => handleBankChange('accountNumber', e.target.value)}
                       placeholder="e.g. 50100234567890"
-                      className="w-full px-3 py-2 rounded-md border border-zinc-200 text-sm text-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900 focus:border-zinc-900 min-h-[40px]"
+                      className="w-full px-3 py-2 rounded-md border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-600 min-h-[40px]"
                     />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[11px] font-semibold text-zinc-600 uppercase mb-1">{t('ifsc_code') || 'IFSC Code'}</label>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1">{t('ifsc_code') || 'IFSC Code'}</label>
                       <input
                         type="text"
                         value={paymentMethods.bank.ifsc}
                         onChange={(e) => handleBankChange('ifsc', e.target.value.toUpperCase())}
                         placeholder="e.g. SBIN0001234"
-                        className="w-full px-3 py-2 rounded-md border border-zinc-200 text-sm uppercase text-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900 focus:border-zinc-900 min-h-[40px]"
+                        className="w-full px-3 py-2 rounded-md border border-gray-200 text-sm uppercase text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-600 min-h-[40px]"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-semibold text-zinc-600 uppercase mb-1">{t('bank_name') || 'Bank Name'}</label>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1">{t('bank_name') || 'Bank Name'}</label>
                       <input
                         type="text"
                         value={paymentMethods.bank.bankName}
                         onChange={(e) => handleBankChange('bankName', e.target.value)}
                         placeholder="e.g. State Bank of India"
-                        className="w-full px-3 py-2 rounded-md border border-zinc-200 text-sm text-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900 focus:border-zinc-900 min-h-[40px]"
+                        className="w-full px-3 py-2 rounded-md border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-600 min-h-[40px]"
                       />
                     </div>
                   </div>
@@ -315,7 +321,7 @@ export function PaymentSettings() {
                 <div className="text-center">
                   {paymentMethods.qr ? (
                     <div className="space-y-3">
-                      <div className="p-3 bg-zinc-50 border border-zinc-200/80 rounded-md inline-block max-w-xs mx-auto">
+                      <div className="p-3 bg-gray-50 border border-gray-200/80 rounded-md inline-block max-w-xs mx-auto">
                         <img
                           src={paymentMethods.qr}
                           alt="Payment QR Code"
@@ -335,10 +341,10 @@ export function PaymentSettings() {
                     </div>
                   ) : (
                     <label className="block cursor-pointer">
-                      <div className="py-10 px-6 border border-dashed border-zinc-300 rounded-md hover:border-zinc-400 hover:bg-zinc-50 transition-colors">
-                        <QrCode className="w-10 h-10 mx-auto text-zinc-400 mb-2" />
-                        <p className="text-xs font-semibold text-zinc-700">{t('upload_qr') || 'Upload Store QR Code (PhonePe, GPay, Paytm)'}</p>
-                        <p className="text-[11px] text-zinc-400 mt-0.5">PNG or JPG up to 5MB</p>
+                      <div className="py-10 px-6 border border-dashed border-gray-300 rounded-md hover:border-gray-400 hover:bg-gray-50 transition-colors">
+                        <QrCode className="w-10 h-10 mx-auto text-gray-400 mb-2" />
+                        <p className="text-xs font-semibold text-gray-700">{t('upload_qr') || 'Upload Store QR Code (PhonePe, GPay, Paytm)'}</p>
+                        <p className="text-[11px] text-gray-400 mt-0.5">PNG or JPG up to 5MB</p>
                       </div>
                       <input
                         type="file"
@@ -352,11 +358,12 @@ export function PaymentSettings() {
               </div>
             )}
 
-            {/* Save Button */}
-            <div className="mt-5">
+            {/* Save Button — right-aligned at its natural width. Full-width it
+                read as a banner and competed with the page heading. */}
+            <div className="mt-6 flex justify-end">
               <Button
                 variant="primary"
-                className="w-full min-h-[42px] text-xs font-semibold shadow-xs flex items-center justify-center gap-1.5"
+                className="px-6 min-h-[42px] text-xs font-semibold shadow-xs flex items-center justify-center gap-1.5"
                 onClick={handleSave}
                 disabled={saving}
               >

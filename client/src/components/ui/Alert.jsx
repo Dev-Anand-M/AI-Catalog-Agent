@@ -26,9 +26,9 @@ export function Alert({
       icon: AlertCircle,
     },
     info: {
-      bg: 'bg-blue-50 border-blue-200',
-      text: 'text-blue-900',
-      softText: 'text-blue-700',
+      bg: 'bg-primary-50 border-primary-200',
+      text: 'text-primary-900',
+      softText: 'text-primary-700',
       icon: Info,
     },
   };

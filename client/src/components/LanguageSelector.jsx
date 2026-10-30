@@ -30,7 +30,7 @@ export function LanguageSelector({ variant = 'dropdown' }) {
 
   if (variant === 'buttons') {
     return (
-      <div className="inline-flex items-center p-1 bg-zinc-100/90 border border-zinc-200/80 rounded-xl overflow-x-auto max-w-full">
+      <div className="inline-flex items-center p-1 bg-gray-100/90 border border-gray-200/80 rounded-xl overflow-x-auto max-w-full">
         {languages.map((lang) => {
           const isActive = language === lang.code;
           return (
@@ -40,8 +40,8 @@ export function LanguageSelector({ variant = 'dropdown' }) {
               onClick={() => setLanguage(lang.code)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all min-h-[36px] whitespace-nowrap flex items-center gap-1.5 ${
                 isActive
-                  ? 'bg-white text-zinc-950 shadow-2xs border border-zinc-200/80 font-bold'
-                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200/50'
+                  ? 'bg-white text-gray-900 shadow-2xs border border-gray-200/80 font-bold'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/50'
               }`}
             >
               {isActive && <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>}
@@ -57,17 +57,17 @@ export function LanguageSelector({ variant = 'dropdown' }) {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 hover:bg-zinc-100 text-zinc-800 transition-colors text-xs font-semibold min-h-[38px]"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 hover:bg-gray-100 text-gray-800 transition-colors text-xs font-semibold min-h-[38px]"
         aria-label="Select language"
       >
-        <Globe className="w-3.5 h-3.5 text-zinc-500" />
-        <span className="text-xs font-medium text-zinc-900">{currentLang.nativeName}</span>
-        <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-150 ${isOpen ? 'rotate-180' : ''}`} />
+        <Globe className="w-3.5 h-3.5 text-gray-500" />
+        <span className="text-xs font-medium text-gray-900">{currentLang.nativeName}</span>
+        <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-150 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-1.5 w-48 bg-white rounded-xl shadow-lg border border-zinc-200 py-1.5 z-50">
-          <div className="px-3 py-1 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+        <div className="absolute right-0 mt-1.5 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-1.5 z-50">
+          <div className="px-3 py-1 text-[10px] font-bold text-gray-400 tracking-normal">
             Select Language
           </div>
           {languages.map((lang) => (
@@ -77,13 +77,13 @@ export function LanguageSelector({ variant = 'dropdown' }) {
                 setLanguage(lang.code);
                 setIsOpen(false);
               }}
-              className={`w-full px-3 py-2 text-left hover:bg-zinc-100 flex items-center justify-between transition-colors ${
-                language === lang.code ? 'bg-zinc-100 text-zinc-900 font-semibold' : 'text-zinc-600'
+              className={`w-full px-3 py-2 text-left hover:bg-gray-100 flex items-center justify-between transition-colors ${
+                language === lang.code ? 'bg-gray-100 text-gray-900 font-semibold' : 'text-gray-600'
               }`}
             >
               <div className="flex items-center gap-2">
                 <span className="text-xs font-medium">{lang.nativeName}</span>
-                <span className="text-[11px] text-zinc-400">({lang.name})</span>
+                <span className="text-[11px] text-gray-400">({lang.name})</span>
               </div>
               {language === lang.code && (
                 <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[2.5]" />

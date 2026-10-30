@@ -49,6 +49,13 @@
     }
   ],
   "payment": {
+    "274": {
+      "userId": 274,
+      "upiData": "[{\"id\":1,\"upiId\":\"artisan@upi\",\"name\":\"Artisan Pay\"}]",
+      "bankAccount": "{\"accountName\":\"Artisan Store\",\"accountNumber\":\"912345678901\",\"ifsc\":\"SBIN0001234\",\"bankName\":\"State Bank of India\"}",
+      "qrCodeUrl": null,
+      "updatedAt": "2026-10-30T14:04:04.154Z"
+    },
     "demo-artisan-1": {
       "id": "pay-1",
       "userId": "demo-artisan-1",

@@ -64,40 +64,40 @@ export function ChangePassword() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex flex-col justify-center py-10 sm:py-16 relative overflow-hidden">
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-10 sm:py-16 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[700px] h-[400px] rounded-full bg-blue-100/60 blur-[110px]"></div>
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[700px] h-[400px] rounded-full bg-primary-100/60 blur-[110px]"></div>
         <div className="absolute -bottom-32 -left-24 w-[400px] h-[300px] rounded-full bg-emerald-100/50 blur-[100px]"></div>
       </div>
 
       <div className="relative w-full max-w-md mx-auto px-4">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-zinc-950 text-white mb-5 shadow-lg ring-1 ring-zinc-800">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary-600 text-white mb-5 shadow-lg ring-1 ring-primary-600">
             <KeyRound className="w-7 h-7 stroke-[2]" />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-zinc-950 tracking-tight font-heading">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight font-heading">
             {t('change_password_title', 'Choose your own password')}
           </h1>
-          <p className="text-zinc-500 text-sm mt-2 max-w-sm mx-auto leading-relaxed">
+          <p className="text-gray-500 text-sm mt-2 max-w-sm mx-auto leading-relaxed">
             {isFirstTime
               ? t('change_password_first_time', 'You signed in with a temporary password. Set your own so only you can open your store.')
               : t('change_password_subtitle', 'Update the password you use to sign in to your store workspace.')}
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-zinc-200 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.1)] p-6 sm:p-8">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.1)] p-6 sm:p-8">
           {done ? (
             <div className="text-center py-6">
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-50 border border-emerald-200 mb-5">
                 <CheckCircle2 className="w-7 h-7 text-emerald-600" />
               </div>
-              <h2 className="text-lg font-bold text-zinc-950 font-heading">
+              <h2 className="text-lg font-bold text-gray-900 font-heading">
                 {t('change_password_done', 'Password updated')}
               </h2>
-              <p className="text-sm text-zinc-500 mt-2">
+              <p className="text-sm text-gray-500 mt-2">
                 {t('change_password_redirect', 'Taking you to your catalog…')}
               </p>
-              <span className="mt-4 inline-block w-4 h-4 border-2 border-zinc-300 border-t-zinc-900 rounded-full animate-spin"></span>
+              <span className="mt-4 inline-block w-4 h-4 border-2 border-gray-300 border-t-primary-500 rounded-full animate-spin"></span>
             </div>
           ) : (
             <>
@@ -105,7 +105,7 @@ export function ChangePassword() {
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label htmlFor="currentPassword" className="block text-xs font-semibold text-zinc-700 mb-1.5 uppercase tracking-wide">
+                  <label htmlFor="currentPassword" className="block text-xs font-semibold text-gray-700 mb-1.5 tracking-normal">
                     {t('current_password', 'Current password')}
                   </label>
                   <input
@@ -123,7 +123,7 @@ export function ChangePassword() {
                 </div>
 
                 <div>
-                  <label htmlFor="newPassword" className="block text-xs font-semibold text-zinc-700 mb-1.5 uppercase tracking-wide">
+                  <label htmlFor="newPassword" className="block text-xs font-semibold text-gray-700 mb-1.5 tracking-normal">
                     {t('new_password', 'New password')}
                   </label>
                   <input
@@ -141,7 +141,7 @@ export function ChangePassword() {
                 </div>
 
                 <div>
-                  <label htmlFor="confirmPassword" className="block text-xs font-semibold text-zinc-700 mb-1.5 uppercase tracking-wide">
+                  <label htmlFor="confirmPassword" className="block text-xs font-semibold text-gray-700 mb-1.5 tracking-normal">
                     {t('confirm_password', 'Confirm new password')}
                   </label>
                   <input
@@ -161,7 +161,7 @@ export function ChangePassword() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="group w-full py-3 bg-zinc-950 hover:bg-zinc-800 text-white font-semibold rounded-xl text-sm shadow-sm transition-all flex items-center justify-center gap-2 min-h-[46px] disabled:opacity-60 mt-2"
+                  className="group w-full py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl text-sm shadow-sm transition-all flex items-center justify-center gap-2 min-h-[46px] disabled:opacity-60 mt-2"
                 >
                   {loading ? (
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
@@ -175,8 +175,8 @@ export function ChangePassword() {
               </form>
 
               {!isFirstTime && (
-                <div className="border-t border-zinc-100 mt-6 pt-5 text-center text-sm text-zinc-500">
-                  <Link to="/dashboard" className="text-zinc-950 hover:text-zinc-700 font-semibold underline-offset-2 hover:underline">
+                <div className="border-t border-gray-100 mt-6 pt-5 text-center text-sm text-gray-500">
+                  <Link to="/dashboard" className="text-gray-900 hover:text-gray-700 font-semibold underline-offset-2 hover:underline">
                     {t('back_to_catalog', 'Back to my catalog')}
                   </Link>
                 </div>
@@ -185,7 +185,7 @@ export function ChangePassword() {
           )}
         </div>
 
-        <div className="mt-6 flex items-center justify-center gap-1.5 text-[11px] text-zinc-400 font-medium">
+        <div className="mt-6 flex items-center justify-center gap-1.5 text-[11px] text-gray-400 font-medium">
           <ShieldCheck className="w-3.5 h-3.5" />
           <span>{t('password_never_shared', 'We can never see your password — it is stored only as a hash')}</span>
         </div>

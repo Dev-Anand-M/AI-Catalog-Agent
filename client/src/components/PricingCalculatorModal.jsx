@@ -127,59 +127,59 @@ export function PricingCalculatorModal({
         <div className="p-5 overflow-y-auto space-y-5 flex-1">
           {/* Inputs Grid */}
           <div className="space-y-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Enter Your Direct Costs</span>
+            <span className="text-xs font-bold tracking-normal text-slate-600">Enter Your Direct Costs</span>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div>
-                <label className="text-[11px] font-semibold text-zinc-500 block mb-1">Raw Materials (₹)</label>
+                <label className="text-[11px] font-semibold text-gray-500 block mb-1">Raw Materials (₹)</label>
                 <input
                   type="number"
                   min="0"
                   value={materialCost}
                   onChange={(e) => setMaterialCost(e.target.value)}
-                  className="w-full text-sm font-semibold p-2.5 bg-zinc-50 border border-zinc-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900 min-h-[44px]"
+                  className="w-full text-sm font-semibold p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500 min-h-[44px]"
                 />
               </div>
 
               <div>
-                <label className="text-[11px] font-semibold text-zinc-500 block mb-1">Artisan Labour (₹)</label>
+                <label className="text-[11px] font-semibold text-gray-500 block mb-1">Artisan Labour (₹)</label>
                 <input
                   type="number"
                   min="0"
                   value={labourCost}
                   onChange={(e) => setLabourCost(e.target.value)}
-                  className="w-full text-sm font-semibold p-2.5 bg-zinc-50 border border-zinc-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900 min-h-[44px]"
+                  className="w-full text-sm font-semibold p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500 min-h-[44px]"
                 />
               </div>
 
               <div>
-                <label className="text-[11px] font-semibold text-zinc-500 block mb-1">Packaging (₹)</label>
+                <label className="text-[11px] font-semibold text-gray-500 block mb-1">Packaging (₹)</label>
                 <input
                   type="number"
                   min="0"
                   value={packagingCost}
                   onChange={(e) => setPackagingCost(e.target.value)}
-                  className="w-full text-sm font-semibold p-2.5 bg-zinc-50 border border-zinc-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900 min-h-[44px]"
+                  className="w-full text-sm font-semibold p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500 min-h-[44px]"
                 />
               </div>
 
               <div>
-                <label className="text-[11px] font-semibold text-zinc-500 block mb-1">Other / Freight (₹)</label>
+                <label className="text-[11px] font-semibold text-gray-500 block mb-1">Other / Freight (₹)</label>
                 <input
                   type="number"
                   min="0"
                   value={otherCost}
                   onChange={(e) => setOtherCost(e.target.value)}
-                  className="w-full text-sm font-semibold p-2.5 bg-zinc-50 border border-zinc-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900 min-h-[44px]"
+                  className="w-full text-sm font-semibold p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500 min-h-[44px]"
                 />
               </div>
             </div>
           </div>
 
           {/* Desired Margin Slider */}
-          <div className="space-y-2 p-3 bg-zinc-50 border border-zinc-200 rounded-xl">
+          <div className="space-y-2 p-3 bg-gray-50 border border-gray-200 rounded-xl">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-zinc-700">Desired Profit Margin:</span>
-              <span className="font-extrabold text-blue-700 font-mono text-sm">{desiredMarginPct}%</span>
+              <span className="font-bold text-gray-700">Desired Profit Margin:</span>
+              <span className="font-extrabold text-primary-700 font-mono text-sm">{desiredMarginPct}%</span>
             </div>
             <input
               type="range"
@@ -188,9 +188,9 @@ export function PricingCalculatorModal({
               step="5"
               value={desiredMarginPct}
               onChange={(e) => setDesiredMarginPct(parseInt(e.target.value))}
-              className="w-full accent-blue-600 cursor-pointer h-2 bg-zinc-200 rounded-lg"
+              className="w-full accent-primary-600 cursor-pointer h-2 bg-gray-200 rounded-lg"
             />
-            <div className="flex justify-between text-[10px] text-zinc-400">
+            <div className="flex justify-between text-[10px] text-gray-400">
               <span>10% (High Volume)</span>
               <span>25% (Balanced Retail)</span>
               <span>60% (Artisan Premium)</span>
@@ -202,7 +202,7 @@ export function PricingCalculatorModal({
             <div className="p-4 bg-emerald-50/60 border border-emerald-200 rounded-xl space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-emerald-200/60 pb-3">
                 <div>
-                  <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider block">
+                  <span className="text-xs font-bold text-emerald-800 tracking-normal block">
                     Recommended Selling Price
                   </span>
                   <div className="flex items-baseline gap-2 mt-0.5">
@@ -216,8 +216,8 @@ export function PricingCalculatorModal({
                 </div>
 
                 <div className="text-left sm:text-right">
-                  <span className="text-[11px] font-semibold text-zinc-500 block">Viable Market Range</span>
-                  <span className="text-xs font-bold text-zinc-800 font-mono">
+                  <span className="text-[11px] font-semibold text-gray-500 block">Viable Market Range</span>
+                  <span className="text-xs font-bold text-gray-800 font-mono">
                     ₹{pricingResult.priceRange?.min} — ₹{pricingResult.priceRange?.max}
                   </span>
                 </div>
@@ -225,11 +225,11 @@ export function PricingCalculatorModal({
 
               {/* Cost Breakdown Progress Bar */}
               <div className="space-y-1.5 pt-1">
-                <span className="text-[11px] font-bold text-zinc-600 uppercase">Cost Composition</span>
-                <div className="h-3 w-full bg-zinc-200 rounded-full overflow-hidden flex">
+                <span className="text-[11px] font-semibold text-gray-600">Cost composition</span>
+                <div className="h-3 w-full bg-gray-200 rounded-full overflow-hidden flex">
                   <div 
                     style={{ width: `${(pricingResult.costBreakdown?.materialCost / (pricingResult.recommendedPrice || 1)) * 100}%` }}
-                    className="bg-blue-600 h-full"
+                    className="bg-primary-600 h-full"
                     title="Materials"
                   />
                   <div 
@@ -248,8 +248,8 @@ export function PricingCalculatorModal({
                     title="Net Margin"
                   />
                 </div>
-                <div className="flex flex-wrap gap-3 text-[10px] text-zinc-600 pt-1">
-                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-600"></span> Materials (₹{pricingResult.costBreakdown?.materialCost})</span>
+                <div className="flex flex-wrap gap-3 text-[10px] text-gray-600 pt-1">
+                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-primary-600"></span> Materials (₹{pricingResult.costBreakdown?.materialCost})</span>
                   <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-indigo-500"></span> Labour (₹{pricingResult.costBreakdown?.labourCost})</span>
                   <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500"></span> Pkg (₹{pricingResult.costBreakdown?.packagingCost})</span>
                   <span className="flex items-center gap-1 font-bold text-emerald-800"><span className="w-2 h-2 rounded-full bg-emerald-500"></span> Margin (₹{pricingResult.costBreakdown?.profitAmount})</span>
@@ -257,14 +257,14 @@ export function PricingCalculatorModal({
               </div>
 
               {/* Explainability Callout */}
-              <div className="p-3 bg-white/80 border border-emerald-200 rounded-lg text-xs text-zinc-700 leading-relaxed flex items-start gap-2">
+              <div className="p-3 bg-white/80 border border-emerald-200 rounded-lg text-xs text-gray-700 leading-relaxed flex items-start gap-2">
                 <Info className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                 <p>{pricingResult.explanation}</p>
               </div>
 
               {/* Trust Disclaimer */}
-              <p className="text-[11px] text-zinc-500 italic flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" />
+              <p className="text-[11px] text-gray-500 italic flex items-center gap-1">
+                <ShieldCheck className="w-3.5 h-3.5 text-gray-400" />
                 This recommendation is for seller guidance. You remain the final authority on product pricing.
               </p>
             </div>
@@ -284,7 +284,7 @@ export function PricingCalculatorModal({
             type="button"
             onClick={handleApply}
             disabled={!pricingResult}
-            className="px-5 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-xl min-h-[44px] shadow-sm flex items-center gap-1.5 transition-all"
+            className="px-5 py-2 text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 disabled:opacity-50 rounded-xl min-h-[44px] shadow-sm flex items-center gap-1.5 transition-all"
           >
             <Check className="w-4 h-4" />
             Apply ₹{pricingResult?.recommendedPrice || 0} to Product

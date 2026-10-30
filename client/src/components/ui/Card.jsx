@@ -11,7 +11,7 @@ export function Card({ children, className = '', onClick }) {
 
 export function CardHeader({ children, className = '' }) {
   return (
-    <div className={`px-5 py-4 border-b border-zinc-100 ${className}`}>
+    <div className={`px-5 py-4 border-b border-gray-100 ${className}`}>
       {children}
     </div>
   );
@@ -27,7 +27,7 @@ export function CardBody({ children, className = '' }) {
 
 export function CardFooter({ children, className = '' }) {
   return (
-    <div className={`px-5 py-4 border-t border-zinc-100 bg-zinc-50 ${className}`}>
+    <div className={`px-5 py-4 border-t border-gray-100 bg-gray-50 ${className}`}>
       {children}
     </div>
   );

@@ -51,7 +51,7 @@ export function Demo() {
       <Container>
         {/* Header */}
         <div className="text-center mb-10 max-w-2xl mx-auto">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-zinc-900 text-white rounded-xl shadow-xs mb-3">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-primary-600 text-white rounded-xl shadow-xs mb-3">
             <Store className="w-6 h-6 stroke-[2]" />
           </div>
           <div className="flex items-center justify-center gap-2 mb-2">
@@ -59,8 +59,8 @@ export function Demo() {
               <CheckCircle2 className="w-3 h-3 text-emerald-600 inline mr-1" /> Demo Storefront
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-zinc-950 tracking-tight mb-2">Sample Merchant Storefront</h1>
-          <p className="text-zinc-500 text-sm sm:text-base">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight mb-2">Sample Merchant Storefront</h1>
+          <p className="text-gray-500 text-sm sm:text-base">
             This is an example of what buyers see when you share your catalog link on WhatsApp or social media.
           </p>
         </div>
@@ -99,7 +99,7 @@ function ProductCard({ product }) {
   return (
     <div className="merchant-card overflow-hidden flex flex-col justify-between group">
       <div>
-        <div className="relative aspect-square bg-zinc-100 border-b border-zinc-200/80 overflow-hidden">
+        <div className="relative aspect-square bg-gray-100 border-b border-gray-200/80 overflow-hidden">
           {product.imageUrl ? (
             <img 
               src={product.imageUrl} 
@@ -107,30 +107,30 @@ function ProductCard({ product }) {
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
             />
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center text-zinc-400">
-              <Package className="w-8 h-8 stroke-[1.5] text-zinc-300 mb-1" />
+            <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
+              <Package className="w-8 h-8 stroke-[1.5] text-gray-300 mb-1" />
               <span className="text-xs font-medium">No image</span>
             </div>
           )}
-          <span className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm text-zinc-800 border border-zinc-200 px-2 py-0.5 rounded text-[10px] font-medium shadow-2xs">
+          <span className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm text-gray-800 border border-gray-200 px-2 py-0.5 rounded text-[10px] font-medium shadow-2xs">
             {product.category}
           </span>
         </div>
         <div className="p-3.5 space-y-1.5">
-          <h3 className="text-sm font-semibold text-zinc-950 tracking-tight truncate">{product.name}</h3>
-          <p className="text-xs text-zinc-500 line-clamp-2 leading-relaxed">{product.description}</p>
+          <h3 className="text-sm font-semibold text-gray-900 tracking-tight truncate">{product.name}</h3>
+          <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">{product.description}</p>
           <div className="flex items-baseline gap-2 pt-1">
-            <span className="text-lg font-bold text-zinc-950 font-mono">₹{Number(product.price).toFixed(2)}</span>
+            <span className="text-lg font-bold text-gray-900 font-mono">₹{Number(product.price).toFixed(2)}</span>
           </div>
         </div>
       </div>
       <div className="p-3.5 pt-0">
-        <div className="flex items-center gap-1.5 pt-2.5 border-t border-zinc-100">
+        <div className="flex items-center gap-1.5 pt-2.5 border-t border-gray-100">
           <a
             href={`https://wa.me/?text=Namaste,%20I%20want%20to%20order%20${encodeURIComponent(product.name)}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white font-medium text-xs rounded-md flex items-center justify-center gap-1.5 transition-colors min-h-[36px]"
+            className="flex-1 py-1.5 bg-primary-600 hover:bg-primary-700 text-white font-medium text-xs rounded-md flex items-center justify-center gap-1.5 transition-colors min-h-[36px]"
           >
             <MessageCircle className="w-3.5 h-3.5" />
             Order via WhatsApp
@@ -139,7 +139,7 @@ function ProductCard({ product }) {
             href="#"
             target="_blank"
             rel="noopener noreferrer"
-            className="p-1.5 text-zinc-400 hover:text-zinc-900 rounded-md transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
+            className="p-1.5 text-gray-400 hover:text-gray-900 rounded-md transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
             title="Share product"
           >
             <Share2 className="w-3.5 h-3.5" />

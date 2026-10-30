@@ -83,9 +83,9 @@ export function RequestAccess() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 relative overflow-hidden py-10 sm:py-16">
+    <div className="min-h-screen bg-gray-50 relative overflow-hidden py-10 sm:py-16">
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[700px] h-[400px] rounded-full bg-blue-100/60 blur-[110px]"></div>
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[700px] h-[400px] rounded-full bg-primary-100/60 blur-[110px]"></div>
         <div className="absolute -bottom-32 -right-24 w-[400px] h-[300px] rounded-full bg-emerald-100/50 blur-[100px]"></div>
       </div>
 
@@ -95,44 +95,44 @@ export function RequestAccess() {
         </div>
 
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-zinc-950 text-white mb-5 shadow-lg ring-1 ring-zinc-800">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary-600 text-white mb-5 shadow-lg ring-1 ring-primary-600">
             <Store className="w-7 h-7 stroke-[2]" />
           </div>
           <span className="flex justify-center mb-4">
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-blue-700 bg-blue-50 border border-blue-100 px-3 py-1 rounded-full">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold tracking-normal text-primary-700 bg-primary-50 border border-primary-100 px-3 py-1 rounded-full">
               <Sparkles className="w-3 h-3" />
               {t('invite_only_badge', 'Invitation-only onboarding')}
             </span>
           </span>
-          <h1 className="text-3xl sm:text-4xl font-bold text-zinc-950 tracking-tight font-heading">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight font-heading">
             {t('request_access_title', 'Request access to your store workspace')}
           </h1>
-          <p className="text-zinc-500 text-sm sm:text-base mt-3 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-gray-500 text-sm sm:text-base mt-3 max-w-2xl mx-auto leading-relaxed">
             {t('request_access_subtitle', 'Tell us about your shop. Our onboarding team reviews every request personally and sets up your catalog with you — usually within one working day.')}
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-6 items-start">
           {/* ---------- Form ---------- */}
-          <div className="bg-white rounded-2xl border border-zinc-200 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.1)] p-6 sm:p-8">
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.1)] p-6 sm:p-8">
             {submitted ? (
               <div className="text-center py-6">
                 <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-50 border border-emerald-200 mb-5">
                   <CheckCircle2 className="w-7 h-7 text-emerald-600" />
                 </div>
-                <h2 className="text-xl font-bold text-zinc-950 font-heading">
+                <h2 className="text-xl font-bold text-gray-900 font-heading">
                   {t('request_received_title', 'Request received')}
                 </h2>
-                <p className="text-sm text-zinc-500 mt-2.5 max-w-md mx-auto leading-relaxed">
+                <p className="text-sm text-gray-500 mt-2.5 max-w-md mx-auto leading-relaxed">
                   {submitted.message || t('request_received_body', 'Our onboarding team will contact you within one working day.')}
                 </p>
                 {submitted.request?.id && (
-                  <p className="mt-5 inline-flex items-center gap-2 text-xs font-medium text-zinc-600 bg-zinc-50 border border-zinc-200 rounded-lg px-4 py-2">
+                  <p className="mt-5 inline-flex items-center gap-2 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2">
                     {t('request_reference', 'Reference')}:{' '}
-                    <span className="font-mono font-semibold text-zinc-900">#{submitted.request.id}</span>
+                    <span className="font-mono font-semibold text-gray-900">#{submitted.request.id}</span>
                   </p>
                 )}
-                <div className="mt-8 pt-6 border-t border-zinc-100 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-center gap-3">
                   <Link to="/demo">
                     <button type="button" className="btn-secondary text-xs min-h-[40px]">
                       {t('request_explore_demo', 'Explore the demo store meanwhile')}
@@ -152,7 +152,7 @@ export function RequestAccess() {
                 <form onSubmit={handleSubmit} className="space-y-5" noValidate>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
-                      <label htmlFor="name" className="block text-xs font-semibold text-zinc-700 mb-1.5 uppercase tracking-wide">
+                      <label htmlFor="name" className="block text-xs font-semibold text-gray-700 mb-1.5 tracking-normal">
                         {t('request_your_name', 'Your name')}
                       </label>
                       <input
@@ -169,7 +169,7 @@ export function RequestAccess() {
                     </div>
 
                     <div>
-                      <label htmlFor="businessName" className="block text-xs font-semibold text-zinc-700 mb-1.5 uppercase tracking-wide">
+                      <label htmlFor="businessName" className="block text-xs font-semibold text-gray-700 mb-1.5 tracking-normal">
                         {t('request_store_name', 'Store or brand name')}
                       </label>
                       <input
@@ -187,7 +187,7 @@ export function RequestAccess() {
                   </div>
 
                   <div>
-                    <label htmlFor="email" className="block text-xs font-semibold text-zinc-700 mb-1.5 uppercase tracking-wide">
+                    <label htmlFor="email" className="block text-xs font-semibold text-gray-700 mb-1.5 tracking-normal">
                       {t('request_email', 'Email address')}
                     </label>
                     <input
@@ -208,7 +208,7 @@ export function RequestAccess() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
-                      <label htmlFor="city" className="block text-xs font-semibold text-zinc-700 mb-1.5 uppercase tracking-wide">
+                      <label htmlFor="city" className="block text-xs font-semibold text-gray-700 mb-1.5 tracking-normal">
                         {t('request_city', 'City or town')}
                       </label>
                       <input
@@ -234,7 +234,7 @@ export function RequestAccess() {
                   </div>
 
                   <div>
-                    <label htmlFor="message" className="block text-xs font-semibold text-zinc-700 mb-1.5 uppercase tracking-wide">
+                    <label htmlFor="message" className="block text-xs font-semibold text-gray-700 mb-1.5 tracking-normal">
                       {t('request_message', 'Anything we should know?')}
                     </label>
                     <textarea
@@ -253,7 +253,7 @@ export function RequestAccess() {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="group w-full py-3 bg-zinc-950 hover:bg-zinc-800 text-white font-semibold rounded-xl text-sm shadow-sm transition-all flex items-center justify-center gap-2 min-h-[46px] disabled:opacity-60"
+                      className="group w-full py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl text-sm shadow-sm transition-all flex items-center justify-center gap-2 min-h-[46px] disabled:opacity-60"
                     >
                       {loading ? (
                         <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
@@ -266,14 +266,14 @@ export function RequestAccess() {
                     </button>
                   </div>
 
-                  <p className="text-[11px] text-zinc-400 text-center leading-relaxed">
+                  <p className="text-[11px] text-gray-500 text-center leading-relaxed">
                     {t('request_consent', 'We only use these details to set up your store and contact you about it. No spam, ever.')}
                   </p>
                 </form>
 
-                <div className="border-t border-zinc-100 mt-6 pt-5 text-center text-sm text-zinc-500">
+                <div className="border-t border-gray-100 mt-6 pt-5 text-center text-sm text-gray-500">
                   {t('have_account', 'Already have an account?')}{' '}
-                  <Link to="/login" className="text-zinc-950 hover:text-zinc-700 font-semibold underline-offset-2 hover:underline">
+                  <Link to="/login" className="text-gray-900 hover:text-gray-700 font-semibold underline-offset-2 hover:underline">
                     {t('login_btn', 'Sign In')}
                   </Link>
                 </div>
@@ -282,9 +282,9 @@ export function RequestAccess() {
           </div>
 
           {/* ---------- Trust panel ---------- */}
-          <aside className="bg-white rounded-2xl border border-zinc-200 p-6 sm:p-7 lg:sticky lg:top-24">
-            <h2 className="text-sm font-bold text-zinc-950 font-heading mb-5 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-blue-600" />
+          <aside className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-7 lg:sticky lg:top-24">
+            <h2 className="text-sm font-bold text-gray-900 font-heading mb-5 flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-primary-600" />
               {t('request_what_happens', 'What happens next')}
             </h2>
 
@@ -307,27 +307,27 @@ export function RequestAccess() {
                 }
               ].map((step, index) => (
                 <li key={step.title} className="flex gap-3.5">
-                  <span className="flex-shrink-0 w-8 h-8 rounded-lg bg-zinc-950 text-white flex items-center justify-center">
+                  <span className="flex-shrink-0 w-8 h-8 rounded-lg bg-primary-600 text-white flex items-center justify-center">
                     <step.icon className="w-4 h-4" />
                   </span>
                   <div>
-                    <p className="text-xs font-bold text-zinc-900">
+                    <p className="text-xs font-bold text-gray-900">
                       {index + 1}. {step.title}
                     </p>
-                    <p className="text-xs text-zinc-500 mt-1 leading-relaxed">{step.body}</p>
+                    <p className="text-xs text-gray-500 mt-1 leading-relaxed">{step.body}</p>
                   </div>
                 </li>
               ))}
             </ol>
 
-            <div className="mt-6 pt-5 border-t border-zinc-100 flex items-start gap-2.5 text-[11px] text-zinc-500">
-              <Clock3 className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-zinc-400" />
+            <div className="mt-6 pt-5 border-t border-gray-100 flex items-start gap-2.5 text-[11px] text-gray-500">
+              <Clock3 className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-gray-500" />
               <span>{t('request_sla', 'Typical turnaround: one working day, Monday to Saturday.')}</span>
             </div>
           </aside>
         </div>
 
-        <div className="mt-6 flex items-center justify-center gap-1.5 text-[11px] text-zinc-400 font-medium">
+        <div className="mt-6 flex items-center justify-center gap-1.5 text-[11px] text-gray-500 font-medium">
           <ShieldCheck className="w-3.5 h-3.5" />
           <span>{t('request_privacy', 'Your details are used for onboarding only')}</span>
         </div>

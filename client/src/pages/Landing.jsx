@@ -84,13 +84,16 @@ export function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-zinc-900 selection:bg-zinc-900 selection:text-white overflow-x-hidden">
+    <div className="min-h-screen bg-white text-gray-900 selection:bg-primary-600 selection:text-white overflow-x-hidden">
       {/* ===== Top Language Bar ===== */}
-      <div className="bg-white/85 backdrop-blur-md border-b border-zinc-200/70 py-2 sticky top-16 z-30">
+      {/* top-0, not top-16: this page's wrapper sets overflow-x-hidden, which
+          makes it the sticky container, so a 4rem offset left a white band
+          above the bar even before scrolling. */}
+      <div className="bg-white/85 backdrop-blur-md border-b border-gray-200/70 py-2 sticky top-0 z-30">
         <Container>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5">
-            <div className="flex items-center gap-2 text-xs font-semibold text-zinc-600">
-              <Globe className="w-3.5 h-3.5 text-zinc-500" />
+            <div className="flex items-center gap-2 text-xs font-semibold text-gray-600">
+              <Globe className="w-3.5 h-3.5 text-gray-500" />
               <span>{t('choose_language', 'Available in 6 Regional Languages')}</span>
             </div>
             <div className="w-full sm:w-auto flex justify-center">
@@ -100,50 +103,44 @@ export function Landing() {
         </Container>
       </div>
 
-      {/* ===== HERO — dark premium with ambient gradient glow ===== */}
-      <section className="relative bg-zinc-950 overflow-hidden">
-        {/* Ambient gradient orbs */}
+      {/* ===== HERO — teal → orange brand gradient with ambient glow ===== */}
+      <section className="hero-texture relative bg-gradient-to-br from-[#063b35] via-[#0a5a52] to-primary-700 overflow-hidden">
+        {/* Just the gradient and a faint grain. No colour blobs, no grid lines,
+            no decorative overlays — each one is another thing that competes with
+            the headline and makes the page read as a template. */}
         <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-          <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[500px] rounded-full bg-blue-600/20 blur-[120px]"></div>
-          <div className="absolute top-1/3 -right-32 w-[500px] h-[400px] rounded-full bg-indigo-500/15 blur-[100px]"></div>
-          <div className="absolute -bottom-40 -left-32 w-[500px] h-[400px] rounded-full bg-emerald-500/10 blur-[100px]"></div>
-          {/* Fine grid texture */}
-          <div
-            className="absolute inset-0 opacity-[0.04]"
-            style={{
-              backgroundImage: 'linear-gradient(rgba(255,255,255,.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px)',
-              backgroundSize: '56px 56px'
-            }}
-          ></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
         </div>
 
         <Container className="relative">
           <div className="max-w-4xl mx-auto text-center pt-20 pb-24 sm:pt-28 sm:pb-32">
             {/* Trust Pill */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/[0.06] border border-white/10 rounded-full text-xs font-medium text-zinc-300 backdrop-blur-sm mb-8">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/20 border border-white/25 rounded-full text-xs font-medium text-white backdrop-blur-sm mb-8">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 ring-4 ring-emerald-300/20"></span>
               <span>{t('zero_commission_badge')}</span>
               <button
                 type="button"
                 onClick={speakIntro}
-                className="ml-1 pl-2.5 border-l border-white/10 inline-flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors"
+                className="ml-1 pl-2.5 border-l border-white/25 inline-flex items-center gap-1.5 text-primary-50 hover:text-white transition-colors"
                 title={t('listen', 'Listen to audio overview')}
               >
-                <Volume2 className={`w-3.5 h-3.5 ${isSpeakingIntro ? 'text-blue-400 animate-bounce' : ''}`} />
+                <Volume2 className={`w-3.5 h-3.5 ${isSpeakingIntro ? 'text-primary-400 animate-bounce' : ''}`} />
                 <span>{isSpeakingIntro ? (t('playing') || 'Playing...') : (t('listen') || 'Listen')}</span>
               </button>
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-white tracking-tight font-heading leading-[1.05] mb-7">
+            <h1 className="text-[2.15rem] sm:text-6xl lg:text-[4.25rem] font-bold text-white font-heading leading-[1.04] mb-6">
               {t('hero_headline_1', 'Your craft. Your store.')} <br className="hidden sm:inline" />
-              <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-emerald-300 bg-clip-text text-transparent">
+              {/* Solid, warm — a gradient-filled headline is the single most
+                  recognisable "generated landing page" cliché. */}
+              <span className="text-accent-200">
                 {t('hero_headline_2', 'Zero commission.')}
               </span>
             </h1>
 
             {/* Subheading */}
-            <p className="text-base sm:text-lg lg:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed mb-10 font-light">
+            <p className="text-base sm:text-lg text-primary-50/90 max-w-xl mx-auto leading-relaxed mb-10">
               {t('hero_sub', 'Transform handmade goods and retail stock into an enterprise-grade digital catalog in seconds. Voice-activated in regional languages.')}
             </p>
 
@@ -153,7 +150,7 @@ export function Landing() {
                 type="button"
                 onClick={handleQuickDemo}
                 disabled={demoLoading}
-                className="group w-full sm:w-auto inline-flex items-center justify-center gap-2.5 py-3.5 px-8 text-sm font-semibold rounded-xl bg-white text-zinc-950 shadow-[0_8px_30px_-6px_rgba(255,255,255,0.25)] hover:shadow-[0_12px_40px_-6px_rgba(255,255,255,0.35)] hover:-translate-y-0.5 transition-all min-h-[50px] disabled:opacity-60"
+                className="group w-full sm:w-auto inline-flex items-center justify-center gap-2.5 py-3.5 px-8 text-sm font-semibold rounded-xl bg-white text-gray-900 shadow-lg hover:bg-gray-50 hover:-translate-y-0.5 transition-all min-h-[50px] disabled:opacity-60"
               >
                 <Zap className="w-4 h-4 text-amber-500" />
                 <span>{demoLoading ? (t('loading') || 'Launching...') : (t('try_demo', 'Try Interactive Demo Store'))}</span>
@@ -173,22 +170,22 @@ export function Landing() {
             <div className="mt-16 pt-10 border-t border-white/[0.08] grid grid-cols-3 gap-5 max-w-2xl mx-auto text-center">
               <div>
                 <p className="text-2xl sm:text-3xl font-bold text-white font-heading">6</p>
-                <p className="text-[11px] sm:text-xs text-zinc-500 font-medium mt-1 uppercase tracking-wider">{t('metric_languages', 'Indian Languages')}</p>
+                <p className="text-[11px] sm:text-xs text-primary-100/80 font-medium mt-1">{t('metric_languages', 'Indian Languages')}</p>
               </div>
               <div>
                 <p className="text-2xl sm:text-3xl font-bold text-white font-heading">0%</p>
-                <p className="text-[11px] sm:text-xs text-zinc-500 font-medium mt-1 uppercase tracking-wider">{t('metric_commission', 'Sales Commission')}</p>
+                <p className="text-[11px] sm:text-xs text-primary-100/80 font-medium mt-1">{t('metric_commission', 'Sales Commission')}</p>
               </div>
               <div>
                 <p className="text-2xl sm:text-3xl font-bold text-white font-heading">{t('metric_direct', 'Direct')}</p>
-                <p className="text-[11px] sm:text-xs text-zinc-500 font-medium mt-1 uppercase tracking-wider">{t('metric_upi', 'UPI & WhatsApp')}</p>
+                <p className="text-[11px] sm:text-xs text-primary-100/80 font-medium mt-1">{t('metric_upi', 'UPI & WhatsApp')}</p>
               </div>
             </div>
           </div>
         </Container>
 
-        {/* Bottom fade into next section */}
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent"></div>
+        {/* The teal ends on a clean edge. A white fade here only ever looked
+            like a haze sitting on top of the section. */}
       </section>
 
       {/* ===== 3 Feature Pillars ===== */}
@@ -196,14 +193,14 @@ export function Landing() {
         <Container>
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-14">
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-blue-600 bg-blue-50 border border-blue-100 px-3 py-1 rounded-full mb-4">
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold tracking-normal text-primary-600 bg-primary-50 border border-primary-100 px-3 py-1 rounded-full mb-4">
                 <Sparkles className="w-3 h-3" />
                 {t('ai_powered', 'AI-Powered')}
               </span>
-              <h2 className="text-3xl sm:text-4xl font-bold text-zinc-950 tracking-tight font-heading">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight font-heading">
                 {t('powerful_features', 'Engineered for speed and simplicity')}
               </h2>
-              <p className="text-sm sm:text-base text-zinc-500 mt-3 max-w-xl mx-auto">
+              <p className="text-sm sm:text-base text-gray-500 mt-3 max-w-xl mx-auto">
                 {t('features_subtitle', 'Everything you need to run your digital storefront with zero technical barriers.')}
               </p>
             </div>
@@ -215,17 +212,17 @@ export function Landing() {
                 className="card-enterprise p-7 cursor-pointer group flex flex-col justify-between"
               >
                 <div>
-                  <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-5 ring-1 ring-blue-100 group-hover:ring-blue-200 group-hover:scale-105 transition-all">
+                  <div className="w-11 h-11 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center mb-5 ring-1 ring-primary-100 group-hover:ring-primary-200 group-hover:scale-105 transition-all">
                     <Mic className="w-5 h-5 stroke-[2.2]" />
                   </div>
-                  <h3 className="text-lg font-bold text-zinc-950 font-heading mb-2">
+                  <h3 className="text-lg font-bold text-gray-900 font-heading mb-2">
                     {t('feature_voice_title', 'Voice-to-Catalog')}
                   </h3>
-                  <p className="text-sm text-zinc-600 leading-relaxed">
+                  <p className="text-sm text-gray-600 leading-relaxed">
                     {t('feature_voice_desc', 'Simply speak in your language. AI drafts full titles, descriptions, and pricing.')}
                   </p>
                 </div>
-                <span className="text-sm font-semibold text-blue-600 inline-flex items-center gap-1.5 mt-6 group-hover:gap-2.5 transition-all">
+                <span className="text-sm font-semibold text-primary-600 inline-flex items-center gap-1.5 mt-6 group-hover:gap-2.5 transition-all">
                   {t('card_voice_cta', 'Try Voice Copilot')} <ArrowRight className="w-4 h-4" />
                 </span>
               </Link>
@@ -239,10 +236,10 @@ export function Landing() {
                   <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-5 ring-1 ring-emerald-100 group-hover:ring-emerald-200 group-hover:scale-105 transition-all">
                     <Camera className="w-5 h-5 stroke-[2.2]" />
                   </div>
-                  <h3 className="text-lg font-bold text-zinc-950 font-heading mb-2">
+                  <h3 className="text-lg font-bold text-gray-900 font-heading mb-2">
                     {t('feature_photo_title', 'AI Vision Studio')}
                   </h3>
-                  <p className="text-sm text-zinc-600 leading-relaxed">
+                  <p className="text-sm text-gray-600 leading-relaxed">
                     {t('feature_photo_desc', 'Upload a craft photo. AI identifies materials, category, and fair market pricing.')}
                   </p>
                 </div>
@@ -257,17 +254,17 @@ export function Landing() {
                 className="card-enterprise p-7 cursor-pointer group flex flex-col justify-between"
               >
                 <div>
-                  <div className="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-5 ring-1 ring-purple-100 group-hover:ring-purple-200 group-hover:scale-105 transition-all">
+                  <div className="w-11 h-11 rounded-xl bg-accent-50 text-accent-600 flex items-center justify-center mb-5 ring-1 ring-accent-100 group-hover:ring-accent-200 group-hover:scale-105 transition-all">
                     <Share2 className="w-5 h-5 stroke-[2.2]" />
                   </div>
-                  <h3 className="text-lg font-bold text-zinc-950 font-heading mb-2">
+                  <h3 className="text-lg font-bold text-gray-900 font-heading mb-2">
                     {t('nav_market_channels', 'Multi-Channel Export')}
                   </h3>
-                  <p className="text-sm text-zinc-600 leading-relaxed">
+                  <p className="text-sm text-gray-600 leading-relaxed">
                     {t('feature_share_desc', 'Share your catalog link on WhatsApp, Facebook, or any platform to reach customers.')}
                   </p>
                 </div>
-                <span className="text-sm font-semibold text-purple-600 inline-flex items-center gap-1.5 mt-6 group-hover:gap-2.5 transition-all">
+                <span className="text-sm font-semibold text-accent-700 inline-flex items-center gap-1.5 mt-6 group-hover:gap-2.5 transition-all">
                   {t('card_export_cta', 'View Channels')} <ArrowRight className="w-4 h-4" />
                 </span>
               </Link>
@@ -277,19 +274,19 @@ export function Landing() {
       </section>
 
       {/* ===== Live Storefront Showcase ===== */}
-      <section className="pb-20 sm:pb-28 bg-gradient-to-b from-white to-zinc-50">
+      <section className="pb-20 sm:pb-28 bg-gradient-to-b from-white to-gray-50">
         <Container>
           <div className="max-w-5xl mx-auto">
-            <div className="rounded-2xl border border-zinc-200 bg-white shadow-[0_20px_60px_-20px_rgba(0,0,0,0.12)] overflow-hidden">
+            <div className="rounded-2xl border border-gray-200 bg-white shadow-[0_20px_60px_-20px_rgba(0,0,0,0.12)] overflow-hidden">
               {/* Storefront header bar */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-6 sm:px-8 py-6 border-b border-zinc-100 bg-gradient-to-r from-zinc-50/80 to-white">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-6 sm:px-8 py-6 border-b border-gray-100 bg-gradient-to-r from-gray-50/80 to-white">
                 <div className="flex items-center gap-3.5">
-                  <div className="w-11 h-11 rounded-xl bg-zinc-950 text-white flex items-center justify-center ring-1 ring-zinc-800">
+                  <div className="w-11 h-11 rounded-xl bg-primary-600 text-white flex items-center justify-center ring-1 ring-primary-600">
                     <Store className="w-5 h-5 stroke-[2]" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-base sm:text-lg font-bold text-zinc-950 font-heading">
+                      <h3 className="text-base sm:text-lg font-bold text-gray-900 font-heading">
                         {t('showcase_store_name', 'Ramesh Handicrafts & Potteries')}
                       </h3>
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -297,7 +294,7 @@ export function Landing() {
                         {t('showcase_verified', 'Verified Seller')}
                       </span>
                     </div>
-                    <p className="text-xs text-zinc-500 mt-0.5">
+                    <p className="text-xs text-gray-500 mt-0.5">
                       {t('showcase_sub', 'Live shareable buyer storefront · Direct UPI payments enabled')}
                     </p>
                   </div>
@@ -316,33 +313,33 @@ export function Landing() {
               {/* 3 Real Catalog Products */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 p-6 sm:p-8">
                 {/* Product 1 */}
-                <div className="group bg-white border border-zinc-200 rounded-xl overflow-hidden hover:border-zinc-300 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
-                  <div className="aspect-square bg-zinc-100 relative overflow-hidden">
+                <div className="group bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+                  <div className="aspect-square bg-gray-100 relative overflow-hidden">
                     <img
                       src="https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=500&q=80"
                       alt="Terracotta Chai Cups"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
-                    <span className="absolute top-2.5 left-2.5 px-2.5 py-1 bg-zinc-950/75 backdrop-blur-sm text-white text-[10px] font-semibold rounded-md">
+                    <span className="absolute top-2.5 left-2.5 px-2.5 py-1 bg-gray-900/75 backdrop-blur-sm text-white text-[10px] font-semibold rounded-md">
                       Mitti Pottery
                     </span>
                   </div>
                   <div className="p-4 flex flex-col justify-between flex-1">
                     <div>
-                      <h4 className="font-semibold text-zinc-950 text-sm mb-1 line-clamp-1">
+                      <h4 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-1">
                         Terracotta Chai Kulhad (Set of 6)
                       </h4>
-                      <p className="text-xs text-zinc-500 line-clamp-2 mb-3">
+                      <p className="text-xs text-gray-500 line-clamp-2 mb-3">
                         Handmade clay tea cups with natural earthy aroma. 100% eco-friendly.
                       </p>
                     </div>
-                    <div className="pt-3 border-t border-zinc-100 flex items-center justify-between">
-                      <span className="text-base font-bold text-zinc-950">₹170</span>
+                    <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
+                      <span className="text-base font-bold text-gray-900">₹170</span>
                       <a
                         href="https://wa.me/?text=Namaste,%20I%20want%20to%20order%20Terracotta%20Chai%20Kulhad"
                         target="_blank"
                         rel="noreferrer"
-                        className="px-3.5 py-2 bg-zinc-950 hover:bg-zinc-800 text-white font-medium text-xs rounded-lg flex items-center gap-1.5 transition-colors"
+                        className="px-3.5 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium text-xs rounded-lg flex items-center gap-1.5 transition-colors"
                       >
                         <MessageCircle className="w-3.5 h-3.5" />
                         <span>{t('order', 'Order')}</span>
@@ -352,33 +349,33 @@ export function Landing() {
                 </div>
 
                 {/* Product 2 */}
-                <div className="group bg-white border border-zinc-200 rounded-xl overflow-hidden hover:border-zinc-300 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
-                  <div className="aspect-square bg-zinc-100 relative overflow-hidden">
+                <div className="group bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+                  <div className="aspect-square bg-gray-100 relative overflow-hidden">
                     <img
                       src="https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=500&q=80"
                       alt="Khadi Handloom Kurta"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
-                    <span className="absolute top-2.5 left-2.5 px-2.5 py-1 bg-zinc-950/75 backdrop-blur-sm text-white text-[10px] font-semibold rounded-md">
+                    <span className="absolute top-2.5 left-2.5 px-2.5 py-1 bg-gray-900/75 backdrop-blur-sm text-white text-[10px] font-semibold rounded-md">
                       Handloom
                     </span>
                   </div>
                   <div className="p-4 flex flex-col justify-between flex-1">
                     <div>
-                      <h4 className="font-semibold text-zinc-950 text-sm mb-1 line-clamp-1">
+                      <h4 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-1">
                         Pure Khadi Handloom Cotton Kurta
                       </h4>
-                      <p className="text-xs text-zinc-500 line-clamp-2 mb-3">
+                      <p className="text-xs text-gray-500 line-clamp-2 mb-3">
                         Comfortable handspun khadi kurta dyed with traditional indigo colors.
                       </p>
                     </div>
-                    <div className="pt-3 border-t border-zinc-100 flex items-center justify-between">
-                      <span className="text-base font-bold text-zinc-950">₹860</span>
+                    <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
+                      <span className="text-base font-bold text-gray-900">₹860</span>
                       <a
                         href="https://wa.me/?text=Namaste,%20I%20want%20to%20order%20Khadi%20Kurta"
                         target="_blank"
                         rel="noreferrer"
-                        className="px-3.5 py-2 bg-zinc-950 hover:bg-zinc-800 text-white font-medium text-xs rounded-lg flex items-center gap-1.5 transition-colors"
+                        className="px-3.5 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium text-xs rounded-lg flex items-center gap-1.5 transition-colors"
                       >
                         <MessageCircle className="w-3.5 h-3.5" />
                         <span>{t('order', 'Order')}</span>
@@ -388,33 +385,33 @@ export function Landing() {
                 </div>
 
                 {/* Product 3 */}
-                <div className="group bg-white border border-zinc-200 rounded-xl overflow-hidden hover:border-zinc-300 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
-                  <div className="aspect-square bg-zinc-100 relative overflow-hidden">
+                <div className="group bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+                  <div className="aspect-square bg-gray-100 relative overflow-hidden">
                     <img
                       src="https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=500&q=80"
                       alt="Wooden Bowl"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
-                    <span className="absolute top-2.5 left-2.5 px-2.5 py-1 bg-zinc-950/75 backdrop-blur-sm text-white text-[10px] font-semibold rounded-md">
+                    <span className="absolute top-2.5 left-2.5 px-2.5 py-1 bg-gray-900/75 backdrop-blur-sm text-white text-[10px] font-semibold rounded-md">
                       Woodcraft
                     </span>
                   </div>
                   <div className="p-4 flex flex-col justify-between flex-1">
                     <div>
-                      <h4 className="font-semibold text-zinc-950 text-sm mb-1 line-clamp-1">
+                      <h4 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-1">
                         Hand-Carved Sheesham Wooden Bowl
                       </h4>
-                      <p className="text-xs text-zinc-500 line-clamp-2 mb-3">
+                      <p className="text-xs text-gray-500 line-clamp-2 mb-3">
                         Traditional carved bowl polished with organic beeswax for food safety.
                       </p>
                     </div>
-                    <div className="pt-3 border-t border-zinc-100 flex items-center justify-between">
-                      <span className="text-base font-bold text-zinc-950">₹470</span>
+                    <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
+                      <span className="text-base font-bold text-gray-900">₹470</span>
                       <a
                         href="https://wa.me/?text=Namaste,%20I%20want%20to%20order%20Sheesham%20Wooden%20Bowl"
                         target="_blank"
                         rel="noreferrer"
-                        className="px-3.5 py-2 bg-zinc-950 hover:bg-zinc-800 text-white font-medium text-xs rounded-lg flex items-center gap-1.5 transition-colors"
+                        className="px-3.5 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium text-xs rounded-lg flex items-center gap-1.5 transition-colors"
                       >
                         <MessageCircle className="w-3.5 h-3.5" />
                         <span>{t('order', 'Order')}</span>

@@ -1,5 +1,6 @@
 const express = require('express');
 const db = require('../db');
+const { formatProductRecord } = require('../lib/productMeta');
 
 const router = express.Router();
 
@@ -35,13 +36,19 @@ router.get('/:userId', async (req, res) => {
         : [];
       payment = {
         upi: Array.isArray(upiData) ? upiData.filter(u => u && u.upiId) : [],
-        qr: paymentSettings.qrCodeUrl
+        qr: paymentSettings.qrCodeUrl,
+        // The buyer's "Order on WhatsApp" button needs a real destination.
+        phone: user.phone || paymentSettings.phoneNumber || null
       };
+    } else if (user.phone) {
+      // No payment row yet, but the seller may still have a WhatsApp number.
+      payment = { upi: [], qr: null, phone: user.phone };
     }
 
     res.json({
       seller: { name: user.name, id: user.id },
-      products: products || [],
+      // Public buyers must never receive the raw `<!--META:...-->` blob.
+      products: (products || []).map(formatProductRecord),
       payment,
       catalogUrl: `/catalog/${user.id}`
     });

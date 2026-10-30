@@ -213,20 +213,20 @@ export function AddProduct() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900 pb-16">
+    <div className="min-h-screen bg-gray-50 text-gray-900 pb-16">
       {/* Header Banner */}
-      <div className="bg-white border-b border-zinc-200 py-3.5 px-4 sticky top-16 z-30 shadow-2xs">
+      <div className="bg-white border-b border-gray-200 py-3.5 px-4 sticky top-16 z-30 shadow-2xs">
         <Container className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/dashboard')}
-              className="p-2 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-md transition-colors"
+              className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
             <div>
-              <h1 className="text-lg font-semibold text-zinc-900 tracking-tight">{t('add_new_product') || 'Add New Product'}</h1>
-              <p className="text-xs text-zinc-500 font-medium">Step {step} of 2: {step === 1 ? t('step_voice_desc') : t('step_review_desc')}</p>
+              <h1 className="text-lg font-semibold text-gray-900 tracking-tight">{t('add_new_product') || 'Add New Product'}</h1>
+              <p className="text-xs text-gray-500 font-medium">Step {step} of 2: {step === 1 ? t('step_voice_desc') : t('step_review_desc')}</p>
             </div>
           </div>
 
@@ -237,8 +237,8 @@ export function AddProduct() {
               onClick={() => setStep(1)}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all min-h-[36px] ${
                 step === 1 
-                  ? 'bg-zinc-900 text-white shadow-xs' 
-                  : 'bg-white text-zinc-700 border border-zinc-200 hover:bg-zinc-50'
+                  ? 'bg-primary-600 text-white shadow-xs' 
+                  : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
               }`}
             >
               {t('step_voice_input')}
@@ -251,8 +251,8 @@ export function AddProduct() {
               }}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all min-h-[36px] ${
                 step === 2 
-                  ? 'bg-zinc-900 text-white shadow-xs' 
-                  : 'bg-white text-zinc-700 border border-zinc-200 hover:bg-zinc-50'
+                  ? 'bg-primary-600 text-white shadow-xs' 
+                  : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
               }`}
             >
               {t('step_review_confirm')}
@@ -272,8 +272,8 @@ export function AddProduct() {
               <div className="merchant-card p-5 space-y-5">
                 {/* Language Picker */}
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <Languages className="w-3.5 h-3.5 text-zinc-700" />
+                  <label className="block text-xs font-semibold text-gray-600 tracking-normal mb-2 flex items-center gap-1.5">
+                    <Languages className="w-3.5 h-3.5 text-gray-700" />
                     {t('select_language') || 'Language Spoken'}
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -284,25 +284,25 @@ export function AddProduct() {
                         onClick={() => setFormData(prev => ({ ...prev, language: lang.value }))}
                         className={`p-2.5 rounded-md border text-left transition-all min-h-[44px] ${
                           formData.language === lang.value
-                            ? 'border-zinc-900 bg-zinc-900 text-white font-medium shadow-2xs'
-                            : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300'
+                            ? 'border-primary-600 bg-primary-600 text-white font-medium shadow-2xs'
+                            : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
                         }`}
                       >
                         <div className="font-semibold text-xs">{lang.native}</div>
-                        <div className={`text-[10px] ${formData.language === lang.value ? 'text-zinc-300' : 'text-zinc-500'}`}>{lang.label}</div>
+                        <div className={`text-[10px] ${formData.language === lang.value ? 'text-gray-300' : 'text-gray-500'}`}>{lang.label}</div>
                       </button>
                     ))}
                   </div>
                 </div>
 
                 {/* Voice Input Section */}
-                <div className="bg-zinc-50/70 border border-zinc-200/80 p-5 rounded-lg text-center space-y-2.5">
+                <div className="bg-gray-50/70 border border-gray-200/80 p-5 rounded-lg text-center space-y-2.5">
                   <div className="flex items-center justify-center gap-2 mb-0.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
-                    <span className="text-xs font-semibold text-zinc-800 uppercase tracking-wider">{t('tap_mic_speak')}</span>
+                    <span className="text-xs font-semibold text-gray-800 tracking-normal">{t('tap_mic_speak')}</span>
                   </div>
                   <VoiceInput onTranscript={handleVoiceTranscript} language={formData.language} />
-                  <p className="text-xs text-zinc-500 max-w-sm mx-auto">
+                  <p className="text-xs text-gray-500 max-w-sm mx-auto">
                     {t('voice_tip')}
                   </p>
                 </div>
@@ -310,13 +310,13 @@ export function AddProduct() {
                 {/* Description Input Box */}
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-xs font-semibold text-zinc-700 uppercase tracking-wider">
+                    <label className="text-xs font-semibold text-gray-700 tracking-normal">
                       {t('product_description_input') || 'Product Description (Voice Transcript / Text)'}
                     </label>
                     <button
                       type="button"
                       onClick={() => setShowKeyboard(!showKeyboard)}
-                      className="text-xs text-zinc-700 hover:text-zinc-900 flex items-center gap-1 font-medium hover:underline"
+                      className="text-xs text-gray-700 hover:text-gray-900 flex items-center gap-1 font-medium hover:underline"
                     >
                       <Keyboard className="w-3.5 h-3.5" />
                       {showKeyboard ? t('hide_keyboard') || 'Hide Keyboard' : t('show_keyboard') || 'Regional Keyboard'}
@@ -328,7 +328,7 @@ export function AddProduct() {
                     onChange={(e) => setPromptText(e.target.value)}
                     placeholder="Speak into microphone or type your product details here..."
                     rows={4}
-                    className="w-full p-3 bg-white border border-zinc-200 rounded-md text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-900 focus:border-zinc-900"
+                    className="w-full p-3 bg-white border border-gray-200 rounded-md text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-600"
                   />
                 </div>
 
@@ -339,37 +339,37 @@ export function AddProduct() {
                 {/* Photo Upload Section & Studio Action */}
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-xs font-semibold text-zinc-700 uppercase tracking-wider">
+                    <label className="text-xs font-semibold text-gray-700 tracking-normal">
                       {t('product_image_optional') || 'Product Photo (Optional)'}
                     </label>
                     {productImage && (
                       <button
                         type="button"
                         onClick={() => setIsStudioOpen(true)}
-                        className="text-xs font-medium text-zinc-800 hover:text-zinc-900 flex items-center gap-1 bg-zinc-100 px-2.5 py-1 rounded-md border border-zinc-200 transition-colors"
+                        className="text-xs font-medium text-gray-800 hover:text-gray-900 flex items-center gap-1 bg-gray-100 px-2.5 py-1 rounded-md border border-gray-200 transition-colors"
                       >
-                        <Sparkles className="w-3.5 h-3.5 text-zinc-700" />
-                        Enhance in AI Studio
+                        <Sparkles className="w-3.5 h-3.5 text-gray-700" />
+                        {t('enhance_ai_studio')}
                       </button>
                     )}
                   </div>
 
                   {productImage ? (
-                    <div className="relative inline-block border border-zinc-200 rounded-lg bg-white p-2">
+                    <div className="relative inline-block border border-gray-200 rounded-lg bg-white p-2">
                       <img src={productImage} alt="Product preview" className="h-36 w-36 object-cover rounded-md" />
                       <button
                         type="button"
                         onClick={removeImage}
-                        className="absolute -top-2 -right-2 bg-zinc-900 text-white p-1 rounded-full text-xs shadow-xs hover:bg-zinc-800"
+                        className="absolute -top-2 -right-2 bg-primary-600 text-white p-1 rounded-full text-xs shadow-xs hover:bg-primary-700"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   ) : (
-                    <label className="border border-dashed border-zinc-300 hover:border-zinc-400 bg-zinc-50/50 p-6 rounded-lg flex flex-col items-center justify-center cursor-pointer transition-colors">
-                      <Upload className="w-6 h-6 text-zinc-500 mb-2" />
-                      <span className="text-xs font-semibold text-zinc-800">{t('upload_photo') || 'Upload Product Photo'}</span>
-                      <span className="text-[11px] text-zinc-400 mt-0.5">PNG, JPG, WebP up to 10MB</span>
+                    <label className="border border-dashed border-gray-300 hover:border-gray-400 bg-gray-50/50 p-6 rounded-lg flex flex-col items-center justify-center cursor-pointer transition-colors">
+                      <Upload className="w-6 h-6 text-gray-500 mb-2" />
+                      <span className="text-xs font-semibold text-gray-800">{t('upload_photo') || 'Upload Product Photo'}</span>
+                      <span className="text-[11px] text-gray-400 mt-0.5">PNG, JPG, WebP up to 10MB</span>
                       <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                     </label>
                   )}
@@ -382,49 +382,49 @@ export function AddProduct() {
                   disabled={generating || !promptText.trim()}
                   className="w-full btn-primary py-2.5 text-sm font-semibold shadow-xs disabled:opacity-50"
                 >
-                  <Sparkles className="w-4 h-4 mr-1.5 text-zinc-300" />
+                  <Sparkles className="w-4 h-4 mr-1.5 text-gray-300" />
                   {generating ? (t('generating_details') || 'Creating Smart Listing...') : (t('generate_details') || 'Generate Product Listing')}
                 </button>
               </div>
             ) : (
               /* Step 2 Form Review */
               <form onSubmit={handleSubmit} className="merchant-card p-5 space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-zinc-100">
-                  <h2 className="text-sm font-semibold text-zinc-900 flex items-center gap-2">
+                <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                  <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                     {t('step_review_desc')}
                   </h2>
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="text-xs text-zinc-600 hover:text-zinc-900 hover:underline font-medium"
+                    className="text-xs text-gray-600 hover:text-gray-900 hover:underline font-medium"
                   >
                     {t('back_to_voice')}
                   </button>
                 </div>
 
                 {/* Trust Status Selector */}
-                <div className="p-3 bg-zinc-50 border border-zinc-200/80 rounded-md space-y-2">
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-600 block">{t('seller_verification_state')}</span>
+                <div className="p-3 bg-gray-50 border border-gray-200/80 rounded-md space-y-2">
+                  <span className="text-[11px] font-semibold tracking-normal text-gray-600 block">{t('seller_verification_state')}</span>
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, confirmationState: 'seller_confirmed' }))}
                       className={`flex-1 py-1.5 px-3 rounded-md text-xs font-medium border transition-all flex items-center justify-center gap-1.5 min-h-[38px] ${
                         formData.confirmationState === 'seller_confirmed'
-                          ? 'bg-zinc-900 text-white border-zinc-900 shadow-2xs'
-                          : 'bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-50'
+                          ? 'bg-primary-600 text-white border-primary-600 shadow-2xs'
+                          : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
                       }`}
                     >
-                      <Check className="w-3.5 h-3.5 text-emerald-400" /> ✓ {t('confirmed_items')}
+                      <Check className="w-3.5 h-3.5 text-emerald-400" /> {t('confirmed_items')}
                     </button>
                     <button
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, confirmationState: 'needs_review' }))}
                       className={`flex-1 py-1.5 px-3 rounded-md text-xs font-medium border transition-all flex items-center justify-center gap-1.5 min-h-[38px] ${
                         formData.confirmationState === 'needs_review'
-                          ? 'bg-zinc-900 text-white border-zinc-900 shadow-2xs'
-                          : 'bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-50'
+                          ? 'bg-primary-600 text-white border-primary-600 shadow-2xs'
+                          : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
                       }`}
                     >
                       <Clock className="w-3.5 h-3.5 text-amber-400" /> {t('needs_review_items')}
@@ -433,14 +433,14 @@ export function AddProduct() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-700 uppercase tracking-wider mb-1.5">{t('product_name')}</label>
+                  <label className="block text-xs font-semibold text-gray-700 tracking-normal mb-1.5">{t('product_name')}</label>
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="Enter clear, professional title"
-                    className="w-full p-2.5 bg-white border border-zinc-200 rounded-md text-sm font-medium text-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900 focus:border-zinc-900 min-h-[40px]"
+                    className="w-full p-2.5 bg-white border border-gray-200 rounded-md text-sm font-medium text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-600 min-h-[40px]"
                     required
                   />
                   {fieldErrors.name && <p className="text-xs text-rose-600 mt-1">{fieldErrors.name}</p>}
@@ -448,12 +448,12 @@ export function AddProduct() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   <div>
-                    <label className="block text-xs font-semibold text-zinc-700 uppercase tracking-wider mb-1.5">{t('category')}</label>
+                    <label className="block text-xs font-semibold text-gray-700 tracking-normal mb-1.5">{t('category')}</label>
                     <select
                       name="category"
                       value={formData.category}
                       onChange={handleChange}
-                      className="w-full p-2.5 bg-white border border-zinc-200 rounded-md text-sm text-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900 focus:border-zinc-900 min-h-[40px]"
+                      className="w-full p-2.5 bg-white border border-gray-200 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-600 min-h-[40px]"
                       required
                     >
                       {categoryOptions.map(cat => (
@@ -464,13 +464,13 @@ export function AddProduct() {
 
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-xs font-semibold text-zinc-700 uppercase tracking-wider">{t('price_label')} (₹)</label>
+                      <label className="text-xs font-semibold text-gray-700 tracking-normal">{t('price_label')} (₹)</label>
                       <button
                         type="button"
                         onClick={() => setIsPricingOpen(true)}
-                        className="text-xs font-medium text-zinc-700 hover:text-zinc-900 flex items-center gap-1 hover:underline"
+                        className="text-xs font-medium text-gray-700 hover:text-gray-900 flex items-center gap-1 hover:underline"
                       >
-                        <Calculator className="w-3.5 h-3.5 text-zinc-500" />
+                        <Calculator className="w-3.5 h-3.5 text-gray-500" />
                         {t('pricing_calculator')}
                       </button>
                     </div>
@@ -482,7 +482,7 @@ export function AddProduct() {
                       placeholder="e.g. 850"
                       step="0.01"
                       min="0"
-                      className="w-full p-2.5 bg-white border border-zinc-200 rounded-md text-sm font-semibold font-mono text-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900 focus:border-zinc-900 min-h-[40px]"
+                      className="w-full p-2.5 bg-white border border-gray-200 rounded-md text-sm font-semibold font-mono text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-600 min-h-[40px]"
                       required
                     />
                     {fieldErrors.price && <p className="text-xs text-rose-600 mt-1">{fieldErrors.price}</p>}
@@ -490,14 +490,14 @@ export function AddProduct() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-700 uppercase tracking-wider mb-1.5">{t('product_description_input')}</label>
+                  <label className="block text-xs font-semibold text-gray-700 tracking-normal mb-1.5">{t('product_description_input')}</label>
                   <textarea
                     name="description"
                     value={formData.description}
                     onChange={handleChange}
                     placeholder="Product features, dimensions, material..."
                     rows={4}
-                    className="w-full p-2.5 bg-white border border-zinc-200 rounded-md text-sm text-zinc-900 leading-relaxed focus:outline-none focus:ring-1 focus:ring-zinc-900 focus:border-zinc-900"
+                    className="w-full p-2.5 bg-white border border-gray-200 rounded-md text-sm text-gray-900 leading-relaxed focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-600"
                     required
                   />
                   {fieldErrors.description && <p className="text-xs text-rose-600 mt-1">{fieldErrors.description}</p>}
@@ -506,39 +506,39 @@ export function AddProduct() {
                 {/* Photo & Image Studio Action in Step 2 */}
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-xs font-semibold text-zinc-700 uppercase tracking-wider">{t('product_image_optional')}</label>
+                    <label className="text-xs font-semibold text-gray-700 tracking-normal">{t('product_image_optional')}</label>
                     {productImage && (
                       <button
                         type="button"
                         onClick={() => setIsStudioOpen(true)}
-                        className="text-xs font-medium text-zinc-800 hover:text-zinc-900 flex items-center gap-1 bg-zinc-100 px-2 py-1 rounded-md border border-zinc-200 transition-colors"
+                        className="text-xs font-medium text-gray-800 hover:text-gray-900 flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-md border border-gray-200 transition-colors"
                       >
-                        <Sparkles className="w-3.5 h-3.5 text-zinc-600" />
+                        <Sparkles className="w-3.5 h-3.5 text-gray-600" />
                         {t('enhance_ai_studio')}
                       </button>
                     )}
                   </div>
                   {productImage ? (
-                    <div className="relative inline-block border border-zinc-200 rounded-md bg-zinc-50 p-2">
+                    <div className="relative inline-block border border-gray-200 rounded-md bg-gray-50 p-2">
                       <img src={productImage} alt="Product" className="h-24 w-24 object-cover rounded" />
                       <button
                         type="button"
                         onClick={removeImage}
-                        className="absolute -top-2 -right-2 bg-zinc-900 text-white p-1 rounded-full text-xs hover:bg-zinc-800 shadow-xs"
+                        className="absolute -top-2 -right-2 bg-primary-600 text-white p-1 rounded-full text-xs hover:bg-primary-700 shadow-xs"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   ) : (
-                    <label className="border border-dashed border-zinc-300 hover:border-zinc-400 bg-zinc-50/50 p-3.5 rounded-md flex items-center justify-center gap-2 cursor-pointer transition-colors">
-                      <Upload className="w-4 h-4 text-zinc-500" />
-                      <span className="text-xs font-medium text-zinc-700">{t('upload_photo')}</span>
+                    <label className="border border-dashed border-gray-300 hover:border-gray-400 bg-gray-50/50 p-3.5 rounded-md flex items-center justify-center gap-2 cursor-pointer transition-colors">
+                      <Upload className="w-4 h-4 text-gray-500" />
+                      <span className="text-xs font-medium text-gray-700">{t('upload_photo')}</span>
                       <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                     </label>
                   )}
                 </div>
 
-                <div className="flex gap-2.5 pt-3 border-t border-zinc-100">
+                <div className="flex gap-2.5 pt-3 border-t border-gray-100">
                   <button
                     type="button"
                     onClick={() => setStep(1)}
@@ -551,7 +551,7 @@ export function AddProduct() {
                     disabled={loading}
                     className="btn-primary flex-1 py-2 text-xs font-semibold shadow-xs disabled:opacity-50"
                   >
-                    {loading ? t('saving_to_catalog') : (t('add_to_catalog') || '✓ Save to Catalog')}
+                    {loading ? t('saving_to_catalog') : (t('add_to_catalog') || 'Save to Catalog')}
                   </button>
                 </div>
               </form>
@@ -561,9 +561,9 @@ export function AddProduct() {
           {/* Right Column: Customer Card Preview (5 cols) */}
           <div className="lg:col-span-5 space-y-4">
             <div className="merchant-card p-4 sticky top-28">
-              <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-zinc-100">
-                <h3 className="text-xs font-semibold text-zinc-700 uppercase tracking-wider flex items-center gap-1.5">
-                  <ShoppingBag className="w-3.5 h-3.5 text-zinc-700" />
+              <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-gray-100">
+                <h3 className="text-xs font-semibold text-gray-700 tracking-normal flex items-center gap-1.5">
+                  <ShoppingBag className="w-3.5 h-3.5 text-gray-700" />
                   {t('live_buyer_preview')}
                 </h3>
                 <span className="badge-confirmed text-[10px]">
@@ -572,18 +572,18 @@ export function AddProduct() {
               </div>
 
               {/* Customer E-Commerce Card */}
-              <div className="bg-white border border-zinc-200/90 rounded-lg overflow-hidden shadow-2xs">
-                <div className="relative aspect-square w-full bg-zinc-100 flex items-center justify-center overflow-hidden">
+              <div className="bg-white border border-gray-200/90 rounded-lg overflow-hidden shadow-2xs">
+                <div className="relative aspect-square w-full bg-gray-100 flex items-center justify-center overflow-hidden">
                   {formData.imageUrl ? (
                     <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" />
                   ) : (
-                    <div className="flex flex-col items-center justify-center p-6 text-center text-zinc-400">
-                      <ShoppingBag className="w-8 h-8 mb-1 stroke-[1.5] text-zinc-300" />
+                    <div className="flex flex-col items-center justify-center p-6 text-center text-gray-400">
+                      <ShoppingBag className="w-8 h-8 mb-1 stroke-[1.5] text-gray-300" />
                       <span className="text-xs font-medium">{t('add_photo_preview')}</span>
                     </div>
                   )}
                   {formData.category && (
-                    <span className="absolute top-2.5 left-2.5 bg-white/95 text-zinc-800 border border-zinc-200 px-2 py-0.5 rounded text-[11px] font-medium">
+                    <span className="absolute top-2.5 left-2.5 bg-white/95 text-gray-800 border border-gray-200 px-2 py-0.5 rounded text-[11px] font-medium">
                       {formData.category}
                     </span>
                   )}
@@ -595,16 +595,16 @@ export function AddProduct() {
                 </div>
 
                 <div className="p-3.5 space-y-2">
-                  <h4 className="text-sm font-semibold text-zinc-900 tracking-tight leading-snug line-clamp-2">
+                  <h4 className="text-sm font-semibold text-gray-900 tracking-tight leading-snug line-clamp-2">
                     {formData.name || t('sample_product_title')}
                   </h4>
 
-                  <p className="text-xs text-zinc-500 line-clamp-2 leading-relaxed">
+                  <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
                     {formData.description || t('sample_product_desc')}
                   </p>
 
                   <div className="flex items-baseline gap-2 pt-0.5">
-                    <span className="text-xl font-bold text-zinc-900 font-mono">
+                    <span className="text-xl font-bold text-gray-900 font-mono">
                       ₹{formData.price || '0.00'}
                     </span>
                   </div>
@@ -614,7 +614,7 @@ export function AddProduct() {
                     <button
                       type="button"
                       disabled
-                      className="w-full py-2 bg-zinc-900 text-white font-medium text-xs rounded-md flex items-center justify-center gap-1.5 shadow-2xs opacity-95 cursor-default"
+                      className="w-full py-2 bg-primary-600 text-white font-medium text-xs rounded-md flex items-center justify-center gap-1.5 shadow-2xs opacity-95 cursor-default"
                     >
                       <Share2 className="w-3.5 h-3.5" />
                       {t('order_via_whatsapp')}

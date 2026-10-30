@@ -88,19 +88,19 @@ function PlatformChannelHub() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900 pb-16">
-      <div className="bg-white border-b border-zinc-200 py-5 px-4 shadow-2xs">
+    <div className="min-h-screen bg-gray-50 text-gray-900 pb-16">
+      <div className="bg-white border-b border-gray-200 py-5 px-4 shadow-2xs">
         <Container>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-950 text-amber-400">
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-gray-900 text-amber-400">
                   <ShieldCheck className="w-3 h-3" />
                   {t('admin_channels_badge', 'Platform Channels')}
                 </span>
               </div>
-              <h1 className="text-xl font-semibold text-zinc-900 tracking-tight">{t('admin_channels_title', 'Channel Integrations')}</h1>
-              <p className="text-xs text-zinc-500 mt-0.5 max-w-2xl">{t('admin_channels_sub', 'Every storefront and marketplace this platform is wired into. Sellers manage their own channels — this is the platform view.')}</p>
+              <h1 className="text-xl font-semibold text-gray-900 tracking-tight">{t('admin_channels_title', 'Channel Integrations')}</h1>
+              <p className="text-xs text-gray-500 mt-0.5 max-w-2xl">{t('admin_channels_sub', 'Every storefront and marketplace this platform is wired into. Sellers manage their own channels — this is the platform view.')}</p>
             </div>
             <button type="button" onClick={() => navigate('/admin?tab=overview')} className="btn-secondary text-xs font-medium py-2 px-3.5 self-start">
               {t('admin_title', 'Admin Portal')}
@@ -113,22 +113,22 @@ function PlatformChannelHub() {
         {/* Platform counts — the numbers an administrator can act on */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="card-enterprise p-5">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{t('admin_stat_sellers', 'Active Sellers')}</p>
-            <p className="text-2xl font-bold text-zinc-950 font-heading mt-1">{stats?.sellers ?? '—'}</p>
+            <p className="text-[11px] font-bold tracking-normal text-gray-500">{t('admin_stat_sellers', 'Active Sellers')}</p>
+            <p className="text-2xl font-bold text-gray-900 font-heading mt-1">{stats?.sellers ?? '—'}</p>
           </div>
           <div className="card-enterprise p-5">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{t('admin_channels_products', 'Products platform-wide')}</p>
-            <p className="text-2xl font-bold text-zinc-950 font-heading mt-1">{stats?.products ?? '—'}</p>
+            <p className="text-[11px] font-bold tracking-normal text-gray-500">{t('admin_channels_products', 'Products platform-wide')}</p>
+            <p className="text-2xl font-bold text-gray-900 font-heading mt-1">{stats?.products ?? '—'}</p>
           </div>
           <div className="card-enterprise p-5">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{t('admin_channels_shopify_linked', 'Linked to Shopify')}</p>
-            <p className="text-2xl font-bold text-zinc-950 font-heading mt-1">{loading ? '—' : linkedCount}</p>
+            <p className="text-[11px] font-bold tracking-normal text-gray-500">{t('admin_channels_shopify_linked', 'Linked to Shopify')}</p>
+            <p className="text-2xl font-bold text-gray-900 font-heading mt-1">{loading ? '—' : linkedCount}</p>
           </div>
         </div>
 
         <div className="space-y-3">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-600 flex items-center gap-2">
-            <Layers className="w-3.5 h-3.5 text-zinc-700" />
+          <h2 className="text-xs font-semibold tracking-normal text-gray-600 flex items-center gap-2">
+            <Layers className="w-3.5 h-3.5 text-gray-700" />
             {t('export_platforms_title')}
           </h2>
 
@@ -145,10 +145,10 @@ function PlatformChannelHub() {
                 </span>
               </div>
               <div>
-                <h3 className="font-semibold text-zinc-900 text-sm">{t('shopify_storefront', 'Shopify Storefront')}</h3>
-                <p className="text-xs text-zinc-500 leading-relaxed mt-0.5">{t('admin_channels_shopify_note', 'Configured platform-wide. Sellers publish their own verified catalogs — administrators do not sync on their behalf.')}</p>
-                <div className="mt-2 text-[11px] text-zinc-500 flex items-center gap-1 font-mono bg-zinc-50 p-1.5 rounded border border-zinc-200/80">
-                  <Store className="w-3 h-3 text-zinc-400 shrink-0" />
+                <h3 className="font-semibold text-gray-900 text-sm">{t('shopify_storefront', 'Shopify Storefront')}</h3>
+                <p className="text-xs text-gray-500 leading-relaxed mt-0.5">{t('admin_channels_shopify_note', 'Configured platform-wide. Sellers publish their own verified catalogs — administrators do not sync on their behalf.')}</p>
+                <div className="mt-2 text-[11px] text-gray-500 flex items-center gap-1 font-mono bg-gray-50 p-1.5 rounded border border-gray-200/80">
+                  <Store className="w-3 h-3 text-gray-400 shrink-0" />
                   <span className="truncate">{shopifyStatus?.storeDomain || 'digital-catalog-agent.myshopify.com'}</span>
                 </div>
               </div>
@@ -157,16 +157,16 @@ function PlatformChannelHub() {
             {/* Data export — read-only, the whole platform */}
             <div className="merchant-card p-5 space-y-4">
               <div className="flex items-center justify-between">
-                <div className="w-9 h-9 rounded-md bg-zinc-900 text-white flex items-center justify-center">
+                <div className="w-9 h-9 rounded-md bg-primary-600 text-white flex items-center justify-center">
                   <FileSpreadsheet className="w-4 h-4" />
                 </div>
                 <span className="badge-ai text-[10px]">CSV / Excel</span>
               </div>
               <div>
-                <h3 className="font-semibold text-zinc-900 text-sm">{t('admin_channels_export', 'Export platform catalog')}</h3>
-                <p className="text-xs text-zinc-500 leading-relaxed mt-0.5">{t('admin_channels_export_desc', 'Download every product across all sellers as CSV, with its owner and Shopify link.')}</p>
+                <h3 className="font-semibold text-gray-900 text-sm">{t('admin_channels_export', 'Export platform catalog')}</h3>
+                <p className="text-xs text-gray-500 leading-relaxed mt-0.5">{t('admin_channels_export_desc', 'Download every product across all sellers as CSV, with its owner and Shopify link.')}</p>
               </div>
-              <div className="pt-3 border-t border-zinc-100">
+              <div className="pt-3 border-t border-gray-100">
                 <button
                   type="button"
                   onClick={downloadPlatformCsv}
@@ -183,12 +183,12 @@ function PlatformChannelHub() {
             <div className="merchant-card p-5 space-y-4 md:col-span-2">
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-md bg-zinc-900 text-white flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-md bg-primary-600 text-white flex items-center justify-center">
                     <Store className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-zinc-900 text-sm">{t('admin_channels_storefronts', 'Seller storefronts')}</h3>
-                    <p className="text-xs text-zinc-500">{t('admin_channels_storefronts_sub', 'Every seller publishes a public catalog that buyers can open and order from.')}</p>
+                    <h3 className="font-semibold text-gray-900 text-sm">{t('admin_channels_storefronts', 'Seller storefronts')}</h3>
+                    <p className="text-xs text-gray-500">{t('admin_channels_storefronts_sub', 'Every seller publishes a public catalog that buyers can open and order from.')}</p>
                   </div>
                 </div>
                 <button type="button" onClick={() => navigate('/admin?tab=sellers')} className="btn-secondary text-xs py-1.5 px-3 flex items-center gap-1.5">
@@ -198,29 +198,29 @@ function PlatformChannelHub() {
               </div>
 
               {loading ? (
-                <div className="flex items-center gap-2 text-xs text-zinc-500 py-2">
+                <div className="flex items-center gap-2 text-xs text-gray-500 py-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   {t('loading')}
                 </div>
               ) : sellers.length === 0 ? (
-                <p className="text-xs text-zinc-500 py-2">{t('admin_channels_no_sellers', 'No sellers have been onboarded yet.')}</p>
+                <p className="text-xs text-gray-500 py-2">{t('admin_channels_no_sellers', 'No sellers have been onboarded yet.')}</p>
               ) : (
-                <div className="divide-y divide-zinc-100 border border-zinc-200/80 rounded-lg overflow-hidden">
+                <div className="divide-y divide-gray-100 border border-gray-200/80 rounded-lg overflow-hidden">
                   {sellers.slice(0, 8).map((seller) => (
                     <div key={seller.id} className="flex items-center justify-between gap-3 px-3.5 py-2.5 bg-white">
                       <div className="min-w-0">
-                        <p className="text-xs font-semibold text-zinc-900 truncate">{seller.name || seller.email}</p>
-                        <p className="text-[11px] text-zinc-500 truncate">{seller.email}</p>
+                        <p className="text-xs font-semibold text-gray-900 truncate">{seller.name || seller.email}</p>
+                        <p className="text-[11px] text-gray-500 truncate">{seller.email}</p>
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
-                        <span className="text-[11px] text-zinc-500 font-medium">
+                        <span className="text-[11px] text-gray-500 font-medium">
                           {seller.productCount ?? 0} {t('products_count', 'products')}
                         </span>
                         <a
                           href={`/catalog/${seller.id}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-1 rounded border border-blue-200 hover:bg-blue-100 transition-colors"
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary-700 bg-primary-50 px-2 py-1 rounded border border-primary-200 hover:bg-primary-100 transition-colors"
                           title={t('admin_channels_view_storefront', 'Open this seller\'s public storefront')}
                         >
                           {t('admin_channels_view_storefront', 'Storefront')}
@@ -238,50 +238,50 @@ function PlatformChannelHub() {
         {/* Marketplace readiness is a platform concern, not a checklist for one seller */}
         <div className="space-y-3 pt-2">
           <div className="flex items-center justify-between">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-600 flex items-center gap-2">
-              <Globe className="w-3.5 h-3.5 text-zinc-600" />
+            <h2 className="text-xs font-semibold tracking-normal text-gray-600 flex items-center gap-2">
+              <Globe className="w-3.5 h-3.5 text-gray-600" />
               {t('admin_channels_gov_title', 'Government & Marketplace Channels')}
             </h2>
-            <span className="text-[11px] text-zinc-500 font-medium">{t('admin_channels_readiness', 'Platform readiness')}</span>
+            <span className="text-[11px] text-gray-500 font-medium">{t('admin_channels_readiness', 'Platform readiness')}</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-white border border-zinc-200/90 rounded-lg p-4 space-y-2.5 shadow-2xs">
+            <div className="bg-white border border-gray-200/90 rounded-lg p-4 space-y-2.5 shadow-2xs">
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-zinc-900 text-xs">ONDC (Open Network for Digital Commerce)</span>
+                <span className="font-semibold text-gray-900 text-xs">ONDC (Open Network for Digital Commerce)</span>
                 <span className="badge-review text-[10px]">{t('admin_channels_planned', 'Planned Integration')}</span>
               </div>
-              <p className="text-xs text-zinc-500 leading-relaxed">{t('admin_channels_ondc_desc', 'Listing sellers on the open protocol network that reaches buyers across Paytm, Magicpin and pincode-level demand.')}</p>
-              <div className="space-y-1 text-xs text-zinc-600 bg-zinc-50 p-2.5 rounded-md border border-zinc-200/80">
-                <span className="text-[10px] font-semibold text-zinc-500 uppercase block">{t('admin_channels_checklist', 'Platform Readiness')}</span>
+              <p className="text-xs text-gray-500 leading-relaxed">{t('admin_channels_ondc_desc', 'Listing sellers on the open protocol network that reaches buyers across Paytm, Magicpin and pincode-level demand.')}</p>
+              <div className="space-y-1 text-xs text-gray-600 bg-gray-50 p-2.5 rounded-md border border-gray-200/80">
+                <span className="text-[11px] font-semibold text-gray-500 block">{t('admin_channels_checklist', 'Platform Readiness')}</span>
                 <div className="flex items-center gap-1.5 text-emerald-700 font-medium text-[11px]">
                   <CheckCircle2 className="w-3 h-3 text-emerald-600" /> {t('admin_channels_ready_format', 'Digital Product Record Format Ready')}
                 </div>
-                <div className="flex items-center gap-1.5 text-zinc-500 text-[11px]">
-                  <Clock className="w-3 h-3 text-zinc-400" /> {t('admin_channels_todo_adapter', 'ONDC Network Participant (SNP) adapter')}
+                <div className="flex items-center gap-1.5 text-gray-500 text-[11px]">
+                  <Clock className="w-3 h-3 text-gray-400" /> {t('admin_channels_todo_adapter', 'ONDC Network Participant (SNP) adapter')}
                 </div>
-                <div className="flex items-center gap-1.5 text-zinc-500 text-[11px]">
-                  <Clock className="w-3 h-3 text-zinc-400" /> {t('admin_channels_todo_logistics', 'Pincode logistics provider integration')}
+                <div className="flex items-center gap-1.5 text-gray-500 text-[11px]">
+                  <Clock className="w-3 h-3 text-gray-400" /> {t('admin_channels_todo_logistics', 'Pincode logistics provider integration')}
                 </div>
               </div>
             </div>
 
-            <div className="bg-white border border-zinc-200/90 rounded-lg p-4 space-y-2.5 shadow-2xs">
+            <div className="bg-white border border-gray-200/90 rounded-lg p-4 space-y-2.5 shadow-2xs">
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-zinc-900 text-xs">GeM (Government e-Marketplace)</span>
+                <span className="font-semibold text-gray-900 text-xs">GeM (Government e-Marketplace)</span>
                 <span className="badge-review text-[10px]">{t('admin_channels_planned', 'Planned Integration')}</span>
               </div>
-              <p className="text-xs text-zinc-500 leading-relaxed">{t('admin_channels_gem_desc', 'Connecting sellers to public sector units and government procurement offices.')}</p>
-              <div className="space-y-1 text-xs text-zinc-600 bg-zinc-50 p-2.5 rounded-md border border-zinc-200/80">
-                <span className="text-[10px] font-semibold text-zinc-500 uppercase block">{t('admin_channels_checklist', 'Platform Readiness')}</span>
+              <p className="text-xs text-gray-500 leading-relaxed">{t('admin_channels_gem_desc', 'Connecting sellers to public sector units and government procurement offices.')}</p>
+              <div className="space-y-1 text-xs text-gray-600 bg-gray-50 p-2.5 rounded-md border border-gray-200/80">
+                <span className="text-[11px] font-semibold text-gray-500 block">{t('admin_channels_checklist', 'Platform Readiness')}</span>
                 <div className="flex items-center gap-1.5 text-emerald-700 font-medium text-[11px]">
                   <CheckCircle2 className="w-3 h-3 text-emerald-600" /> {t('admin_channels_ready_taxonomy', 'Reusable Product Title & Category Taxonomy')}
                 </div>
-                <div className="flex items-center gap-1.5 text-zinc-500 text-[11px]">
-                  <Clock className="w-3 h-3 text-zinc-400" /> {t('admin_channels_todo_kyc', 'GeM seller ID & PAN validation')}
+                <div className="flex items-center gap-1.5 text-gray-500 text-[11px]">
+                  <Clock className="w-3 h-3 text-gray-400" /> {t('admin_channels_todo_kyc', 'GeM seller ID & PAN validation')}
                 </div>
-                <div className="flex items-center gap-1.5 text-zinc-500 text-[11px]">
-                  <Clock className="w-3 h-3 text-zinc-400" /> {t('admin_channels_todo_hsn', 'HSN / SAC code harmonization')}
+                <div className="flex items-center gap-1.5 text-gray-500 text-[11px]">
+                  <Clock className="w-3 h-3 text-gray-400" /> {t('admin_channels_todo_hsn', 'HSN / SAC code harmonization')}
                 </div>
               </div>
             </div>
@@ -399,9 +399,9 @@ function SellerChannelHub() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900 pb-16">
+    <div className="min-h-screen bg-gray-50 text-gray-900 pb-16">
       {/* Header */}
-      <div className="bg-white border-b border-zinc-200 py-5 px-4 shadow-2xs">
+      <div className="bg-white border-b border-gray-200 py-5 px-4 shadow-2xs">
         <Container>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -410,14 +410,14 @@ function SellerChannelHub() {
                   <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Multi-Channel Hub
                 </span>
               </div>
-              <h1 className="text-xl font-semibold text-zinc-900 tracking-tight">{t('export_channels_title')}</h1>
-              <p className="text-xs text-zinc-500 mt-0.5">
+              <h1 className="text-xl font-semibold text-gray-900 tracking-tight">{t('export_channels_title')}</h1>
+              <p className="text-xs text-gray-500 mt-0.5">
                 {t('export_channels_sub')}
               </p>
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-xs font-medium px-3 py-1 bg-zinc-100 rounded-md text-zinc-700 border border-zinc-200">
+              <span className="text-xs font-medium px-3 py-1 bg-gray-100 rounded-md text-gray-700 border border-gray-200">
                 {products.length} {t('products_count') || 'Products Ready'}
               </span>
             </div>
@@ -429,8 +429,8 @@ function SellerChannelHub() {
         <div className="space-y-6">
           {/* Active Channels Section */}
           <div className="space-y-3">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-600 flex items-center gap-2">
-              <Layers className="w-3.5 h-3.5 text-zinc-700" />
+            <h2 className="text-xs font-semibold tracking-normal text-gray-600 flex items-center gap-2">
+              <Layers className="w-3.5 h-3.5 text-gray-700" />
               {t('export_platforms_title')}
             </h2>
 
@@ -439,7 +439,7 @@ function SellerChannelHub() {
               <div className="merchant-card p-5 flex flex-col justify-between space-y-4">
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <div className="w-9 h-9 rounded-md bg-zinc-900 text-white flex items-center justify-center">
+                    <div className="w-9 h-9 rounded-md bg-primary-600 text-white flex items-center justify-center">
                       <Store className="w-4 h-4" />
                     </div>
                     <span className="badge-confirmed text-[10px]">
@@ -447,15 +447,15 @@ function SellerChannelHub() {
                     </span>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-zinc-900 text-sm">{t('store_preview_title')}</h3>
-                    <p className="text-xs text-zinc-500 leading-relaxed mt-0.5">
+                    <h3 className="font-semibold text-gray-900 text-sm">{t('store_preview_title')}</h3>
+                    <p className="text-xs text-gray-500 leading-relaxed mt-0.5">
                       {t('browse_catalog_desc')}
                     </p>
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-zinc-100 space-y-2">
-                  <div className="p-2 bg-zinc-50 border border-zinc-200/80 rounded-md text-[11px] font-mono text-zinc-600 truncate">
+                <div className="pt-3 border-t border-gray-100 space-y-2">
+                  <div className="p-2 bg-gray-50 border border-gray-200/80 rounded-md text-[11px] font-mono text-gray-600 truncate">
                     {shareLink}
                   </div>
                   <div className="flex gap-2">
@@ -483,7 +483,7 @@ function SellerChannelHub() {
               <div className="merchant-card p-5 flex flex-col justify-between space-y-4">
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <div className="w-9 h-9 rounded-md bg-zinc-900 text-white flex items-center justify-center">
+                    <div className="w-9 h-9 rounded-md bg-primary-600 text-white flex items-center justify-center">
                       <MessageCircle className="w-4 h-4" />
                     </div>
                     <span className="badge-confirmed text-[10px]">
@@ -491,14 +491,14 @@ function SellerChannelHub() {
                     </span>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-zinc-900 text-sm">{t('whatsapp_orders')}</h3>
-                    <p className="text-xs text-zinc-500 leading-relaxed mt-0.5">
+                    <h3 className="font-semibold text-gray-900 text-sm">{t('whatsapp_orders')}</h3>
+                    <p className="text-xs text-gray-500 leading-relaxed mt-0.5">
                       {t('whatsapp_broadcast_desc')}
                     </p>
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-zinc-100">
+                <div className="pt-3 border-t border-gray-100">
                   <button
                     type="button"
                     onClick={copyWhatsAppBroadcast}
@@ -523,20 +523,20 @@ function SellerChannelHub() {
                     </span>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-zinc-900 text-sm flex items-center gap-1.5">
+                    <h3 className="font-semibold text-gray-900 text-sm flex items-center gap-1.5">
                       {t('shopify_storefront', 'Shopify Storefront')}
                     </h3>
-                    <p className="text-xs text-zinc-500 leading-relaxed mt-0.5">
+                    <p className="text-xs text-gray-500 leading-relaxed mt-0.5">
                       Sync your verified catalog directly to your Shopify store. Products receive live links and variant pricing.
                     </p>
-                    <div className="mt-2 text-[11px] text-zinc-500 flex items-center gap-1 font-mono bg-zinc-50 p-1.5 rounded border border-zinc-200/80 truncate">
-                      <Store className="w-3 h-3 text-zinc-400 shrink-0" />
+                    <div className="mt-2 text-[11px] text-gray-500 flex items-center gap-1 font-mono bg-gray-50 p-1.5 rounded border border-gray-200/80 truncate">
+                      <Store className="w-3 h-3 text-gray-400 shrink-0" />
                       <span className="truncate">{shopifyStatus?.storeDomain || 'digital-catalog-agent.myshopify.com'}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-zinc-100 space-y-2.5">
+                <div className="pt-3 border-t border-gray-100 space-y-2.5">
                   {shopifySync.result && (
                     <div className="p-2.5 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-md text-xs space-y-1.5">
                       <div className="flex items-center gap-1.5 font-medium">
@@ -583,7 +583,7 @@ function SellerChannelHub() {
               <div className="merchant-card p-5 flex flex-col justify-between space-y-4">
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <div className="w-9 h-9 rounded-md bg-zinc-900 text-white flex items-center justify-center">
+                    <div className="w-9 h-9 rounded-md bg-primary-600 text-white flex items-center justify-center">
                       <FileSpreadsheet className="w-4 h-4" />
                     </div>
                     <span className="badge-ai text-[10px]">
@@ -591,14 +591,14 @@ function SellerChannelHub() {
                     </span>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-zinc-900 text-sm">{t('download_csv')}</h3>
-                    <p className="text-xs text-zinc-500 leading-relaxed mt-0.5">
+                    <h3 className="font-semibold text-gray-900 text-sm">{t('download_csv')}</h3>
+                    <p className="text-xs text-gray-500 leading-relaxed mt-0.5">
                       {t('export_csv_desc')}
                     </p>
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-zinc-100">
+                <div className="pt-3 border-t border-gray-100">
                   <button
                     type="button"
                     onClick={downloadCSV}
@@ -616,60 +616,60 @@ function SellerChannelHub() {
           {/* Planned Marketplaces & Government Channels */}
           <div className="space-y-3 pt-2">
             <div className="flex items-center justify-between">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-600 flex items-center gap-2">
-                <Globe className="w-3.5 h-3.5 text-zinc-600" />
+              <h2 className="text-xs font-semibold tracking-normal text-gray-600 flex items-center gap-2">
+                <Globe className="w-3.5 h-3.5 text-gray-600" />
                 Government & Marketplace Channels
               </h2>
-              <span className="text-[11px] text-zinc-500 font-medium">Compliance Readiness</span>
+              <span className="text-[11px] text-gray-500 font-medium">Compliance Readiness</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* ONDC Channel Card */}
-              <div className="bg-white border border-zinc-200/90 rounded-lg p-4 space-y-2.5 shadow-2xs">
+              <div className="bg-white border border-gray-200/90 rounded-lg p-4 space-y-2.5 shadow-2xs">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-zinc-900 text-xs">ONDC (Open Network for Digital Commerce)</span>
+                  <span className="font-semibold text-gray-900 text-xs">ONDC (Open Network for Digital Commerce)</span>
                   <span className="badge-review text-[10px]">
                     Planned Integration
                   </span>
                 </div>
-                <p className="text-xs text-zinc-500 leading-relaxed">
+                <p className="text-xs text-gray-500 leading-relaxed">
                   Direct listing on the open protocol network connecting buyers from Paytm, Magicpin, and pincode-level buyers.
                 </p>
-                <div className="space-y-1 text-xs text-zinc-600 bg-zinc-50 p-2.5 rounded-md border border-zinc-200/80">
-                  <span className="text-[10px] font-semibold text-zinc-500 uppercase block">Seller Onboarding Checklist:</span>
+                <div className="space-y-1 text-xs text-gray-600 bg-gray-50 p-2.5 rounded-md border border-gray-200/80">
+                  <span className="text-[11px] font-semibold text-gray-500 block">Seller onboarding checklist</span>
                   <div className="flex items-center gap-1.5 text-emerald-700 font-medium text-[11px]">
                     <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Digital Product Record Format Ready
                   </div>
-                  <div className="flex items-center gap-1.5 text-zinc-500 text-[11px]">
-                    <Clock className="w-3 h-3 text-zinc-400" /> ONDC Seller Network Participant (SNP) Adapter
+                  <div className="flex items-center gap-1.5 text-gray-500 text-[11px]">
+                    <Clock className="w-3 h-3 text-gray-400" /> ONDC Seller Network Participant (SNP) Adapter
                   </div>
-                  <div className="flex items-center gap-1.5 text-zinc-500 text-[11px]">
-                    <Clock className="w-3 h-3 text-zinc-400" /> Pincode Logistics Provider Integration
+                  <div className="flex items-center gap-1.5 text-gray-500 text-[11px]">
+                    <Clock className="w-3 h-3 text-gray-400" /> Pincode Logistics Provider Integration
                   </div>
                 </div>
               </div>
 
               {/* GeM Channel Card */}
-              <div className="bg-white border border-zinc-200/90 rounded-lg p-4 space-y-2.5 shadow-2xs">
+              <div className="bg-white border border-gray-200/90 rounded-lg p-4 space-y-2.5 shadow-2xs">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-zinc-900 text-xs">GeM (Government e-Marketplace)</span>
+                  <span className="font-semibold text-gray-900 text-xs">GeM (Government e-Marketplace)</span>
                   <span className="badge-review text-[10px]">
                     Planned Integration
                   </span>
                 </div>
-                <p className="text-xs text-zinc-500 leading-relaxed">
+                <p className="text-xs text-gray-500 leading-relaxed">
                   Supply handmade and artisan products directly to public sector units and government procurement offices.
                 </p>
-                <div className="space-y-1 text-xs text-zinc-600 bg-zinc-50 p-2.5 rounded-md border border-zinc-200/80">
-                  <span className="text-[10px] font-semibold text-zinc-500 uppercase block">Seller Onboarding Checklist:</span>
+                <div className="space-y-1 text-xs text-gray-600 bg-gray-50 p-2.5 rounded-md border border-gray-200/80">
+                  <span className="text-[11px] font-semibold text-gray-500 block">Seller onboarding checklist</span>
                   <div className="flex items-center gap-1.5 text-emerald-700 font-medium text-[11px]">
                     <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Reusable Product Title & Category Taxonomy
                   </div>
-                  <div className="flex items-center gap-1.5 text-zinc-500 text-[11px]">
-                    <Clock className="w-3 h-3 text-zinc-400" /> GeM Primary Seller ID & PAN Validation
+                  <div className="flex items-center gap-1.5 text-gray-500 text-[11px]">
+                    <Clock className="w-3 h-3 text-gray-400" /> GeM Primary Seller ID & PAN Validation
                   </div>
-                  <div className="flex items-center gap-1.5 text-zinc-500 text-[11px]">
-                    <Clock className="w-3 h-3 text-zinc-400" /> HSN / SAC Code Harmonization
+                  <div className="flex items-center gap-1.5 text-gray-500 text-[11px]">
+                    <Clock className="w-3 h-3 text-gray-400" /> HSN / SAC Code Harmonization
                   </div>
                 </div>
               </div>

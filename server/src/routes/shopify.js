@@ -1,5 +1,6 @@
 const express = require('express');
 const db = require('../db');
+const { formatProductRecord } = require('../lib/productMeta');
 const { logAudit } = require('../lib/audit');
 const jwt = require('jsonwebtoken');
 
@@ -63,7 +64,9 @@ router.post('/sync', requireAuth, async (req, res) => {
 
     const syncedResults = [];
 
-    for (const product of targetProducts) {
+    for (const rawProduct of targetProducts) {
+      // Strip the embedded metadata comment before it reaches Shopify.
+      const product = formatProductRecord(rawProduct);
       const slug = (product.name || 'product')
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')

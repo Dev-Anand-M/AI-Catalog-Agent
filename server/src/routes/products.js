@@ -2,63 +2,12 @@ const express = require('express');
 const db = require('../db');
 const authMiddleware = require('../middleware/auth');
 const { logAudit } = require('../lib/audit');
+const { formatProductRecord, serializeProductRecord } = require('../lib/productMeta');
 
 const router = express.Router();
 
 // All routes require authentication
 router.use(authMiddleware);
-
-// Helper functions to unpack/pack rich product metadata safely
-function formatProductRecord(product) {
-  if (!product) return product;
-  let cleanDesc = product.description || '';
-  let meta = {};
-
-  const metaMatch = cleanDesc.match(/<!--META:([\s\S]*?)-->/);
-  if (metaMatch) {
-    try {
-      meta = JSON.parse(metaMatch[1]);
-      cleanDesc = cleanDesc.replace(/<!--META:[\s\S]*?-->/, '').trim();
-    } catch (e) {
-      console.error('Failed to parse product metadata:', e.message);
-    }
-  }
-
-  return {
-    ...product,
-    description: cleanDesc,
-    confirmationState: meta.confirmationState || product.confirmationState || 'seller_confirmed',
-    status: meta.status || product.status || 'active',
-    attributes: meta.attributes || product.attributes || {},
-    tags: meta.tags || product.tags || [product.category, product.language].filter(Boolean),
-    costBreakdown: meta.costBreakdown || product.costBreakdown || null,
-    media: meta.media || (product.imageUrl ? [product.imageUrl] : [])
-  };
-}
-
-function serializeProductRecord(data) {
-  const { confirmationState, costBreakdown, attributes, tags, media, status, description, ...rest } = data;
-  const hasMeta = confirmationState || costBreakdown || attributes || tags || media || status;
-  
-  let finalDesc = (description || '').trim();
-  if (hasMeta) {
-    finalDesc = finalDesc.replace(/<!--META:[\s\S]*?-->/, '').trim();
-    const meta = {
-      confirmationState: confirmationState || 'seller_confirmed',
-      status: status || 'active',
-      attributes: attributes || {},
-      tags: tags || [],
-      costBreakdown: costBreakdown || null,
-      media: media || []
-    };
-    finalDesc = `${finalDesc}\n<!--META:${JSON.stringify(meta)}-->`;
-  }
-
-  return {
-    ...rest,
-    description: finalDesc
-  };
-}
 
 // GET /api/products - List user's products
 router.get('/', async (req, res) => {

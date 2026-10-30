@@ -211,17 +211,17 @@ export function CentralAssistantModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm">
-      <div className="bg-white rounded-xl max-w-xl w-full border border-zinc-200/90 shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div className="bg-white rounded-xl max-w-xl w-full border border-gray-200/90 shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="p-4 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
+        <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-zinc-900 text-white flex items-center justify-center shadow-2xs">
+            <div className="w-8 h-8 rounded-lg bg-primary-600 text-white flex items-center justify-center shadow-2xs">
               <Sparkles className="w-4 h-4 stroke-[2]" />
             </div>
             <div>
-              <h3 className="font-semibold text-zinc-950 text-sm">{t('central_assistant_title')}</h3>
-              <p className="text-[11px] text-zinc-500">
+              <h3 className="font-semibold text-gray-900 text-sm">{t('central_assistant_title')}</h3>
+              <p className="text-[11px] text-gray-500">
                 {isAdmin
                   ? t('admin_assistant_sub', 'Platform assistant — opens console sections and reports live platform numbers')
                   : t('central_assistant_sub')}
@@ -230,7 +230,7 @@ export function CentralAssistantModal({
           </div>
           <button 
             onClick={onClose}
-            className="p-1.5 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 rounded-md transition-colors"
+            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -240,7 +240,7 @@ export function CentralAssistantModal({
         <div className="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1">
           {/* Voice & Text Input Box */}
           <div className="space-y-1.5">
-            <label className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+            <label className="text-[11px] font-semibold tracking-normal text-gray-400">
               {t('assistant_prompt_label')}
             </label>
             <div className="relative flex items-center">
@@ -254,7 +254,7 @@ export function CentralAssistantModal({
                     ? t('admin_assistant_placeholder', 'Ask about the platform — sellers, requests, logs…')
                     : (t('assistant_placeholder') || 'Ask anything about your catalog...')
                 }
-                className="w-full pl-3 pr-24 py-2.5 min-h-[42px] bg-zinc-50 border border-zinc-200 rounded-lg text-zinc-900 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-colors placeholder:text-zinc-400"
+                className="w-full pl-3 pr-24 py-2.5 min-h-[42px] bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors placeholder:text-gray-400"
               />
               <div className="absolute right-1.5 flex items-center gap-1">
                 <button
@@ -263,7 +263,7 @@ export function CentralAssistantModal({
                   className={`p-1.5 rounded-md transition-all min-h-[32px] min-w-[32px] flex items-center justify-center ${
                     isListening 
                       ? 'bg-rose-600 text-white animate-pulse' 
-                      : 'bg-zinc-200/80 hover:bg-zinc-300 text-zinc-700'
+                      : 'bg-gray-200/80 hover:bg-gray-300 text-gray-700'
                   }`}
                   title={isListening ? 'Stop listening' : 'Start speaking'}
                 >
@@ -273,7 +273,7 @@ export function CentralAssistantModal({
                   type="button"
                   onClick={() => processOrchestrator()}
                   disabled={loading || !prompt.trim()}
-                  className="p-1.5 bg-zinc-900 hover:bg-zinc-800 disabled:opacity-40 text-white rounded-md transition-colors min-h-[32px] min-w-[32px] flex items-center justify-center"
+                  className="p-1.5 bg-primary-600 hover:bg-primary-700 disabled:opacity-40 text-white rounded-md transition-colors min-h-[32px] min-w-[32px] flex items-center justify-center"
                 >
                   {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                 </button>
@@ -290,7 +290,7 @@ export function CentralAssistantModal({
           {/* Quick Command Suggestions */}
           {!proposal && !loading && (
             <div className="pt-1">
-              <p className="text-[11px] text-zinc-400 mb-2">{t('try_saying_like')}</p>
+              <p className="text-[11px] text-gray-400 mb-2">{t('try_saying_like')}</p>
               <div className="flex flex-wrap gap-1.5">
                 {samples.map((sample, idx) => (
                   <button
@@ -300,7 +300,7 @@ export function CentralAssistantModal({
                       setPrompt(sample);
                       processOrchestrator(sample);
                     }}
-                    className="text-xs bg-zinc-50 hover:bg-zinc-100 text-zinc-700 px-2.5 py-1 rounded-md border border-zinc-200/80 transition-colors"
+                    className="text-xs bg-gray-50 hover:bg-gray-100 text-gray-700 px-2.5 py-1 rounded-md border border-gray-200/80 transition-colors"
                   >
                     "{sample}"
                   </button>
@@ -311,7 +311,7 @@ export function CentralAssistantModal({
 
           {/* Working on it */}
           {busy && (
-            <div className="p-3 bg-zinc-50 border border-zinc-200 text-zinc-700 rounded-lg text-xs flex items-center gap-2">
+            <div className="p-3 bg-gray-50 border border-gray-200 text-gray-700 rounded-lg text-xs flex items-center gap-2">
               <Loader2 className="w-4 h-4 shrink-0 animate-spin" />
               <span>{t('assistant_thinking', 'Understanding your instruction…')}</span>
             </div>
@@ -353,7 +353,7 @@ export function CentralAssistantModal({
 
           {/* Structured Proposal & Confirmation View */}
           {proposal && (
-            <div className="p-4 bg-zinc-50 border border-zinc-200/80 rounded-lg space-y-3">
+            <div className="p-4 bg-gray-50 border border-gray-200/80 rounded-lg space-y-3">
               <div className="flex items-center justify-between">
                 <span className="badge-ai text-[11px]">
                   <Sparkles className="w-3 h-3" />
@@ -367,48 +367,48 @@ export function CentralAssistantModal({
               </div>
 
               <div>
-                <h4 className="font-semibold text-zinc-950 text-sm">{proposal.actionTitle}</h4>
-                <p className="text-xs text-zinc-600 mt-0.5">{proposal.explanation}</p>
+                <h4 className="font-semibold text-gray-900 text-sm">{proposal.actionTitle}</h4>
+                <p className="text-xs text-gray-600 mt-0.5">{proposal.explanation}</p>
               </div>
 
               {/* Editable Fields if Creating or Updating */}
               {proposal.intent === 'CREATE_PRODUCT' && (
-                <div className="space-y-2 pt-2 border-t border-zinc-200">
+                <div className="space-y-2 pt-2 border-t border-gray-200">
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">{t('product_name')}</label>
+                      <label className="text-[10px] font-semibold text-gray-400 tracking-normal">{t('product_name')}</label>
                       <input
                         type="text"
                         value={draftData.name || ''}
                         onChange={(e) => setDraftData({ ...draftData, name: e.target.value })}
-                        className="w-full text-xs font-medium px-2.5 py-1.5 bg-white border border-zinc-300 rounded-md focus:outline-none focus:ring-1 focus:ring-zinc-900"
+                        className="w-full text-xs font-medium px-2.5 py-1.5 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">{t('price_label')} (₹)</label>
+                      <label className="text-[10px] font-semibold text-gray-400 tracking-normal">{t('price_label')} (₹)</label>
                       <input
                         type="number"
                         value={draftData.price || ''}
                         onChange={(e) => setDraftData({ ...draftData, price: parseFloat(e.target.value) || 0 })}
-                        className="w-full text-xs font-bold text-zinc-950 px-2.5 py-1.5 bg-white border border-zinc-300 rounded-md focus:outline-none focus:ring-1 focus:ring-zinc-900"
+                        className="w-full text-xs font-bold text-gray-900 px-2.5 py-1.5 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">{t('category')}</label>
+                    <label className="text-[10px] font-semibold text-gray-400 tracking-normal">{t('category')}</label>
                     <input
                       type="text"
                       value={draftData.category || ''}
                       onChange={(e) => setDraftData({ ...draftData, category: e.target.value })}
-                      className="w-full text-xs px-2.5 py-1.5 bg-white border border-zinc-300 rounded-md focus:outline-none focus:ring-1 focus:ring-zinc-900"
+                      className="w-full text-xs px-2.5 py-1.5 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
                     />
                   </div>
                 </div>
               )}
 
               {proposal.intent === 'UPDATE_PRODUCT' && (
-                <div className="p-2.5 bg-white rounded-md border border-zinc-200 space-y-1 text-xs">
-                  <p className="font-semibold text-zinc-800">Updating: {draftData.name || 'Catalog Item'}</p>
+                <div className="p-2.5 bg-white rounded-md border border-gray-200 space-y-1 text-xs">
+                  <p className="font-semibold text-gray-800">Updating: {draftData.name || 'Catalog Item'}</p>
                   {draftData.price && (
                     <p className="text-emerald-700 font-bold">New Proposed Price: ₹{draftData.price}</p>
                   )}
@@ -429,11 +429,11 @@ export function CentralAssistantModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="p-3.5 border-t border-zinc-100 bg-zinc-50/50 flex items-center justify-end gap-2">
+        <div className="p-3.5 border-t border-gray-100 bg-gray-50/50 flex items-center justify-end gap-2">
           <button
             type="button"
             onClick={onClose}
-            className="px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-100 rounded-md min-h-[36px] transition-colors"
+            className="px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-md min-h-[36px] transition-colors"
           >
             {t('cancel')}
           </button>

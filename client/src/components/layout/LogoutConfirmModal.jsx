@@ -32,7 +32,7 @@ export function LogoutConfirmModal({ isOpen, onConfirm, onClose }) {
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-600 p-1 rounded-lg hover:bg-zinc-100 transition-colors"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors"
           aria-label="Close"
         >
           <X className="w-5 h-5" />
@@ -43,16 +43,16 @@ export function LogoutConfirmModal({ isOpen, onConfirm, onClose }) {
             <LogOut className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-zinc-950 font-heading">
+            <h3 className="text-base font-bold text-gray-900 font-heading">
               {t('logout_confirm_title', 'Confirm Sign Out')}
             </h3>
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-gray-500">
               {t('logout_confirm_sub', 'Are you sure you want to exit your store session?')}
             </p>
           </div>
         </div>
 
-        <p className="text-xs text-zinc-600 mt-2 mb-6 leading-relaxed">
+        <p className="text-xs text-gray-600 mt-2 mb-6 leading-relaxed">
           {t('logout_confirm_desc', 'Your catalog, active listings, and payment settings remain saved and secure. You can log back in anytime with your credentials.')}
         </p>
 

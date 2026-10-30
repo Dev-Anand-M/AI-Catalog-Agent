@@ -126,7 +126,7 @@ export function ImageStudioModal({
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-sm">
+            <div className="w-10 h-10 rounded-xl bg-primary-600 text-white flex items-center justify-center shadow-sm">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
@@ -149,8 +149,8 @@ export function ImageStudioModal({
             {/* Original Card */}
             <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col">
               <div className="flex items-center justify-between mb-2 px-1">
-                <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Original Upload</span>
-                <span className="text-[11px] font-semibold text-zinc-400">Raw Photo</span>
+                <span className="text-xs font-bold text-gray-500 tracking-normal">Original Upload</span>
+                <span className="text-[11px] font-semibold text-gray-400">Raw Photo</span>
               </div>
               <div className="aspect-square w-full rounded-lg overflow-hidden bg-slate-200 flex items-center justify-center border border-slate-300">
                 <img src={image} alt="Original product" className="w-full h-full object-contain" />
@@ -160,7 +160,7 @@ export function ImageStudioModal({
             {/* Enhanced Card */}
             <div className="bg-emerald-50/50 border border-emerald-200 rounded-xl p-3 flex flex-col relative">
               <div className="flex items-center justify-between mb-2 px-1">
-                <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1">
+                <span className="text-xs font-bold text-emerald-800 tracking-normal flex items-center gap-1">
                   <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
                   Enhanced Studio Result
                 </span>
@@ -171,7 +171,7 @@ export function ImageStudioModal({
               <div className="aspect-square w-full rounded-lg overflow-hidden bg-white flex items-center justify-center border border-emerald-300 relative shadow-sm">
                 {loading ? (
                   <div className="flex flex-col items-center justify-center gap-2 p-6 text-slate-500">
-                    <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                    <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
                     <span className="text-xs font-semibold">Balancing lighting and studio framing...</span>
                   </div>
                 ) : enhancedImage ? (
@@ -183,16 +183,16 @@ export function ImageStudioModal({
             </div>
           </div>
 
-          {/* Studio Backdrop & Styling Controls */}            <div className="space-y-3 pt-2 border-t border-zinc-100">
-            <label className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+          {/* Studio Backdrop & Styling Controls */}            <div className="space-y-3 pt-2 border-t border-gray-100">
+            <label className="text-xs font-bold tracking-normal text-gray-600">
               Select Studio Framing Style
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               {[
-                { id: 'studio_white', label: 'Pure Studio White', desc: 'Amazon / E-commerce standard', color: 'bg-white border-zinc-300' },
+                { id: 'studio_white', label: 'Pure Studio White', desc: 'Amazon / E-commerce standard', color: 'bg-white border-gray-300' },
                 { id: 'warm_studio', label: 'Warm Artisan Studio', desc: 'Warm cream tone for handicrafts', color: 'bg-[#faf7f2] border-amber-200' },
-                { id: 'neutral_gray', label: 'Neutral Light Gray', desc: 'Modern minimal catalog look', color: 'bg-zinc-100 border-zinc-300' },
-                { id: 'sharpen', label: 'Texture & Weave Focus', desc: 'High clarity for handloom/fabrics', color: 'bg-blue-50 border-blue-300' },
+                { id: 'neutral_gray', label: 'Neutral Light Gray', desc: 'Modern minimal catalog look', color: 'bg-gray-100 border-gray-300' },
+                { id: 'sharpen', label: 'Texture & Weave Focus', desc: 'High clarity for handloom/fabrics', color: 'bg-primary-50 border-primary-300' },
               ].map((style) => (
                 <button
                   key={style.id}
@@ -200,12 +200,12 @@ export function ImageStudioModal({
                   onClick={() => setMode(style.id)}
                   className={`p-3 rounded-xl border text-left transition-all min-h-[52px] flex flex-col justify-between ${
                     mode === style.id
-                      ? 'border-zinc-900 bg-zinc-900 text-white ring-2 ring-zinc-900/30'
-                      : 'border-zinc-200 hover:border-zinc-300 bg-zinc-50/50 text-zinc-800'
+                      ? 'border-primary-600 bg-primary-600 text-white ring-2 ring-primary-500/30'
+                      : 'border-gray-200 hover:border-gray-300 bg-gray-50/50 text-gray-800'
                   }`}
                 >
                   <span className="text-xs font-bold text-white">{style.label}</span>
-                  <span className="text-[10px] text-zinc-300 mt-1">{style.desc}</span>
+                  <span className="text-[10px] text-gray-300 mt-1">{style.desc}</span>
                 </button>
               ))}
             </div>
@@ -214,7 +214,7 @@ export function ImageStudioModal({
           {/* Applied Enhancements List */}
           {enhancementsList.length > 0 && !loading && (
             <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5">
-              <span className="text-[11px] font-bold uppercase text-slate-500 tracking-wider">Quality Improvements Applied</span>
+              <span className="text-[11px] font-semibold text-slate-500">Quality improvements applied</span>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
                 {enhancementsList.map((enhancement, index) => (
                   <div key={index} className="flex items-center gap-1.5 text-xs text-slate-700">

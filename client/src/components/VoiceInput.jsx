@@ -97,7 +97,7 @@ export function VoiceInput({ language, onTranscript, placeholder, className = ''
       {transcript && (
         <div className={`bg-emerald-50/60 rounded-xl p-3.5 border border-emerald-200 text-left ${className}`}>
           <div className="flex justify-between items-start mb-1">
-            <span className="text-xs font-bold text-emerald-800 uppercase tracking-wide">
+            <span className="text-xs font-bold text-emerald-800 tracking-normal">
               {t('product_description_input') || 'Voice Transcript'}
             </span>
             <button
@@ -108,7 +108,7 @@ export function VoiceInput({ language, onTranscript, placeholder, className = ''
               {t('cancel') || 'Clear'}
             </button>
           </div>
-          <p className="text-zinc-900 text-sm font-medium leading-relaxed">{transcript}</p>
+          <p className="text-gray-900 text-sm font-medium leading-relaxed">{transcript}</p>
         </div>
       )}
 

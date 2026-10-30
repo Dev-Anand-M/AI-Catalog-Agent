@@ -30,21 +30,34 @@
   }
 
   body {
-    background-color: #f4f5f7;
-    color: #0a0a0b;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f9fafb;
+    color: #111827;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
-    letter-spacing: -0.02em;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    /* Large system-font headings look loose at display sizes; tighten them a
+       touch and let the browser balance line breaks instead of leaving an
+       orphaned word. */
+    letter-spacing: -0.021em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Numbers should line up in tables and stat rows. */
+  body {
+    font-feature-settings: 'cv11', 'ss01';
   }
 
   /* Readable focus rings for keyboard navigation */
   :focus-visible {
-    outline: 2px solid #0a0a0b;
+    outline: 2px solid #14b8a6;
     outline-offset: 2px;
     border-radius: 8px;
   }
@@ -116,11 +129,11 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d4d4d8;
+  background: #d1d5db;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #a1a1aa;
+  background: #9ca3af;
 }
 
 /* ============================================================
@@ -142,15 +155,15 @@
    ============================================================ */
 .surface-card {
   background: #ffffff;
-  border: 1px solid #e4e4e7;
-  border-radius: 14px;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
+  border: 1px solid #f3f4f6;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .surface-card:hover {
-  border-color: #d4d4d8;
-  box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.04), 0 1px 3px -1px rgba(0, 0, 0, 0.02);
+  border-color: #e5e7eb;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
 }
 
 .surface-card-interactive {
@@ -158,38 +171,38 @@
 }
 
 .surface-card-interactive:hover {
-  border-color: #c4c4c7;
-  box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.06), 0 2px 6px -2px rgba(0, 0, 0, 0.02);
+  border-color: #ccfbf1;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 /* Landing page feature/showcase card — used by Landing.jsx */
 .card-enterprise {
   background: #ffffff;
-  border: 1px solid #e4e4e7;
-  border-radius: 16px;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  border: 1px solid #f3f4f6;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   transition: border-color var(--dur-base) ease, box-shadow var(--dur-base) ease,
     transform var(--dur-base) var(--ease-out-soft);
 }
 
 .card-enterprise:hover {
-  border-color: #c4c4c7;
-  box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.08), 0 2px 8px -2px rgba(0, 0, 0, 0.03);
+  border-color: #ccfbf1;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   transform: translateY(-2px);
 }
 
 /* Dense/merchant card variant used by catalog grids */
 .merchant-card {
   background-color: #ffffff;
-  border: 1px solid #e4e4e7;
-  border-radius: 14px;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+  border: 1px solid #f3f4f6;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   transition: border-color var(--dur-fast) ease, box-shadow var(--dur-fast) ease;
 }
 
 .merchant-card:hover {
-  border-color: #d4d4d8;
-  box-shadow: 0 6px 16px -6px rgba(0, 0, 0, 0.05);
+  border-color: #e5e7eb;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
 }
 
 /* ============================================================
@@ -205,19 +218,21 @@
 .btn-secondary,
 .btn-ghost,
 .btn-success,
-.btn-danger {
+.btn-danger,
+.btn-outline,
+.btn-accent {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  min-height: 42px;
+  min-height: 44px;
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
   font-weight: 500;
   /* Wrapped labels are the norm in Tamil, Telugu and Kannada — give them air. */
   line-height: 1.2;
   text-align: center;
-  border-radius: 10px;
+  border-radius: 8px;
   transition: background-color var(--dur-fast) ease-in-out,
     border-color var(--dur-fast) ease-in-out, color var(--dur-fast) ease-in-out,
     box-shadow var(--dur-fast) ease-in-out, transform var(--dur-fast) ease-in-out,
@@ -236,8 +251,8 @@
 /* A .btn rendered as a react-router <Link> must not keep text-link metrics.
    NOTE: this rule must never set `color`. `a.btn:hover` (0,2,1) outranks
    `a.btn-primary` (0,1,1), so `color: inherit` here used to win ON HOVER and
-   the white label on the near-black primary button inherited the page's dark
-   text colour — the label vanished exactly while the cursor was on the button
+   the white label on the primary button inherited the page's dark text colour
+   — the label vanished exactly while the cursor was on the button
    ("Request Access" in the navbar was the visible casualty). Each variant now
    declares its own hover colour below. */
 a.btn,
@@ -250,50 +265,56 @@ a.btn-primary:hover,
 a.btn-success,
 a.btn-success:hover,
 a.btn-danger,
-a.btn-danger:hover {
+a.btn-danger:hover,
+a.btn-accent,
+a.btn-accent:hover {
   color: #ffffff;
 }
 
 a.btn-secondary,
 a.btn-secondary:hover,
 a.btn-ghost,
-a.btn-ghost:hover {
-  color: #0a0a0b;
+a.btn-ghost:hover,
+a.btn-outline,
+a.btn-outline:hover {
+  color: #0d9488;
 }
 
 .btn-primary {
-  background-color: #0a0a0b;
-  border-color: #0a0a0b;
+  background-color: #0d9488;
+  border-color: #0d9488;
   color: #ffffff;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: #1c1c1f;
-  border-color: #1c1c1f;
+  background-color: #0f766e;
+  border-color: #0f766e;
   color: #ffffff;
 }
 
 .btn-primary:active:not(:disabled) {
+  background-color: #115e59;
+  border-color: #115e59;
   transform: scale(0.98);
 }
 
 .btn-primary:disabled {
-  opacity: 0.45;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 .btn-secondary {
-  background-color: #ffffff;
-  border-color: #e4e4e7;
-  color: #0a0a0b;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+  background-color: #f3f4f6;
+  border-color: #f3f4f6;
+  color: #111827;
+  box-shadow: none;
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background-color: #f4f5f7;
-  border-color: #d4d4d8;
-  color: #0a0a0b;
+  background-color: #e5e7eb;
+  border-color: #e5e7eb;
+  color: #111827;
 }
 
 .btn-secondary:active:not(:disabled) {
@@ -308,12 +329,12 @@ a.btn-ghost:hover {
 .btn-ghost {
   background-color: transparent;
   border-color: transparent;
-  color: #0a0a0b;
+  color: #374151;
 }
 
 .btn-ghost:hover:not(:disabled) {
-  background-color: #f4f5f7;
-  color: #0a0a0b;
+  background-color: #f0fdfa;
+  color: #0d9488;
 }
 
 .btn-ghost:disabled {
@@ -321,16 +342,35 @@ a.btn-ghost:hover {
   cursor: not-allowed;
 }
 
+.btn-outline {
+  background-color: #ffffff;
+  border: 2px solid #14b8a6;
+  color: #0f766e;
+  padding-top: calc(0.5rem - 1px);
+  padding-bottom: calc(0.5rem - 1px);
+}
+
+.btn-outline:hover:not(:disabled) {
+  background-color: #f0fdfa;
+  color: #0f766e;
+}
+
+.btn-outline:disabled {
+  border-color: #d1d5db;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
 .btn-success {
-  background-color: #059669;
-  border-color: #059669;
+  background-color: #10b981;
+  border-color: #10b981;
   color: #ffffff;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .btn-success:hover:not(:disabled) {
-  background-color: #047857;
-  border-color: #047857;
+  background-color: #059669;
+  border-color: #059669;
   color: #ffffff;
 }
 
@@ -339,19 +379,19 @@ a.btn-ghost:hover {
 }
 
 .btn-success:disabled {
-  opacity: 0.45;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 .btn-danger {
-  background-color: #be123c;
-  border-color: #be123c;
+  background-color: #ef4444;
+  border-color: #ef4444;
   color: #ffffff;
 }
 
 .btn-danger:hover:not(:disabled) {
-  background-color: #9f1239;
-  border-color: #9f1239;
+  background-color: #dc2626;
+  border-color: #dc2626;
   color: #ffffff;
 }
 
@@ -360,7 +400,31 @@ a.btn-ghost:hover {
 }
 
 .btn-danger:disabled {
-  opacity: 0.45;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-accent {
+  background-color: #f97316;
+  border-color: #f97316;
+  color: #ffffff;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.btn-accent:hover:not(:disabled) {
+  background-color: #ea580c;
+  border-color: #ea580c;
+  color: #ffffff;
+}
+
+.btn-accent:active:not(:disabled) {
+  background-color: #c2410c;
+  border-color: #c2410c;
+  transform: scale(0.98);
+}
+
+.btn-accent:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
@@ -397,14 +461,14 @@ button.badge-confirmed:hover {
   border-radius: 9999px;
   line-height: 1.2;
   white-space: nowrap;
-  color: #1d4ed8;
-  background-color: #eff6ff;
-  border: 1px solid #bfdbfe;
+  color: #0f766e;
+  background-color: #f0fdfa;
+  border: 1px solid #99f6e4;
   transition: background-color 0.15s ease;
 }
 
 button.badge-ai:hover {
-  background-color: #dbeafe;
+  background-color: #ccfbf1;
 }
 
 .badge-review {
@@ -441,19 +505,19 @@ button.badge-review:hover {
 }
 
 .badge-neutral {
-  color: #3f3f46;
-  background-color: #f4f5f7;
-  border: 1px solid #e4e4e7;
+  color: #374151;
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
 }
 
 .badge-primary {
-  color: #2563eb;
-  background-color: #eff6ff;
-  border: 1px solid #dbeafe;
+  color: #0f766e;
+  background-color: #f0fdfa;
+  border: 1px solid #99f6e4;
 }
 
 .badge-success {
-  color: #059669;
+  color: #047857;
   background-color: #ecfdf5;
   border: 1px solid #a7f3d0;
 }
@@ -472,7 +536,7 @@ button.badge-review:hover {
 
 .badge-emerald-solid {
   color: #ffffff;
-  background-color: #059669;
+  background-color: #10b981;
 }
 
 /* ============================================================
@@ -486,64 +550,64 @@ button.badge-review:hover {
   display: block;
   font-size: 0.8rem;
   font-weight: 600;
-  color: #3f3f46;
+  color: #374151;
   margin-bottom: 0.35rem;
   letter-spacing: 0.01em;
 }
 
 .field-label.required::after {
   content: '*';
-  color: #be123c;
+  color: #ef4444;
   margin-left: 0.15rem;
 }
 
 .input {
   background-color: #ffffff;
-  border: 1px solid #e4e4e7;
-  color: #0a0a0b;
-  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  color: #111827;
+  border-radius: 8px;
   padding: 0.6rem 0.85rem;
   font-size: 0.875rem;
-  min-height: 42px;
+  min-height: 44px;
   width: 100%;
   transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
 }
 
 .input:hover:not(:disabled) {
-  border-color: #d4d4d8;
+  border-color: #9ca3af;
 }
 
 .input:focus {
   outline: none;
-  border-color: #0a0a0b;
-  box-shadow: 0 0 0 3px rgba(10, 10, 11, 0.08);
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.16);
 }
 
 .input:disabled {
-  background-color: #f4f5f7;
-  color: #71717a;
+  background-color: #f9fafb;
+  color: #6b7280;
   cursor: not-allowed;
 }
 
 .input-error {
-  border-color: #be123c;
-  background-color: #fff1f2;
+  border-color: #ef4444;
+  background-color: #fef2f2;
 }
 
 .input-error:focus {
-  box-shadow: 0 0 0 3px rgba(190, 18, 60, 0.12);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
 }
 
 .field-error {
   margin-top: 0.35rem;
   font-size: 0.75rem;
-  color: #be123c;
+  color: #dc2626;
   font-weight: 500;
 }
 
 .select {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233f3f46' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23374151' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
   background-size: 1rem;
@@ -573,9 +637,9 @@ button.badge-review:hover {
 
 /* Product image container */
 .image-well {
-  background-color: #f4f5f7;
-  border: 1px solid #e4e4e7;
-  border-radius: 10px;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
   overflow: hidden;
 }
 
@@ -590,7 +654,7 @@ button.badge-review:hover {
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #f4f5f7 25%, #eaeaea 50%, #f4f5f7 75%);
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite;
   border-radius: 8px;
@@ -666,13 +730,13 @@ button.badge-review:hover {
 }
 
 .status-dot-active {
-  background-color: #059669;
-  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.18);
+  background-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.18);
 }
 
 /* Backdrop */
 .backdrop-overlay {
-  background-color: rgba(10, 10, 11, 0.5);
+  background-color: rgba(17, 24, 39, 0.5);
   backdrop-filter: blur(3px);
 }
 
@@ -693,7 +757,7 @@ button.badge-review:hover {
   z-index: 50;
   overflow-y: auto;
   overscroll-behavior: contain;
-  background-color: rgba(15, 23, 42, 0.6);
+  background-color: rgba(17, 24, 39, 0.55);
   backdrop-filter: blur(4px);
 }
 
@@ -708,22 +772,518 @@ button.badge-review:hover {
 .modal-panel {
   width: 100%;
   background-color: #ffffff;
-  border-radius: 16px;
-  border: 1px solid #e4e4e7;
-  box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.25);
+  border-radius: 12px;
+  border: 1px solid #f3f4f6;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   animation: fadeSlideIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Sticky rail backgrounds */
 .rail-sticky {
-  background-color: rgba(255, 255, 255, 0.92);
+  background-color: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(8px);
-  border-bottom: 1px solid #e4e4e7;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 /* Empty state illustration placeholder */
 .empty-illustration {
   opacity: 0.35;
+}
+
+/* ============================================================
+   POLISH PASS
+
+   These rules deliberately come last so they win over the definitions above
+   without rewriting them. Same palette (teal primary, orange accent, warm
+   greys) — the difference is restraint: hairline borders instead of coloured
+   shadows, one radius scale, no all-caps micro-labels, and hover states that
+   read as physical (lift, sheen, press) instead of a colour swap.
+   ============================================================ */
+
+/* --- Surfaces: hairline + depth on demand ------------------- */
+.surface-card,
+.merchant-card,
+.card-enterprise {
+  background: #ffffff;
+  border: 1px solid #eaecf0;
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.03);
+  transition: border-color var(--dur-base) var(--ease-out-soft),
+    box-shadow var(--dur-base) var(--ease-out-soft),
+    transform var(--dur-base) var(--ease-out-soft);
+}
+
+.surface-card:hover,
+.merchant-card:hover,
+.card-enterprise:hover {
+  border-color: #dfe3e7;
+  box-shadow: 0 16px 32px -18px rgba(16, 24, 40, 0.28), 0 2px 6px rgba(16, 24, 40, 0.04);
+  transform: translateY(-3px);
+}
+
+.card-enterprise:hover {
+  border-color: #cde9e3;
+}
+
+/* Cards that are pure containers should not jump when you move the mouse
+   across a long page — only interactive ones get the lift. */
+.surface-card-static:hover,
+.merchant-card-static:hover {
+  transform: none;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.03);
+}
+
+/* --- Buttons ------------------------------------------------ */
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-ghost,
+.btn-success,
+.btn-danger,
+.btn-outline,
+.btn-accent {
+  border-radius: 9px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  transition: background-color var(--dur-base) var(--ease-out-soft),
+    border-color var(--dur-base) var(--ease-out-soft),
+    box-shadow var(--dur-base) var(--ease-out-soft),
+    transform var(--dur-base) var(--ease-out-soft);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary {
+  background-image: linear-gradient(180deg, #14b8a6 0%, #0d9488 100%);
+  border-color: #0b8a7e;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 1px 2px rgba(16, 24, 40, 0.1);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-image: linear-gradient(180deg, #10a99a 0%, #0b8175 100%);
+  border-color: #0a776c;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24), 0 8px 20px -8px rgba(13, 148, 136, 0.55);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0) scale(0.995);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.12);
+}
+
+/* A single soft highlight that sweeps across on hover — the one bit of
+   flourish, kept off the text itself by staying pointer-transparent. */
+.btn-primary::after,
+.btn-accent::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 25%, rgba(255, 255, 255, 0.22) 48%, transparent 72%);
+  transform: translateX(-130%);
+  transition: transform 0.65s var(--ease-out-soft);
+}
+
+.btn-primary:hover::after,
+.btn-accent:hover::after {
+  transform: translateX(130%);
+}
+
+.btn-secondary {
+  background-color: #ffffff;
+  border-color: #e3e6ea;
+  color: #111827;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #f8fafb;
+  border-color: #d2d8de;
+  color: #111827;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px -10px rgba(16, 24, 40, 0.35);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background-color: #f3f7f6;
+  color: #0f766e;
+}
+
+.btn-outline {
+  border-width: 1px;
+  background-color: #ffffff;
+}
+
+.btn-outline:hover:not(:disabled) {
+  background-color: #f2fbf9;
+  border-color: #0d9488;
+  transform: translateY(-1px);
+}
+
+.btn-accent {
+  background-image: linear-gradient(180deg, #fb923c 0%, #f97316 100%);
+  border-color: #ea580c;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 2px rgba(16, 24, 40, 0.1);
+}
+
+.btn-accent:hover:not(:disabled) {
+  background-image: linear-gradient(180deg, #f8852d 0%, #ea580c 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.26), 0 8px 20px -8px rgba(234, 88, 12, 0.5);
+  transform: translateY(-1px);
+}
+
+.btn:disabled,
+.btn-primary:disabled,
+.btn-secondary:disabled {
+  transform: none;
+  box-shadow: none;
+}
+
+/* The WhatsApp/order action. The old flat #10b981 read as a generic green
+   button next to the teal primary; this sits in the same family and gets the
+   same inset highlight and depth-on-hover as .btn-primary. */
+.btn-success {
+  background-image: linear-gradient(180deg, #0ea774 0%, #06875c 100%);
+  border-color: #067a54;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 1px 2px rgba(16, 24, 40, 0.1);
+}
+
+.btn-success:hover:not(:disabled) {
+  background-image: linear-gradient(180deg, #0b9a6b 0%, #057a53 100%);
+  border-color: #056d4a;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    0 8px 20px -8px rgba(6, 135, 92, 0.55);
+  transform: translateY(-1px);
+}
+
+.btn-success:active:not(:disabled) {
+  transform: translateY(0) scale(0.995);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.14);
+}
+
+/* --- Status badges: small rounded rects, quieter fills ------- */
+.badge-confirmed,
+.badge-ai,
+.badge-review,
+.badge,
+.badge-neutral,
+.badge-primary,
+.badge-success,
+.badge-warning,
+.badge-rose {
+  border-radius: 6px;
+  padding: 0.22rem 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  border-width: 1px;
+  border-style: solid;
+  transition: background-color var(--dur-fast) ease;
+}
+
+.badge-confirmed,
+.badge-success {
+  color: #067a55;
+  background-color: #f2fbf7;
+  border-color: #d3efe2;
+}
+
+.badge-ai,
+.badge-primary {
+  color: #0f766e;
+  background-color: #f3fbfa;
+  border-color: #d6eeea;
+}
+
+.badge-review,
+.badge-warning {
+  color: #a16207;
+  background-color: #fffaeb;
+  border-color: #f6e7bd;
+}
+
+.badge-neutral {
+  color: #4b5563;
+  background-color: #f7f8f9;
+  border-color: #e6e8eb;
+}
+
+.badge-rose {
+  color: #b42318;
+  background-color: #fef4f3;
+  border-color: #fadbd7;
+}
+
+/* --- Chips: sentence case reads calmer than ALL CAPS --------- */
+.chip {
+  border-radius: 5px;
+  padding: 0.22rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* --- Inputs ------------------------------------------------- */
+.input,
+.select {
+  border-color: #dfe3e8;
+  border-radius: 9px;
+  box-shadow: inset 0 1px 2px rgba(16, 24, 40, 0.03);
+  transition: border-color var(--dur-fast) ease, box-shadow var(--dur-fast) ease,
+    background-color var(--dur-fast) ease;
+}
+
+.input:hover:not(:disabled),
+.select:hover:not(:disabled) {
+  border-color: #c9d1d9;
+}
+
+.input:focus,
+.select:focus {
+  border-color: #12a594;
+  box-shadow: 0 0 0 3px rgba(18, 165, 148, 0.14), inset 0 1px 2px rgba(16, 24, 40, 0.03);
+}
+
+.field-label {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+/* --- Media wells ------------------------------------------- */
+.image-well {
+  border-color: #eaecf0;
+  border-radius: 10px;
+  background-color: #f7f8f9;
+}
+
+/* --- Page furniture ---------------------------------------- */
+.modal-panel {
+  border-radius: 16px;
+  border-color: #e9ecef;
+  box-shadow: 0 32px 64px -24px rgba(16, 24, 40, 0.45), 0 2px 8px rgba(16, 24, 40, 0.06);
+}
+
+/* ============================================================
+   INTERACTION
+
+   Hover feedback only where a pointer can actually do something. Every state
+   below is a physical cue — an underline that draws itself, a card that rises
+   a couple of pixels, an icon that leans — never a colour swap alone, and
+   never on a purely decorative tile.
+   ============================================================ */
+
+/* --- Nav tabs: an underline that draws from the centre --- */
+.nav-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 7px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  /* "Commerce Hub" and "Payment Settings" wrapped onto two lines between 768
+     and 1100px, which pushed the 64px bar out of shape. */
+  white-space: nowrap;
+  color: #4b5563;
+  transition: color var(--dur-base) var(--ease-out-soft),
+    background-color var(--dur-base) var(--ease-out-soft);
+}
+
+.nav-tab::after {
+  content: '';
+  position: absolute;
+  left: 0.7rem;
+  right: 0.7rem;
+  bottom: 0.15rem;
+  height: 2px;
+  border-radius: 2px;
+  background-color: #0d9488;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform var(--dur-base) var(--ease-out-soft);
+}
+
+.nav-tab:hover {
+  color: #0f766e;
+  background-color: #f2fbf9;
+}
+
+.nav-tab:hover::after {
+  transform: scaleX(1);
+  background-color: #99f6e4;
+}
+
+.nav-tab.is-active {
+  color: #0f766e;
+  font-weight: 600;
+  background-color: transparent;
+}
+
+.nav-tab.is-active::after {
+  transform: scaleX(1);
+  background-color: #0d9488;
+}
+
+/* Between lg and xl the bar is only just wide enough — tighten the tabs rather
+   than lose one. */
+@media (max-width: 1279px) {
+  .nav-tab {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .nav-tab::after {
+    left: 0.5rem;
+    right: 0.5rem;
+  }
+}
+
+/* --- Cards: lift, tint, and a slower image zoom --- */
+.merchant-card {
+  transition: border-color var(--dur-base) var(--ease-out-soft),
+    box-shadow var(--dur-base) var(--ease-out-soft),
+    transform var(--dur-base) var(--ease-out-soft);
+}
+
+.merchant-card:hover {
+  border-color: #d3e9e4;
+  box-shadow: 0 18px 34px -20px rgba(13, 148, 136, 0.35),
+    0 2px 6px rgba(16, 24, 40, 0.04);
+}
+
+/* Product cards only magnify the photo once the pointer is over the card, so
+   the grid stays still while scrolling on a trackpad. */
+.merchant-card img {
+  transition: transform 520ms var(--ease-out-soft), opacity var(--dur-base) ease;
+  transform-origin: center;
+}
+
+/* --- Stat tiles: respond, but barely --- */
+.stat-tile {
+  transition: border-color var(--dur-base) var(--ease-out-soft),
+    box-shadow var(--dur-base) var(--ease-out-soft),
+    transform var(--dur-base) var(--ease-out-soft);
+}
+
+.stat-tile:hover {
+  border-color: #e0e7e6;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -18px rgba(16, 24, 40, 0.4);
+}
+
+.stat-tile .stat-icon {
+  transition: color var(--dur-base) var(--ease-out-soft),
+    transform var(--dur-base) var(--ease-out-soft);
+}
+
+.stat-tile:hover .stat-icon {
+  transform: translateY(-1px) scale(1.06);
+  color: #0d9488;
+}
+
+/* --- Inline links with a travelling arrow --- */
+.arrow-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: color var(--dur-base) var(--ease-out-soft), gap var(--dur-base) var(--ease-out-soft);
+}
+
+.arrow-link:hover {
+  gap: 0.55rem;
+}
+
+.arrow-link svg {
+  transition: transform var(--dur-base) var(--ease-out-soft);
+}
+
+.arrow-link:hover svg {
+  transform: translateX(1px);
+}
+
+/* --- Icon-only buttons: quiet until touched --- */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: #9ca3af;
+  border: 1px solid transparent;
+  transition: color var(--dur-fast) ease, background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease, transform var(--dur-fast) ease;
+}
+
+.icon-btn:hover {
+  color: #0f766e;
+  background-color: #f2fbf9;
+  border-color: #d9f0eb;
+}
+
+.icon-btn:active {
+  transform: scale(0.94);
+}
+
+/* --- Hero texture --------------------------------------------------------
+   A very low-opacity grain over the teal. Large flat gradients band on cheap
+   panels and read as a CSS demo; the noise breaks the ramps up without
+   costing an image request. */
+.hero-texture::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 140px 140px;
+}
+
+/* --- Footer links: an underline that draws in from the left --- */
+.footer-link {
+  position: relative;
+  padding-bottom: 2px;
+  transition: color var(--dur-base) var(--ease-out-soft);
+}
+
+.footer-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background-color: currentColor;
+  opacity: 0.5;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-base) var(--ease-out-soft);
+}
+
+.footer-link:hover::after {
+  transform: scaleX(1);
+}
+
+/* --- Rows: a warm wash, not a grey box --- */
+.row-hover:hover {
+  background-color: #f7fbfa;
+}
+
+/* --- Small caps badges should not wobble between states --- */
+.badge-confirmed,
+.badge-ai,
+.badge-review {
+  transition: transform var(--dur-fast) ease, filter var(--dur-fast) ease;
+}
+
+.badge-confirmed:hover,
+.badge-ai:hover,
+.badge-review:hover {
+  filter: brightness(0.985);
 }
 
 } /* end @layer components */

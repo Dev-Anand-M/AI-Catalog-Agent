@@ -18,6 +18,7 @@ import { PaymentSettings } from './pages/PaymentSettings';
 import { PublicCatalog } from './pages/PublicCatalog';
 import { Audit } from './pages/Audit';
 import { Admin } from './pages/Admin';
+import { NotFound } from './pages/NotFound';
 
 function App() {
   const location = useLocation();
@@ -49,7 +50,7 @@ function App() {
   return (
     <LanguageProvider>
       <AuthProvider>
-        <div className="min-h-screen flex flex-col bg-zinc-50">
+        <div className="min-h-screen flex flex-col bg-gray-50">
           {!isPublicStorefront && <Navbar />}
           {!isPublicStorefront && <VoiceCommandButton />}
           <main ref={mainRef} className="flex-1">
@@ -135,6 +136,8 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            {/* Unknown URLs used to render a blank page under the navbar. */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
           </main>
           {/* Buyers on a merchant's public storefront must not get the merchant

@@ -32,7 +32,7 @@ import { Container, Alert } from '../components/ui';
 import { productsApi, auditApi } from '../api/client';
 import { CentralAssistantModal } from '../components/CentralAssistantModal';
 import { useShopifySync } from '../hooks/useShopifySync';
-import { getCategoryLabel, getCategoryIcon, getCategoryColor } from '../lib/categories';
+import { getCategoryLabel, CategoryIcon, getCategoryColor } from '../lib/categories';
 
 export function Dashboard() {
   const { user, isAdmin } = useAuth();
@@ -177,24 +177,24 @@ export function Dashboard() {
   const categoriesList = ['ALL', ...Array.from(new Set(products.map(p => p.category).filter(Boolean)))];
 
   return (
-    <div className="min-h-screen bg-zinc-50/50 text-zinc-900 pb-16">
+    <div className="min-h-screen bg-gray-50/50 text-gray-900 pb-16">
       {/* Seller Header */}
-      <div className="bg-white border-b border-zinc-200/80 py-6 px-4 shadow-2xs">
+      <div className="bg-white border-b border-gray-200/80 py-6 px-4 shadow-2xs">
         <Container>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-100 text-zinc-700 border border-zinc-200/80 whitespace-nowrap">
+                <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-gray-100 text-gray-700 border border-gray-200/80 whitespace-nowrap">
                   {isAdmin ? 'System Administrator' : t('merchant_panel')}
                 </span>
                 <span className="badge-confirmed text-[11px] font-medium flex items-center gap-1 whitespace-nowrap">
                   <CheckCircle2 className="w-3 h-3" /> {isAdmin ? 'Global Catalog View' : t('live_storefront_active')}
                 </span>
               </div>
-              <h1 className="text-xl sm:text-2xl font-bold text-zinc-950 tracking-tight">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
                 {isAdmin ? 'Platform Catalog Overview' : t('my_catalog')}
               </h1>
-              <p className="text-xs text-zinc-500 mt-0.5">
+              <p className="text-xs text-gray-500 mt-0.5">
                 {isAdmin ? 'Read-only view of products across merchants. Access administrative tools in the Admin Portal.' : t('digital_store_sub')}
               </p>
             </div>
@@ -212,7 +212,7 @@ export function Dashboard() {
                       of reach. Platform tooling — including the one Activity Log —
                       lives inside the console. */}
                   <Link to="/admin" className="btn btn-primary text-xs px-3.5 col-span-2 sm:col-span-1">
-                    <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
+                    <ShieldCheck className="w-3.5 h-3.5 text-primary-400" />
                     Admin Portal
                   </Link>
                   <Link to="/export" className="btn btn-secondary text-xs px-3.5">
@@ -231,7 +231,7 @@ export function Dashboard() {
                     type="button"
                     onClick={handleSyncAllToShopify}
                     disabled={shopifySyncing || products.length === 0}
-                    className="btn btn-success text-xs px-3.5"
+                    className="btn btn-secondary text-xs px-3.5"
                     title={t('sync_all_to_shopify', 'Sync All to Shopify')}
                   >
                     {shopifySyncing && !shopifySyncingId
@@ -241,7 +241,7 @@ export function Dashboard() {
                   </button>
 
                   <Link to="/export" className="btn btn-secondary text-xs px-3.5">
-                    <Layers className="w-3.5 h-3.5 text-zinc-500" />
+                    <Layers className="w-3.5 h-3.5 text-gray-500" />
                     {t('channels_and_shopify', 'Shopify & Channels')}
                   </Link>
 
@@ -250,7 +250,7 @@ export function Dashboard() {
                     onClick={() => setIsAssistantOpen(true)}
                     className="btn btn-secondary text-xs px-3.5"
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-zinc-600" />
+                    <Sparkles className="w-3.5 h-3.5 text-gray-600" />
                     {t('ask_assistant')}
                   </button>
 
@@ -259,7 +259,7 @@ export function Dashboard() {
                     onClick={copyShareLink}
                     className="btn btn-secondary text-xs px-3.5 col-span-2 sm:col-span-1"
                   >
-                    <Share2 className="w-3.5 h-3.5 text-zinc-500" />
+                    <Share2 className="w-3.5 h-3.5 text-gray-500" />
                     {copiedLink ? t('link_copied') : t('share_catalog_link')}
                   </button>
                 </>
@@ -272,18 +272,18 @@ export function Dashboard() {
               four value rows floated at different heights because the labels
               wrap to one, two or three lines depending on language. */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mt-6">
-            <div className="bg-white border border-zinc-200/80 p-4 rounded-xl shadow-2xs flex flex-col">
-              <div className="flex items-start justify-between gap-2 text-zinc-500 mb-2">
+            <div className="stat-tile bg-white border border-gray-200/80 p-4 rounded-xl shadow-2xs flex flex-col">
+              <div className="flex items-start justify-between gap-2 text-gray-500 mb-2">
                 <span className="text-xs font-medium leading-snug min-w-0">{t('total_listed_items')}</span>
-                <ShoppingBag className="w-4 h-4 text-zinc-400 shrink-0" />
+                <ShoppingBag className="stat-icon w-4 h-4 text-gray-400 shrink-0" />
               </div>
-              <p className="num mt-auto text-2xl font-bold text-zinc-950 font-mono">{products.length}</p>
+              <p className="num mt-auto text-2xl font-bold text-gray-900 font-mono">{products.length}</p>
             </div>
 
-            <div className="bg-white border border-zinc-200/80 p-4 rounded-xl shadow-2xs flex flex-col">
-              <div className="flex items-start justify-between gap-2 text-zinc-500 mb-2">
+            <div className="stat-tile bg-white border border-gray-200/80 p-4 rounded-xl shadow-2xs flex flex-col">
+              <div className="flex items-start justify-between gap-2 text-gray-500 mb-2">
                 <span className="text-xs font-medium leading-snug min-w-0">{t('catalog_value')}</span>
-                <TrendingUp className="w-4 h-4 text-emerald-600 shrink-0" />
+                <TrendingUp className="stat-icon w-4 h-4 text-emerald-600 shrink-0" />
               </div>
               {/* Long catalog values used to widen the card and break the grid. */}
               <p
@@ -294,28 +294,28 @@ export function Dashboard() {
               </p>
             </div>
 
-            <div className="bg-white border border-zinc-200/80 p-4 rounded-xl shadow-2xs flex flex-col">
-              <div className="flex items-start justify-between gap-2 text-zinc-500 mb-2">
+            <div className="stat-tile bg-white border border-gray-200/80 p-4 rounded-xl shadow-2xs flex flex-col">
+              <div className="flex items-start justify-between gap-2 text-gray-500 mb-2">
                 <span className="text-xs font-medium leading-snug min-w-0">{t('seller_confirmed_items')}</span>
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <CheckCircle2 className="stat-icon w-4 h-4 text-emerald-600 shrink-0" />
               </div>
-              <p className="num mt-auto text-2xl font-bold text-zinc-950 font-mono">
-                {confirmedCount}<span className="text-zinc-300 font-normal"> / </span>{products.length}
+              <p className="num mt-auto text-2xl font-bold text-gray-900 font-mono">
+                {confirmedCount}<span className="text-gray-300 font-normal"> / </span>{products.length}
               </p>
             </div>
 
-            <div className="bg-white border border-zinc-200/80 p-4 rounded-xl shadow-2xs flex flex-col">
-              <div className="flex items-start justify-between gap-2 text-zinc-500 mb-2">
+            <div className="stat-tile bg-white border border-gray-200/80 p-4 rounded-xl shadow-2xs flex flex-col">
+              <div className="flex items-start justify-between gap-2 text-gray-500 mb-2">
                 <span className="text-xs font-medium leading-snug min-w-0">{t('store_preview_title')}</span>
-                <MessageSquare className="w-4 h-4 text-emerald-600 shrink-0" />
+                <MessageSquare className="stat-icon w-4 h-4 text-emerald-600 shrink-0" />
               </div>
               <a
                 href={shareCatalogUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-auto text-xs font-semibold text-zinc-900 hover:text-emerald-700 flex items-center gap-1 min-h-[32px] transition-colors"
+                className="arrow-link mt-auto text-xs font-semibold text-gray-900 hover:text-emerald-700 min-h-[32px]"
               >
-                {t('preview_storefront')} <ExternalLink className="w-3 h-3 text-zinc-400" />
+                {t('preview_storefront')} <ExternalLink className="w-3 h-3 text-gray-400" />
               </a>
             </div>
           </div>
@@ -324,17 +324,17 @@ export function Dashboard() {
 
       <Container className="py-6">
         {isAdmin && (
-          <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 text-white border border-zinc-800 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-primary-600 via-primary-500 to-primary-700 text-white border border-primary-700 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 shrink-0 mt-0.5 sm:mt-0">
+              <div className="p-2 rounded-lg bg-white/15 text-white border border-white/25 shrink-0 mt-0.5 sm:mt-0">
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-sm font-bold text-white">Administrator Environment Active</h2>
-                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-400 text-zinc-950">ADMIN</span>
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-400 text-gray-900">ADMIN</span>
                 </div>
-                <p className="text-xs text-zinc-400 mt-0.5">
+                <p className="text-xs text-primary-100 mt-0.5">
                   You are signed in with administrative access. Seller management, AI agent models, and platform audit logs are available in the Admin Portal.
                 </p>
               </div>
@@ -342,7 +342,7 @@ export function Dashboard() {
             <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
               <Link
                 to="/admin"
-                className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white transition-colors flex items-center gap-1.5"
+                className="px-3.5 py-1.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-xs font-semibold text-white transition-colors flex items-center gap-1.5"
               >
                 <ShieldCheck className="w-3.5 h-3.5" />
                 Admin Portal
@@ -389,27 +389,27 @@ export function Dashboard() {
         )}
 
         {/* Filters & Control Bar */}
-        <div className="bg-white border border-zinc-200/80 rounded-xl p-3.5 mb-6 space-y-3 shadow-2xs">
+        <div className="bg-white border border-gray-200/80 rounded-xl p-3.5 mb-6 space-y-3 shadow-2xs">
           {/* Top Row: Search and Status Badges */}
           <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
             <div className="relative w-full md:w-80">
-              <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('search_placeholder')}
-                className="w-full pl-9 pr-4 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-xs text-zinc-900 placeholder:text-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-zinc-900 min-h-[38px] transition-colors"
+                className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-900 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 min-h-[38px] transition-colors"
               />
             </div>
 
             {/* Confirmation State Tabs (Clean Segmented Pills) */}
-            <div className="flex items-center gap-1 bg-zinc-100 p-1 rounded-lg overflow-x-auto shrink-0">
+            <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg overflow-x-auto shrink-0">
               <button
                 type="button"
                 onClick={() => setStatusFilter('ALL')}
                 className={`px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap shrink-0 transition-colors ${
-                  statusFilter === 'ALL' ? 'bg-white text-zinc-950 shadow-2xs border border-zinc-200/80' : 'text-zinc-600 hover:text-zinc-950'
+                  statusFilter === 'ALL' ? 'bg-white text-gray-900 shadow-2xs border border-gray-200/80' : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
                 {t('all_items')} ({products.length})
@@ -418,7 +418,7 @@ export function Dashboard() {
                 type="button"
                 onClick={() => setStatusFilter('seller_confirmed')}
                 className={`px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap shrink-0 transition-colors flex items-center gap-1 ${
-                  statusFilter === 'seller_confirmed' ? 'bg-white text-emerald-800 shadow-2xs border border-zinc-200/80' : 'text-zinc-600 hover:text-zinc-950'
+                  statusFilter === 'seller_confirmed' ? 'bg-white text-emerald-800 shadow-2xs border border-gray-200/80' : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
                 <Check className="w-3 h-3 text-emerald-600" /> {t('confirmed_items')}
@@ -427,16 +427,16 @@ export function Dashboard() {
                 type="button"
                 onClick={() => setStatusFilter('ai_suggested')}
                 className={`px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap shrink-0 transition-colors flex items-center gap-1 ${
-                  statusFilter === 'ai_suggested' ? 'bg-white text-zinc-900 shadow-2xs border border-zinc-200/80' : 'text-zinc-600 hover:text-zinc-950'
+                  statusFilter === 'ai_suggested' ? 'bg-white text-gray-900 shadow-2xs border border-gray-200/80' : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                <Sparkles className="w-3 h-3 text-zinc-600" /> {t('ai_suggested_items')}
+                <Sparkles className="w-3 h-3 text-gray-600" /> {t('ai_suggested_items')}
               </button>
               <button
                 type="button"
                 onClick={() => setStatusFilter('needs_review')}
                 className={`px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap shrink-0 transition-colors flex items-center gap-1 ${
-                  statusFilter === 'needs_review' ? 'bg-white text-amber-800 shadow-2xs border border-zinc-200/80' : 'text-zinc-600 hover:text-zinc-950'
+                  statusFilter === 'needs_review' ? 'bg-white text-amber-800 shadow-2xs border border-gray-200/80' : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
                 <Clock className="w-3 h-3 text-amber-600" /> {t('needs_review_items')}
@@ -444,11 +444,11 @@ export function Dashboard() {
             </div>
 
             {/* View Mode Toggle */}
-            <div className="hidden sm:flex items-center gap-0.5 border border-zinc-200 rounded-lg p-0.5 bg-zinc-50">
+            <div className="hidden sm:flex items-center gap-0.5 border border-gray-200 rounded-lg p-0.5 bg-gray-50">
               <button
                 type="button"
                 onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded-md ${viewMode === 'grid' ? 'bg-white text-zinc-950 shadow-2xs' : 'text-zinc-400 hover:text-zinc-700'}`}
+                className={`p-1.5 rounded-md ${viewMode === 'grid' ? 'bg-white text-gray-900 shadow-2xs' : 'text-gray-400 hover:text-gray-700'}`}
                 title="Grid view"
               >
                 <LayoutGrid className="w-3.5 h-3.5" />
@@ -456,7 +456,7 @@ export function Dashboard() {
               <button
                 type="button"
                 onClick={() => setViewMode('table')}
-                className={`p-1.5 rounded-md ${viewMode === 'table' ? 'bg-white text-zinc-950 shadow-2xs' : 'text-zinc-400 hover:text-zinc-700'}`}
+                className={`p-1.5 rounded-md ${viewMode === 'table' ? 'bg-white text-gray-900 shadow-2xs' : 'text-gray-400 hover:text-gray-700'}`}
                 title="Table view"
               >
                 <TableIcon className="w-3.5 h-3.5" />
@@ -466,7 +466,7 @@ export function Dashboard() {
 
           {/* Category Filter Pills */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
-            <span className="text-[11px] font-medium text-zinc-400 mr-1 flex items-center gap-1">
+            <span className="text-[11px] font-medium text-gray-400 mr-1 flex items-center gap-1">
               <Filter className="w-3 h-3" /> {t('category')}:
             </span>
             {categoriesList.map(cat => (
@@ -476,15 +476,15 @@ export function Dashboard() {
                 onClick={() => setSelectedCategory(cat)}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all border ${
                   selectedCategory === cat
-                    ? 'border-zinc-900 bg-zinc-900 text-white shadow-sm'
-                    : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400'
+                    ? 'border-primary-600 bg-primary-600 text-white shadow-sm'
+                    : 'border-gray-200 bg-white text-gray-700 hover:border-gray-400'
                 }`}
               >
                 {cat === 'ALL' ? (
                   <>{t('all_items')}</>
                 ) : (
                   <>
-                    <span aria-hidden="true">{getCategoryIcon(cat)}</span>
+                    <CategoryIcon category={cat} className="w-3.5 h-3.5" />
                     {getCategoryLabel(cat, language)}
                   </>
                 )}
@@ -511,7 +511,7 @@ export function Dashboard() {
                     <div className="skeleton h-6 w-24" />
                   </div>
                   <div className="p-3.5 pt-0">
-                    <div className="flex items-center gap-1.5 pt-2.5 border-t border-zinc-100">
+                    <div className="flex items-center gap-1.5 pt-2.5 border-t border-gray-100">
                       <div className="skeleton h-9 flex-1" />
                       <div className="skeleton h-9 w-9" />
                       <div className="skeleton h-9 w-9" />
@@ -522,10 +522,10 @@ export function Dashboard() {
             </div>
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="bg-white border border-zinc-200/80 rounded-xl p-12 text-center space-y-4 shadow-2xs">
-            <ShoppingBag className="w-10 h-10 text-zinc-300 mx-auto stroke-[1.5]" />
-            <h3 className="text-sm font-semibold text-zinc-900">{t('no_products_filter')}</h3>
-            <p className="text-zinc-500 text-xs max-w-sm mx-auto">
+          <div className="bg-white border border-gray-200/80 rounded-xl p-12 text-center space-y-4 shadow-2xs">
+            <ShoppingBag className="w-10 h-10 text-gray-300 mx-auto stroke-[1.5]" />
+            <h3 className="text-sm font-semibold text-gray-900">{t('no_products_filter')}</h3>
+            <p className="text-gray-500 text-xs max-w-sm mx-auto">
               {t('no_products_filter_sub')}
             </p>
             {!isAdmin && (
@@ -549,21 +549,20 @@ export function Dashboard() {
                 <div key={product.id} className="merchant-card overflow-hidden flex flex-col justify-between group">
                   <div>
                     {/* Image & Status Tag */}
-                    <div className="relative aspect-square bg-zinc-100 border-b border-zinc-200/80 overflow-hidden">
+                    <div className="relative aspect-square bg-gray-100 border-b border-gray-200/80 overflow-hidden">
                       {product.imageUrl ? (
                         <img 
                           src={product.imageUrl} 
                           alt={product.name} 
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" 
+                          className="w-full h-full object-cover group-hover:scale-[1.04]" 
                         />
                       ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center text-zinc-400 text-xs font-medium">
-                          <ShoppingBag className="w-7 h-7 mb-1 stroke-[1.5] text-zinc-300" />
+                        <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 text-xs font-medium">
+                          <ShoppingBag className="w-7 h-7 mb-1 stroke-[1.5] text-gray-300" />
                           {t('no_image')}
                         </div>
                       )}
-                      <span className={`absolute top-2 left-2 inline-flex items-center gap-1 bg-white/95 backdrop-blur-sm border px-2 py-0.5 rounded-full text-[10px] font-semibold shadow-2xs ${getCategoryColor(product.category)}`}>
-                        <span aria-hidden="true">{getCategoryIcon(product.category)}</span>
+                      <span className={`absolute top-2 left-2 inline-flex items-center gap-1 bg-white/95 backdrop-blur-sm border px-2 py-0.5 rounded-md text-[10px] font-semibold shadow-2xs ${getCategoryColor(product.category)}`}>
                         {getCategoryLabel(product.category, language)}
                       </span>
                       
@@ -586,15 +585,15 @@ export function Dashboard() {
 
                     {/* Details */}
                     <div className="p-3.5 space-y-1.5">
-                      <h3 className="text-sm font-semibold text-zinc-950 tracking-tight truncate" title={product.name}>
+                      <h3 className="text-sm font-semibold text-gray-900 tracking-tight truncate" title={product.name}>
                         {product.name}
                       </h3>
-                      <p className="text-xs text-zinc-500 line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
                         {product.description}
                       </p>
                       <div className="flex items-baseline justify-between gap-2 pt-1 flex-wrap">
                         <div className="flex items-baseline gap-2">
-                          <span className="text-lg font-bold text-zinc-950 font-mono">
+                          <span className="text-lg font-bold text-gray-900 font-mono">
                             ₹{parseFloat(product.price).toFixed(2)}
                           </span>
                           <span className="text-[10px] text-emerald-700 font-medium">{t('whatsapp_order')}</span>
@@ -619,10 +618,10 @@ export function Dashboard() {
                       merchant published. */}
                   {!isAdmin && (
                   <div className="p-3.5 pt-0">
-                    <div className="flex items-center gap-1.5 pt-2.5 border-t border-zinc-100">
+                    <div className="flex items-center gap-1.5 pt-2.5 border-t border-gray-100">
                       <Link to={`/products/${product.id}/edit`} className="flex-1">
-                        <button type="button" className="w-full py-1.5 bg-zinc-50 hover:bg-zinc-100 text-zinc-700 font-medium text-xs rounded-md border border-zinc-200 flex items-center justify-center gap-1 transition-colors min-h-[36px]">
-                          <Pencil className="w-3 h-3 text-zinc-500" />
+                        <button type="button" className="w-full py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium text-xs rounded-md border border-gray-200 flex items-center justify-center gap-1 transition-colors min-h-[36px]">
+                          <Pencil className="w-3 h-3 text-gray-500" />
                           {t('edit')}
                         </button>
                       </Link>
@@ -633,7 +632,7 @@ export function Dashboard() {
                         className={`p-1.5 border rounded-md transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center disabled:opacity-50 ${
                           product.shopifyUrl
                             ? 'text-emerald-700 bg-emerald-50 border-emerald-200 hover:bg-emerald-100'
-                            : 'text-zinc-400 border-zinc-200 hover:text-emerald-700 hover:bg-emerald-50'
+                            : 'text-gray-400 border-gray-200 hover:text-emerald-700 hover:bg-emerald-50'
                         }`}
                         title={product.shopifyUrl
                           ? t('shopify_synced_ok', 'Synced to Shopify — sync again')
@@ -647,7 +646,7 @@ export function Dashboard() {
                         type="button"
                         onClick={() => handleDelete(product.id)}
                         disabled={deleteId === product.id}
-                        className="p-1.5 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 border border-zinc-200 rounded-md transition-colors disabled:opacity-50 min-h-[36px] min-w-[36px] flex items-center justify-center"
+                        className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 border border-gray-200 rounded-md transition-colors disabled:opacity-50 min-h-[36px] min-w-[36px] flex items-center justify-center"
                         title={t('delete')}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -661,10 +660,10 @@ export function Dashboard() {
           </div>
         ) : (
           /* Table View */
-          <div className="bg-white border border-zinc-200/80 rounded-xl overflow-hidden shadow-2xs">
+          <div className="bg-white border border-gray-200/80 rounded-xl overflow-hidden shadow-2xs">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-zinc-50/80 border-b border-zinc-200 text-zinc-500 font-semibold uppercase tracking-wider text-[11px]">
+                <thead className="bg-gray-50/80 border-b border-gray-200 text-gray-500 font-semibold tracking-normal text-[11px]">
                   <tr>
                     <th className="p-3.5">{t('product_name')}</th>
                     <th className="p-3.5">{t('category')}</th>
@@ -673,31 +672,31 @@ export function Dashboard() {
                     <th className="p-3.5 text-right">{t('actions_label')}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-100">
+                <tbody className="divide-y divide-gray-100">
                   {filteredProducts.map(product => {
                     const confState = product.confirmationState || 'seller_confirmed';
                     return (
-                      <tr key={product.id} className="hover:bg-zinc-50/50 transition-colors">
+                      <tr key={product.id} className="row-hover transition-colors">
                         <td className="p-3.5 flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-lg bg-zinc-100 border border-zinc-200/80 overflow-hidden shrink-0">
+                          <div className="w-9 h-9 rounded-lg bg-gray-100 border border-gray-200/80 overflow-hidden shrink-0">
                             {product.imageUrl ? (
                               <img src={product.imageUrl} alt="" className="w-full h-full object-cover" />
                             ) : (
-                              <ShoppingBag className="w-4 h-4 text-zinc-400 m-auto mt-2" />
+                              <ShoppingBag className="w-4 h-4 text-gray-400 m-auto mt-2" />
                             )}
                           </div>
                           <div>
-                            <span className="font-semibold text-zinc-950 block text-xs">{product.name}</span>
-                            <span className="text-zinc-400 text-[11px] truncate max-w-xs block">{product.description}</span>
+                            <span className="font-semibold text-gray-900 block text-xs">{product.name}</span>
+                            <span className="text-gray-400 text-[11px] truncate max-w-xs block">{product.description}</span>
                           </div>
                         </td>
                         <td className="p-3.5">
                           <span className={`inline-flex items-center gap-1 border px-2 py-0.5 rounded-full text-[11px] font-semibold ${getCategoryColor(product.category)}`}>
-                            <span aria-hidden="true">{getCategoryIcon(product.category)}</span>
+                            <CategoryIcon category={product.category} className="w-3 h-3" />
                             {getCategoryLabel(product.category, language)}
                           </span>
                         </td>
-                        <td className="p-3.5 font-bold font-mono text-zinc-950">
+                        <td className="p-3.5 font-bold font-mono text-gray-900">
                           <div className="flex items-center gap-2">
                             <span>₹{parseFloat(product.price).toFixed(2)}</span>
                             {product.shopifyUrl && (
@@ -730,11 +729,11 @@ export function Dashboard() {
                         </td>
                         <td className="p-3.5 text-right">
                           {isAdmin ? (
-                            <span className="text-zinc-300">—</span>
+                            <span className="text-gray-300">—</span>
                           ) : (
                           <div className="inline-flex items-center gap-1.5">
                             <Link to={`/products/${product.id}/edit`}>
-                              <button type="button" className="px-2.5 py-1 bg-zinc-50 hover:bg-zinc-100 text-zinc-700 font-medium rounded-md border border-zinc-200 transition-colors text-xs">
+                              <button type="button" className="px-2.5 py-1 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium rounded-md border border-gray-200 transition-colors text-xs">
                                 {t('edit')}
                               </button>
                             </Link>
@@ -745,7 +744,7 @@ export function Dashboard() {
                               className={`p-1.5 border rounded-md transition-colors disabled:opacity-50 ${
                                 product.shopifyUrl
                                   ? 'text-emerald-700 bg-emerald-50 border-emerald-200 hover:bg-emerald-100'
-                                  : 'text-zinc-400 border-zinc-200 hover:text-emerald-700 hover:bg-emerald-50'
+                                  : 'text-gray-400 border-gray-200 hover:text-emerald-700 hover:bg-emerald-50'
                               }`}
                               title={t('sync_to_shopify', 'Sync to Shopify')}
                             >
@@ -756,7 +755,7 @@ export function Dashboard() {
                             <button
                               type="button"
                               onClick={() => handleDelete(product.id)}
-                              className="p-1 text-zinc-400 hover:text-rose-600 rounded-md transition-colors"
+                              className="p-1 text-gray-400 hover:text-rose-600 rounded-md transition-colors"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>

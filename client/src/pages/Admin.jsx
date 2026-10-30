@@ -37,9 +37,9 @@ import { adminApi } from '../api/client';
 import { ActivityLog } from './Audit';
 
 const PROVIDER_BADGE = {
-  gemini: 'bg-blue-50 text-blue-700 border-blue-200',
+  gemini: 'bg-primary-50 text-primary-700 border-primary-200',
   openai: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  grok: 'bg-zinc-100 text-zinc-700 border-zinc-300',
+  grok: 'bg-gray-100 text-gray-700 border-gray-300',
   sambanova: 'bg-amber-50 text-amber-700 border-amber-200',
   perplexity: 'bg-cyan-50 text-cyan-700 border-cyan-200',
   groq: 'bg-orange-50 text-orange-700 border-orange-200',
@@ -48,10 +48,10 @@ const PROVIDER_BADGE = {
 
 const STATUS_BADGE = {
   pending: 'bg-amber-50 text-amber-700 border-amber-200',
-  under_review: 'bg-blue-50 text-blue-700 border-blue-200',
+  under_review: 'bg-primary-50 text-primary-700 border-primary-200',
   needs_info: 'bg-purple-50 text-purple-700 border-purple-200',
   approved: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  rejected: 'bg-zinc-100 text-zinc-500 border-zinc-200'
+  rejected: 'bg-gray-100 text-gray-500 border-gray-200'
 };
 
 // Tab ids are also the ?tab= values, so "the log" is linkable from the navbar
@@ -364,20 +364,20 @@ export function Admin() {
   ];
 
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900 pb-16">
+    <div className="min-h-screen bg-gray-50 text-gray-900 pb-16">
       {/* Header */}
-      <div className="bg-white border-b border-zinc-200 py-6 px-4">
+      <div className="bg-white border-b border-gray-200 py-6 px-4">
         <Container>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-zinc-950 text-white mb-2">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-primary-600 text-white mb-2">
                 <ShieldCheck className="w-3 h-3" />
                 {t('admin_badge') || 'Admin Portal'}
               </span>
-              <h1 className="text-xl sm:text-2xl font-bold text-zinc-950 tracking-tight font-heading">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight font-heading">
                 {t('admin_title') || 'Platform Administration'}
               </h1>
-              <p className="text-xs text-zinc-500 mt-1">
+              <p className="text-xs text-gray-500 mt-1">
                 {t('admin_subtitle') || 'Oversee sellers, configure AI providers, and audit every platform event.'}
               </p>
             </div>
@@ -400,15 +400,15 @@ export function Admin() {
                 onClick={() => setTab(id)}
                 className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
                   tab === id
-                    ? 'bg-zinc-950 text-white'
-                    : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
+                    ? 'bg-primary-600 text-white'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
                 {label}
                 {badge > 0 && (
                   <span className={`ml-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                    tab === id ? 'bg-amber-400 text-zinc-950' : 'bg-amber-100 text-amber-800'
+                    tab === id ? 'bg-amber-400 text-gray-900' : 'bg-amber-100 text-amber-800'
                   }`}>
                     {badge}
                   </span>
@@ -430,7 +430,7 @@ export function Admin() {
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-white border border-zinc-200 rounded-xl p-6">
+              <div key={i} className="bg-white border border-gray-200 rounded-xl p-6">
                 <div className="skeleton h-3 w-24 mb-3"></div>
                 <div className="skeleton h-8 w-16"></div>
               </div>
@@ -445,10 +445,10 @@ export function Admin() {
                   <div className="card-enterprise p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{t('admin_stat_sellers') || 'Active Sellers'}</p>
-                        <p className="text-3xl font-bold text-zinc-950 font-heading mt-1">{stats.sellers}</p>
+                        <p className="text-[11px] font-bold tracking-normal text-gray-500">{t('admin_stat_sellers') || 'Active Sellers'}</p>
+                        <p className="text-3xl font-bold text-gray-900 font-heading mt-1">{stats.sellers}</p>
                       </div>
-                      <span className="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center ring-1 ring-blue-100">
+                      <span className="w-11 h-11 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center ring-1 ring-primary-100">
                         <Users className="w-5 h-5" />
                       </span>
                     </div>
@@ -456,8 +456,8 @@ export function Admin() {
                   <div className="card-enterprise p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{t('admin_stat_products') || 'Listed Products'}</p>
-                        <p className="text-3xl font-bold text-zinc-950 font-heading mt-1">{stats.products}</p>
+                        <p className="text-[11px] font-bold tracking-normal text-gray-500">{t('admin_stat_products') || 'Listed Products'}</p>
+                        <p className="text-3xl font-bold text-gray-900 font-heading mt-1">{stats.products}</p>
                       </div>
                       <span className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center ring-1 ring-emerald-100">
                         <Package className="w-5 h-5" />
@@ -467,8 +467,8 @@ export function Admin() {
                   <div className="card-enterprise p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{t('admin_stat_events') || 'Audit Events'}</p>
-                        <p className="text-3xl font-bold text-zinc-950 font-heading mt-1">{stats.events ?? 0}</p>
+                        <p className="text-[11px] font-bold tracking-normal text-gray-500">{t('admin_stat_events') || 'Audit Events'}</p>
+                        <p className="text-3xl font-bold text-gray-900 font-heading mt-1">{stats.events ?? 0}</p>
                       </div>
                       <span className="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center ring-1 ring-purple-100">
                         <Activity className="w-5 h-5" />
@@ -481,8 +481,8 @@ export function Admin() {
                 {providers && (
                   <div className="card-enterprise p-6">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-sm font-bold text-zinc-950 flex items-center gap-2">
-                        <Cpu className="w-4 h-4 text-blue-600" />
+                      <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                        <Cpu className="w-4 h-4 text-primary-600" />
                         {t('admin_ai_health') || 'AI Provider Health'}
                       </h3>
                       <button
@@ -501,14 +501,14 @@ export function Admin() {
                           key={p.id}
                           className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border ${
                             p.disabled
-                              ? 'bg-zinc-50 text-zinc-400 border-zinc-200 line-through'
+                              ? 'bg-gray-50 text-gray-400 border-gray-200 line-through'
                               : p.configured
-                                ? (PROVIDER_BADGE[p.id] || 'bg-zinc-100 text-zinc-700 border-zinc-200')
-                                : 'bg-zinc-50 text-zinc-400 border-zinc-200'
+                                ? (PROVIDER_BADGE[p.id] || 'bg-gray-100 text-gray-700 border-gray-200')
+                                : 'bg-gray-50 text-gray-400 border-gray-200'
                           }`}
                           title={`${p.id} · ${p.configured ? 'key configured' : 'no API key'} · model: ${p.modelOverride || p.defaultModel}`}
                         >
-                          <span className="text-[10px] font-bold text-zinc-400">#{i + 1}</span>
+                          <span className="text-[10px] font-bold text-gray-400">#{i + 1}</span>
                           {p.label}
                           {p.configured && !p.disabled && <CheckCircle2 className="w-3 h-3" />}
                           {(!p.configured || p.disabled) && <XCircle className="w-3 h-3" />}
@@ -527,7 +527,7 @@ export function Admin() {
                           )}
                         </p>
                         {Array.isArray(testResult.attempts) && testResult.attempts.length > 0 && (
-                          <ul className="space-y-1 text-zinc-600">
+                          <ul className="space-y-1 text-gray-600">
                             {testResult.attempts.map((a, i) => (
                               <li key={i} className="flex items-start gap-1.5">
                                 <span className={`mt-0.5 ${a.ok ? 'text-emerald-600' : 'text-rose-500'}`}>{a.ok ? '✓' : '✗'}</span>
@@ -552,7 +552,7 @@ export function Admin() {
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h3 className="text-sm font-bold text-zinc-950">
+                          <h3 className="text-sm font-bold text-gray-900">
                             {t('admin_shopify_integration', 'Shopify Enterprise Integration')}
                           </h3>
                           <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -560,8 +560,8 @@ export function Admin() {
                             {t('admin_channels_connected', 'Connected')}
                           </span>
                         </div>
-                        <p className="text-xs text-zinc-500 mt-0.5">
-                          {t('admin_active_store', 'Active Store')}: <span className="font-mono font-medium text-zinc-900">digital-catalog-agent.myshopify.com</span> · API 2024-01
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {t('admin_active_store', 'Active Store')}: <span className="font-mono font-medium text-gray-900">digital-catalog-agent.myshopify.com</span> · API 2024-01
                         </p>
                       </div>
                     </div>
@@ -591,26 +591,26 @@ export function Admin() {
                         <CheckCircle2 className="w-5 h-5" />
                       </span>
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-bold text-zinc-950">
+                        <h3 className="text-sm font-bold text-gray-900">
                           {provisioned.isPasswordReset || provisioned.request?.source === 'password_reset'
                             ? 'Password reset approved — temporary credentials ready'
                             : t('admin_creds_title', 'Store account created')}
                         </h3>
-                        <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
+                        <p className="text-xs text-gray-500 mt-1 leading-relaxed">
                           {provisioned.isPasswordReset || provisioned.request?.source === 'password_reset'
                             ? 'Share these temporary credentials with the merchant now via WhatsApp or Email. They will be required to choose a new password on sign-in.'
                             : t('admin_creds_once', 'Share these details with the merchant now — the temporary password is never shown again, and they will be asked to choose their own on first sign-in.')}
                         </p>
                         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3">
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{t('admin_creds_login', 'Sign in with')}</p>
-                            <p className="text-sm font-semibold text-zinc-900 mt-1 break-all font-mono">
+                          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                            <p className="text-[10px] font-bold tracking-normal text-gray-500">{t('admin_creds_login', 'Sign in with')}</p>
+                            <p className="text-sm font-semibold text-gray-900 mt-1 break-all font-mono">
                               {provisioned.credentials?.identifier}
                             </p>
                           </div>
-                          <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3">
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{t('admin_creds_password', 'Temporary password')}</p>
-                            <p className="text-sm font-semibold text-zinc-900 mt-1 font-mono tracking-widest">
+                          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                            <p className="text-[10px] font-bold tracking-normal text-gray-500">{t('admin_creds_password', 'Temporary password')}</p>
+                            <p className="text-sm font-semibold text-gray-900 mt-1 font-mono tracking-widest">
                               {provisioned.credentials?.temporaryPassword}
                             </p>
                           </div>
@@ -659,7 +659,7 @@ export function Admin() {
                           <button
                             type="button"
                             onClick={() => setProvisioned(null)}
-                            className="text-xs font-medium text-zinc-500 hover:text-zinc-900 px-2 py-2"
+                            className="text-xs font-medium text-gray-500 hover:text-gray-900 px-2 py-2"
                           >
                             {t('dismiss', 'Dismiss')}
                           </button>
@@ -672,9 +672,9 @@ export function Admin() {
                 {/* Inline decline confirmation (keeps the reason in the audit log) */}
                 {rejectTarget && (
                   <div className="bg-white border border-rose-200 rounded-xl p-5">
-                    <p className="text-sm font-semibold text-zinc-900">
+                    <p className="text-sm font-semibold text-gray-900">
                       {t('admin_reject_title', 'Decline this request?')}{' '}
-                      <span className="text-zinc-500 font-normal">
+                      <span className="text-gray-500 font-normal">
                         — {rejectTarget.businessName || rejectTarget.name}
                       </span>
                     </p>
@@ -706,46 +706,46 @@ export function Admin() {
                   </div>
                 )}
 
-                <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-xs">
-                  <div className="px-4 py-3 border-b border-zinc-200 bg-zinc-50 flex items-center justify-between">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-xs">
+                  <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+                    <p className="text-[11px] font-bold tracking-normal text-gray-500">
                       {t('admin_access_queue', 'Onboarding queue')}
                     </p>
-                    <span className="text-[11px] font-semibold text-zinc-600">
+                    <span className="text-[11px] font-semibold text-gray-600">
                       {accessCounts.pending || 0} {t('admin_pending', 'pending')}
                     </span>
                   </div>
 
                   {accessRequests.length === 0 ? (
-                    <div className="p-12 text-center text-sm text-zinc-500">
+                    <div className="p-12 text-center text-sm text-gray-500">
                       {t('admin_no_requests', 'No access requests yet. Requests submitted from the website land here.')}
                     </div>
                   ) : (
-                    <ul className="divide-y divide-zinc-100">
+                    <ul className="divide-y divide-gray-100">
                       {[...accessRequests]
                         .sort((a, b) => (a.status === 'pending' ? 0 : 1) - (b.status === 'pending' ? 0 : 1))
                         .map((r) => (
-                          <li key={r.id} className="p-4 sm:p-5 hover:bg-zinc-50/60 transition-colors">
+                          <li key={r.id} className="p-4 sm:p-5 hover:bg-gray-50/60 transition-colors">
                             <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 flex-wrap">
-                                  <p className="font-semibold text-zinc-900 text-sm">
+                                  <p className="font-semibold text-gray-900 text-sm">
                                     {r.businessName || r.name}
                                   </p>
                                   {r.source === 'password_reset' && (
-                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200 flex items-center gap-1">
+                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold tracking-normal bg-purple-50 text-purple-700 border border-purple-200 flex items-center gap-1">
                                       <KeyRound className="w-3 h-3 text-purple-600" />
                                       Password Reset
                                     </span>
                                   )}
-                                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${STATUS_BADGE[r.status] || STATUS_BADGE.pending}`}>
+                                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-normal border ${STATUS_BADGE[r.status] || STATUS_BADGE.pending}`}>
                                     {r.status?.replace('_', ' ')}
                                   </span>
                                   {r.category && (
-                                    <span className="text-[11px] font-medium text-zinc-500">{r.category}</span>
+                                    <span className="text-[11px] font-medium text-gray-500">{r.category}</span>
                                   )}
                                 </div>
-                                <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-zinc-500">
+                                <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-gray-500">
                                   <span>{r.name}</span>
                                   {r.phone && <span className="font-mono">{r.phone}</span>}
                                   {r.email && <span>{r.email}</span>}
@@ -756,10 +756,10 @@ export function Admin() {
                                   </span>
                                 </div>
                                 {r.message && (
-                                  <p className="text-xs text-zinc-600 mt-2 italic">“{r.message}”</p>
+                                  <p className="text-xs text-gray-600 mt-2 italic">“{r.message}”</p>
                                 )}
                                 {r.reviewNote && (
-                                  <div className="mt-2 text-[11px] text-zinc-600 bg-amber-50/70 border border-amber-200/80 rounded-md px-2.5 py-1.5 inline-block">
+                                  <div className="mt-2 text-[11px] text-gray-600 bg-amber-50/70 border border-amber-200/80 rounded-md px-2.5 py-1.5 inline-block">
                                     <span className="font-semibold text-amber-900">{t('admin_review_note', 'Review Note')}:</span> {r.reviewNote}
                                   </div>
                                 )}
@@ -782,9 +782,9 @@ export function Admin() {
                                   {r.email && (
                                     <a
                                       href={`mailto:${r.email}?subject=${encodeURIComponent(`CatalogAI Store Onboarding - ${r.businessName || r.name}`)}`}
-                                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-colors"
+                                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium bg-primary-50 text-primary-700 hover:bg-primary-100 border border-primary-200 transition-colors"
                                     >
-                                      <Mail className="w-3 h-3 text-blue-600" />
+                                      <Mail className="w-3 h-3 text-primary-600" />
                                       <span>Email</span>
                                     </a>
                                   )}
@@ -794,16 +794,16 @@ export function Admin() {
                                       setEditingNoteId(editingNoteId === r.id ? null : r.id);
                                       setNoteText(r.reviewNote || '');
                                     }}
-                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium bg-zinc-100 text-zinc-700 hover:bg-zinc-200 transition-colors"
+                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
                                   >
-                                    <FileText className="w-3 h-3 text-zinc-500" />
+                                    <FileText className="w-3 h-3 text-gray-500" />
                                     <span>{r.reviewNote ? 'Edit Note' : 'Add Note'}</span>
                                   </button>
                                 </div>
 
                                 {/* Inline Note Editor */}
                                 {editingNoteId === r.id && (
-                                  <div className="mt-2.5 p-3 bg-zinc-50 border border-zinc-200 rounded-lg space-y-2 max-w-lg">
+                                  <div className="mt-2.5 p-3 bg-gray-50 border border-gray-200 rounded-lg space-y-2 max-w-lg">
                                     <textarea
                                       value={noteText}
                                       onChange={(e) => setNoteText(e.target.value)}
@@ -856,7 +856,7 @@ export function Admin() {
                                         type="button"
                                         disabled={updatingStatusId === r.id}
                                         onClick={() => handleUpdateStatus(r, 'under_review')}
-                                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors"
+                                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-primary-700 bg-primary-50 hover:bg-primary-100 border border-primary-200 transition-colors"
                                       >
                                         Reviewing
                                       </button>
@@ -876,7 +876,7 @@ export function Admin() {
                                         type="button"
                                         disabled={updatingStatusId === r.id}
                                         onClick={() => handleUpdateStatus(r, 'under_review')}
-                                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors"
+                                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-primary-700 bg-primary-50 hover:bg-primary-100 border border-primary-200 transition-colors"
                                       >
                                         In Review
                                       </button>
@@ -892,14 +892,14 @@ export function Admin() {
                                   </>
                                 ) : r.status === 'rejected' ? (
                                   <div className="flex items-center gap-2">
-                                    <span className="text-[11px] text-zinc-400">Declined</span>
+                                    <span className="text-[11px] text-gray-400">Declined</span>
                                     <button
                                       type="button"
                                       disabled={updatingStatusId === r.id}
                                       onClick={() => handleUpdateStatus(r, 'pending')}
-                                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-zinc-700 bg-zinc-100 hover:bg-zinc-200 transition-colors"
+                                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
                                     >
-                                      <RotateCcw className="w-3 h-3 text-zinc-500" />
+                                      <RotateCcw className="w-3 h-3 text-gray-500" />
                                       <span>Reopen</span>
                                     </button>
                                   </div>
@@ -921,35 +921,35 @@ export function Admin() {
 
             {/* ============ SELLERS ============ */}
             {tab === 'sellers' && (
-              <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-xs">
+              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-xs">
                 {sellers.length === 0 ? (
-                  <div className="p-12 text-center text-sm text-zinc-500">
+                  <div className="p-12 text-center text-sm text-gray-500">
                     {t('admin_no_sellers') || 'No sellers registered yet.'}
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="bg-zinc-50 border-b border-zinc-200 text-left">
-                          <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-zinc-500">{t('admin_col_seller') || 'Seller'}</th>
-                          <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-zinc-500">{t('admin_col_products') || 'Products'}</th>
-                          <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-zinc-500">{t('admin_col_value') || 'Catalog Value'}</th>
-                          <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-zinc-500">{t('admin_col_lang') || 'Language'}</th>
-                          <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-zinc-500">{t('admin_col_joined') || 'Joined'}</th>
+                        <tr className="bg-gray-50 border-b border-gray-200 text-left">
+                          <th className="px-4 py-3 text-[11px] font-bold tracking-normal text-gray-500">{t('admin_col_seller') || 'Seller'}</th>
+                          <th className="px-4 py-3 text-[11px] font-bold tracking-normal text-gray-500">{t('admin_col_products') || 'Products'}</th>
+                          <th className="px-4 py-3 text-[11px] font-bold tracking-normal text-gray-500">{t('admin_col_value') || 'Catalog Value'}</th>
+                          <th className="px-4 py-3 text-[11px] font-bold tracking-normal text-gray-500">{t('admin_col_lang') || 'Language'}</th>
+                          <th className="px-4 py-3 text-[11px] font-bold tracking-normal text-gray-500">{t('admin_col_joined') || 'Joined'}</th>
                           <th className="px-4 py-3"></th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-zinc-100">
+                      <tbody className="divide-y divide-gray-100">
                         {sellers.map((s) => (
-                          <tr key={s.id} className="hover:bg-zinc-50/60 transition-colors">
+                          <tr key={s.id} className="hover:bg-gray-50/60 transition-colors">
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-2.5">
-                                <span className="w-8 h-8 rounded-full bg-zinc-950 text-white flex items-center justify-center text-xs font-bold shrink-0">
+                                <span className="w-8 h-8 rounded-full bg-primary-600 text-white flex items-center justify-center text-xs font-bold shrink-0">
                                   {s.name?.trim().charAt(0).toUpperCase() || 'S'}
                                 </span>
                                 <div className="min-w-0">
-                                  <p className="font-semibold text-zinc-900 truncate max-w-[180px]">{s.name}</p>
-                                  <p className="text-[11px] text-zinc-500 flex items-center gap-1 truncate max-w-[200px]">
+                                  <p className="font-semibold text-gray-900 truncate max-w-[180px]">{s.name}</p>
+                                  <p className="text-[11px] text-gray-500 flex items-center gap-1 truncate max-w-[200px]">
                                     <Mail className="w-3 h-3 shrink-0" /> {s.email}
                                   </p>
                                 </div>
@@ -957,8 +957,8 @@ export function Admin() {
                             </td>
                             <td className="px-4 py-3 font-semibold">{s.productCount}</td>
                             <td className="px-4 py-3 font-semibold">₹{Number(s.catalogValue || 0).toLocaleString('en-IN')}</td>
-                            <td className="px-4 py-3 uppercase text-zinc-600">{s.language || '—'}</td>
-                            <td className="px-4 py-3 text-xs text-zinc-500">{s.createdAt ? formatTime(s.createdAt) : '—'}</td>
+                            <td className="px-4 py-3 uppercase text-gray-600">{s.language || '—'}</td>
+                            <td className="px-4 py-3 text-xs text-gray-500">{s.createdAt ? formatTime(s.createdAt) : '—'}</td>
                             <td className="px-4 py-3 text-right">
                               <button
                                 type="button"
@@ -982,7 +982,7 @@ export function Admin() {
             {/* ============ AI PROVIDERS ============ */}
             {tab === 'ai' && providers && (
               <div className="space-y-4">
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-xs text-blue-900 leading-relaxed">
+                <div className="bg-primary-50 border border-primary-200 rounded-xl p-4 text-xs text-primary-900 leading-relaxed">
                   <strong className="font-bold">{t('admin_ai_how_title') || 'How fallback works:'}</strong>{' '}
                   {t('admin_ai_how_body') || 'Providers are tried top to bottom. If one fails (bad key, quota, outage), the next takes over automatically — and every fallback is recorded to the audit log with the reason. Keys come from server environment variables; here you control order, per-provider model, and on/off state.'}
                 </div>
@@ -992,14 +992,14 @@ export function Admin() {
                     <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                       {/* Position + name */}
                       <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <span className="w-8 h-8 rounded-lg bg-zinc-950 text-white flex items-center justify-center text-xs font-bold shrink-0">
+                        <span className="w-8 h-8 rounded-lg bg-primary-600 text-white flex items-center justify-center text-xs font-bold shrink-0">
                           #{i + 1}
                         </span>
                         <div className="min-w-0">
-                          <p className="font-bold text-zinc-950 text-sm flex items-center gap-2 flex-wrap">
+                          <p className="font-bold text-gray-900 text-sm flex items-center gap-2 flex-wrap">
                             {p.label}
                             <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border ${
-                              p.disabled ? 'bg-zinc-100 text-zinc-400 border-zinc-200'
+                              p.disabled ? 'bg-gray-100 text-gray-400 border-gray-200'
                                 : p.configured ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                                 : 'bg-amber-50 text-amber-700 border-amber-200'
                             }`}>
@@ -1008,7 +1008,7 @@ export function Admin() {
                                 : (t('admin_no_key') || 'No key in env')}
                             </span>
                           </p>
-                          <p className="text-[11px] text-zinc-500 mt-0.5">
+                          <p className="text-[11px] text-gray-500 mt-0.5">
                             {t('admin_env_keys') || 'Env'}: {p.envKeys.join(', ')} · {t('admin_default_model') || 'default'}: {p.defaultModel}
                           </p>
                         </div>
@@ -1018,12 +1018,12 @@ export function Admin() {
                       <div className="flex items-center gap-2 flex-wrap">
                         {/* Precedence arrows */}
                         <button type="button" onClick={() => moveProvider(i, -1)} disabled={i === 0 || savingOrder}
-                          className="p-1.5 rounded-md border border-zinc-200 text-zinc-500 hover:text-zinc-950 hover:bg-zinc-50 disabled:opacity-30"
+                          className="p-1.5 rounded-md border border-gray-200 text-gray-500 hover:text-gray-900 hover:bg-gray-50 disabled:opacity-30"
                           title={t('admin_move_up') || 'Higher precedence'}>
                           <ArrowUp className="w-3.5 h-3.5" />
                         </button>
                         <button type="button" onClick={() => moveProvider(i, 1)} disabled={i === providers.providers.length - 1 || savingOrder}
-                          className="p-1.5 rounded-md border border-zinc-200 text-zinc-500 hover:text-zinc-950 hover:bg-zinc-50 disabled:opacity-30"
+                          className="p-1.5 rounded-md border border-gray-200 text-gray-500 hover:text-gray-900 hover:bg-gray-50 disabled:opacity-30"
                           title={t('admin_move_down') || 'Lower precedence'}>
                           <ArrowDown className="w-3.5 h-3.5" />
                         </button>
@@ -1033,7 +1033,7 @@ export function Admin() {
                           <select
                             value={p.modelOverride || ''}
                             onChange={(e) => setModelOverride(p.id, e.target.value)}
-                            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 bg-white text-zinc-800 focus:outline-none focus:ring-2 focus:ring-blue-500/30 max-w-[200px]"
+                            className="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 max-w-[200px]"
                             title={t('admin_model_select') || 'Model — default or manual override'}
                           >
                             <option value="">{t('admin_model_default') || `Default (${p.defaultModel})`}</option>
@@ -1052,7 +1052,7 @@ export function Admin() {
                               setCustomModelInput('');
                               setCustomModelError('');
                             }}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-zinc-700 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 transition-colors"
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 transition-colors"
                             title="Configure custom model name for this agent"
                           >
                             <Plus className="w-3 h-3" /> Custom Model
@@ -1066,7 +1066,7 @@ export function Admin() {
                           className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold border transition-colors ${
                             p.disabled
                               ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
-                              : 'bg-zinc-100 text-zinc-600 border-zinc-200 hover:bg-zinc-200'
+                              : 'bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200'
                           }`}
                         >
                           {p.disabled ? <><Eye className="w-3 h-3" />{t('admin_enable') || 'Enable'}</> : <><EyeOff className="w-3 h-3" />{t('admin_disable') || 'Disable'}</>}
@@ -1076,7 +1076,7 @@ export function Admin() {
 
                     {/* Active Custom Model Indicator */}
                     {p.modelOverride && !p.knownModels.includes(p.modelOverride) && (
-                      <div className="mt-3 pt-2.5 border-t border-zinc-100 flex items-center justify-between text-xs">
+                      <div className="mt-3 pt-2.5 border-t border-gray-100 flex items-center justify-between text-xs">
                         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-50 text-purple-700 border border-purple-200">
                           <Cpu className="w-3 h-3 text-purple-600" />
                           Custom Model Override: <span className="font-mono font-bold">{p.modelOverride}</span>
@@ -1084,7 +1084,7 @@ export function Admin() {
                         <button
                           type="button"
                           onClick={() => resetModelToDefault(p.id)}
-                          className="text-[11px] text-zinc-500 hover:text-rose-600 underline font-medium"
+                          className="text-[11px] text-gray-500 hover:text-rose-600 underline font-medium"
                         >
                           Reset to default ({p.defaultModel})
                         </button>
@@ -1093,23 +1093,23 @@ export function Admin() {
 
                     {/* Custom Model Inline Config Drawer */}
                     {customModelProvider?.id === p.id && (
-                      <div className="mt-3 p-3.5 bg-zinc-50 border border-zinc-200 rounded-xl space-y-2.5">
+                      <div className="mt-3 p-3.5 bg-gray-50 border border-gray-200 rounded-xl space-y-2.5">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-1.5">
-                            <Cpu className="w-3.5 h-3.5 text-blue-600" />
-                            <span className="text-xs font-bold text-zinc-950">
+                            <Cpu className="w-3.5 h-3.5 text-primary-600" />
+                            <span className="text-xs font-bold text-gray-900">
                               Enter Custom Model Name for {p.label}
                             </span>
                           </div>
                           <button
                             type="button"
                             onClick={() => { setCustomModelProvider(null); setCustomModelError(''); }}
-                            className="text-[11px] text-zinc-400 hover:text-zinc-600 font-medium"
+                            className="text-[11px] text-gray-400 hover:text-gray-600 font-medium"
                           >
                             {t('cancel', 'Cancel')}
                           </button>
                         </div>
-                        <p className="text-[11px] text-zinc-500">
+                        <p className="text-[11px] text-gray-500">
                           {t('admin_custom_model_help', 'Enter the exact identifier of the custom model. Models already in the standard list cannot be entered as custom models.')}{' '}
                           <span className="font-mono">{p.knownModels.join(', ')}</span>
                         </p>
@@ -1120,7 +1120,7 @@ export function Admin() {
                             onChange={(e) => { setCustomModelInput(e.target.value); setCustomModelError(''); }}
                             onKeyDown={(e) => { if (e.key === 'Enter') handleSaveCustomModel(p); }}
                             placeholder={`e.g. ${p.id}-v2-custom`}
-                            className="flex-1 text-xs border border-zinc-300 rounded-lg px-3 py-2 bg-white text-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30 font-mono shadow-2xs"
+                            className="flex-1 text-xs border border-gray-300 rounded-lg px-3 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500/30 font-mono shadow-2xs"
                             autoFocus
                           />
                           <button
@@ -1159,7 +1159,7 @@ export function Admin() {
                         ? <><CheckCircle2 className="w-4 h-4 text-emerald-600" /> {t('admin_test_ok') || 'Chain OK'} — {testResult.provider} ({testResult.model}){testResult.reply ? ` · Response: "${testResult.reply.trim()}"` : ''}</>
                         : <><XCircle className="w-4 h-4 text-rose-600" /> {t('admin_test_fail') || 'All providers failed'}</>}
                     </p>
-                    <ul className="space-y-1 text-zinc-600">
+                    <ul className="space-y-1 text-gray-600">
                       {(testResult.attempts || []).map((a, i) => (
                         <li key={i} className="flex items-start gap-1.5">
                           <span className={a.ok ? 'text-emerald-600' : 'text-rose-500'}>{a.ok ? '✓' : '✗'}</span>
