@@ -632,10 +632,10 @@ const db = {
   upsertPayment: async (userId, data) => {
     if (!isTestEnv) {
       try {
-        const res = await fetch(q('PaymentSettings'), {
+        const res = await fetch(`${q('PaymentSettings')}?on_conflict=userId`, {
           method: 'POST',
           headers: { ...headers(), 'Prefer': 'return=representation,resolution=merge-duplicates' },
-          body: JSON.stringify({ userId, ...data }),
+          body: JSON.stringify({ userId, ...data, updatedAt: new Date().toISOString() }),
           signal: AbortSignal.timeout(3000)
         });
         if (res.ok) {

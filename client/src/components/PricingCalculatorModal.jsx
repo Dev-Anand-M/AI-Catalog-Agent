@@ -127,50 +127,75 @@ export function PricingCalculatorModal({
         <div className="p-5 overflow-y-auto space-y-5 flex-1">
           {/* Inputs Grid */}
           <div className="space-y-3">
-            <span className="text-xs font-bold tracking-normal text-slate-600">Enter Your Direct Costs</span>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold tracking-normal text-slate-700">Enter Your Direct Costs</span>
+              <span className="text-xs font-medium text-slate-500">
+                Total Direct Cost: <b className="font-mono text-slate-900">₹{totalCost}</b>
+              </span>
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div>
-                <label className="text-[11px] font-semibold text-gray-500 block mb-1">Raw Materials (₹)</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={materialCost}
-                  onChange={(e) => setMaterialCost(e.target.value)}
-                  className="w-full text-sm font-semibold p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500 min-h-[44px]"
-                />
+              <div className="flex flex-col justify-end">
+                <label className="text-[11px] font-semibold text-gray-600 h-7 flex items-end mb-1.5">
+                  Raw Materials
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 select-none">₹</span>
+                  <input
+                    type="number"
+                    min="0"
+                    value={materialCost}
+                    onChange={(e) => setMaterialCost(e.target.value)}
+                    className="w-full text-sm font-semibold pl-7 pr-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500 min-h-[42px]"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="text-[11px] font-semibold text-gray-500 block mb-1">Artisan Labour (₹)</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={labourCost}
-                  onChange={(e) => setLabourCost(e.target.value)}
-                  className="w-full text-sm font-semibold p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500 min-h-[44px]"
-                />
+              <div className="flex flex-col justify-end">
+                <label className="text-[11px] font-semibold text-gray-600 h-7 flex items-end mb-1.5">
+                  Artisan Labour
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 select-none">₹</span>
+                  <input
+                    type="number"
+                    min="0"
+                    value={labourCost}
+                    onChange={(e) => setLabourCost(e.target.value)}
+                    className="w-full text-sm font-semibold pl-7 pr-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500 min-h-[42px]"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="text-[11px] font-semibold text-gray-500 block mb-1">Packaging (₹)</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={packagingCost}
-                  onChange={(e) => setPackagingCost(e.target.value)}
-                  className="w-full text-sm font-semibold p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500 min-h-[44px]"
-                />
+              <div className="flex flex-col justify-end">
+                <label className="text-[11px] font-semibold text-gray-600 h-7 flex items-end mb-1.5">
+                  Packaging
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 select-none">₹</span>
+                  <input
+                    type="number"
+                    min="0"
+                    value={packagingCost}
+                    onChange={(e) => setPackagingCost(e.target.value)}
+                    className="w-full text-sm font-semibold pl-7 pr-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500 min-h-[42px]"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="text-[11px] font-semibold text-gray-500 block mb-1">Other / Freight (₹)</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={otherCost}
-                  onChange={(e) => setOtherCost(e.target.value)}
-                  className="w-full text-sm font-semibold p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500 min-h-[44px]"
-                />
+              <div className="flex flex-col justify-end">
+                <label className="text-[11px] font-semibold text-gray-600 h-7 flex items-end mb-1.5">
+                  Other / Freight
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 select-none">₹</span>
+                  <input
+                    type="number"
+                    min="0"
+                    value={otherCost}
+                    onChange={(e) => setOtherCost(e.target.value)}
+                    className="w-full text-sm font-semibold pl-7 pr-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500 min-h-[42px]"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -200,24 +225,24 @@ export function PricingCalculatorModal({
           {/* Dynamic Result Display Card */}
           {pricingResult && (
             <div className="p-4 bg-emerald-50/60 border border-emerald-200 rounded-xl space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-emerald-200/60 pb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-emerald-200/60 pb-3">
                 <div>
                   <span className="text-xs font-bold text-emerald-800 tracking-normal block">
                     Recommended Selling Price
                   </span>
-                  <div className="flex items-baseline gap-2 mt-0.5">
+                  <div className="flex items-baseline gap-2 mt-1">
                     <span className="text-3xl font-extrabold text-emerald-900 font-mono">
                       ₹{pricingResult.recommendedPrice}
                     </span>
                     <span className="text-xs text-emerald-700 font-semibold">
-                      (₹{pricingResult.costBreakdown?.profitAmount} profit / unit)
+                      (+₹{pricingResult.costBreakdown?.profitAmount} profit / unit)
                     </span>
                   </div>
                 </div>
 
-                <div className="text-left sm:text-right">
-                  <span className="text-[11px] font-semibold text-gray-500 block">Viable Market Range</span>
-                  <span className="text-xs font-bold text-gray-800 font-mono">
+                <div className="sm:text-right bg-emerald-100/70 sm:bg-transparent p-2.5 sm:p-0 rounded-lg">
+                  <span className="text-[11px] font-medium text-gray-500 block">Viable Market Range</span>
+                  <span className="text-sm font-bold text-gray-800 font-mono mt-0.5 block">
                     ₹{pricingResult.priceRange?.min} — ₹{pricingResult.priceRange?.max}
                   </span>
                 </div>
@@ -248,11 +273,23 @@ export function PricingCalculatorModal({
                     title="Net Margin"
                   />
                 </div>
-                <div className="flex flex-wrap gap-3 text-[10px] text-gray-600 pt-1">
-                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-primary-600"></span> Materials (₹{pricingResult.costBreakdown?.materialCost})</span>
-                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-indigo-500"></span> Labour (₹{pricingResult.costBreakdown?.labourCost})</span>
-                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500"></span> Pkg (₹{pricingResult.costBreakdown?.packagingCost})</span>
-                  <span className="flex items-center gap-1 font-bold text-emerald-800"><span className="w-2 h-2 rounded-full bg-emerald-500"></span> Margin (₹{pricingResult.costBreakdown?.profitAmount})</span>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-gray-600 pt-1.5">
+                  <div className="flex items-center gap-1.5 bg-white/80 border border-emerald-100 px-2 py-1.5 rounded-md">
+                    <span className="w-2.5 h-2.5 rounded-full bg-primary-600 shrink-0"></span>
+                    <span className="truncate">Materials: <b className="text-gray-900 font-mono">₹{pricingResult.costBreakdown?.materialCost}</b></span>
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-white/80 border border-emerald-100 px-2 py-1.5 rounded-md">
+                    <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 shrink-0"></span>
+                    <span className="truncate">Labour: <b className="text-gray-900 font-mono">₹{pricingResult.costBreakdown?.labourCost}</b></span>
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-white/80 border border-emerald-100 px-2 py-1.5 rounded-md">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0"></span>
+                    <span className="truncate">Packaging: <b className="text-gray-900 font-mono">₹{pricingResult.costBreakdown?.packagingCost}</b></span>
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-white/80 border border-emerald-200 px-2 py-1.5 rounded-md">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
+                    <span className="truncate text-emerald-800">Margin: <b className="text-emerald-950 font-mono">₹{pricingResult.costBreakdown?.profitAmount}</b></span>
+                  </div>
                 </div>
               </div>
 

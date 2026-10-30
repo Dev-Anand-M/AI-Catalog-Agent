@@ -51,4 +51,8 @@ PROJECT_REPORT.md
 *.zip
 .freebuff/
 
+# Extras / Non-runtime Archive
+extras/
+
+
 
