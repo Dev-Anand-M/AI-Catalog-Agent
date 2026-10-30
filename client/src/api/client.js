@@ -137,7 +137,10 @@ export const aiApi = {
 };
 
 export const shopifyApi = {
-  sync: (productIds) => api.post('/shopify/sync', { productIds }),
+  sync: (productIds, products) => api.post('/shopify/sync', {
+    ...(productIds ? { productIds } : {}),
+    ...(products ? { products } : {})
+  }),
   getStatus: () => api.get('/shopify/status')
 };
 

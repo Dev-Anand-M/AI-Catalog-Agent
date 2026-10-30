@@ -36,9 +36,36 @@ export default async function handler(req, res) {
     payment = { upi: [], bank: null, qr: null, phone: user.phone };
   }
 
+  function formatProductRecord(product) {
+    if (!product) return product;
+    let cleanDesc = product.description || '';
+    let meta = {};
+
+    const metaMatch = cleanDesc.match(/<!--META:([\s\S]*?)-->/);
+    if (metaMatch) {
+      try {
+        meta = JSON.parse(metaMatch[1]);
+        cleanDesc = cleanDesc.replace(/<!--META:[\s\S]*?-->/g, '').trim();
+      } catch (e) {
+        console.error('Failed to parse product metadata:', e.message);
+      }
+    }
+
+    return {
+      ...product,
+      description: cleanDesc,
+      confirmationState: meta.confirmationState || product.confirmationState || 'seller_confirmed',
+      status: meta.status || product.status || 'active',
+      attributes: meta.attributes || product.attributes || {},
+      tags: meta.tags || product.tags || [product.category, product.language].filter(Boolean),
+      costBreakdown: meta.costBreakdown || product.costBreakdown || null,
+      media: meta.media || (product.imageUrl ? [product.imageUrl] : [])
+    };
+  }
+
   res.json({
     seller: { name: user.name, id: user.id },
-    products: products.map(p => ({
+    products: products.map(formatProductRecord).map(p => ({
       id: p.id,
       name: p.name,
       description: p.description,

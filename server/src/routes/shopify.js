@@ -50,16 +50,27 @@ router.get('/status', requireAuth, async (req, res) => {
 router.post('/sync', requireAuth, async (req, res) => {
   try {
     const { domain, token, isLive } = getShopifyConfig();
-    const { productIds } = req.body || {};
+    const { productIds, products } = req.body || {};
 
     // Get user products
-    const allProducts = await db.findProductsByUserId(req.userId);
-    const targetProducts = Array.isArray(productIds) && productIds.length > 0
-      ? allProducts.filter(p => productIds.includes(p.id) || productIds.includes(String(p.id)))
-      : allProducts;
+    let targetProducts = [];
+    if (Array.isArray(products) && products.length > 0) {
+      targetProducts = products;
+    } else {
+      const allProducts = await db.findProductsByUserId(req.userId);
+      targetProducts = Array.isArray(productIds) && productIds.length > 0
+        ? allProducts.filter(p => productIds.includes(p.id) || productIds.includes(String(p.id)))
+        : (allProducts || []);
+    }
 
     if (targetProducts.length === 0) {
-      return res.status(400).json({ error: 'No products selected or available to sync' });
+      return res.json({
+        success: true,
+        message: 'No products selected or available to sync',
+        storeDomain: domain,
+        syncedCount: 0,
+        products: []
+      });
     }
 
     const syncedResults = [];

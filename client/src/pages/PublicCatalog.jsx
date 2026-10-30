@@ -24,6 +24,11 @@ import { useLanguage } from '../context/LanguageContext';
 import { getCategoryLabel, CategoryIcon, getCategoryColor, CATEGORIES } from '../lib/categories';
 import { LanguageSelector } from '../components/LanguageSelector';
 
+export function cleanDescription(desc) {
+  if (!desc || typeof desc !== 'string') return '';
+  return desc.replace(/<!--META:[\s\S]*?-->/g, '').trim();
+}
+
 export function PublicCatalog() {
   const { userId } = useParams();
   const { t, language } = useLanguage();
@@ -56,9 +61,15 @@ export function PublicCatalog() {
         phone: rawPayment.phone || rawPayment.phoneNumber || null
       } : null;
 
+      const rawProducts = Array.isArray(data.products) ? data.products : [];
+      const cleanProducts = rawProducts.map(p => ({
+        ...p,
+        description: cleanDescription(p.description)
+      }));
+
       setCatalog({
         seller: data.seller || data.user || { name: 'Artisan Store' },
-        products: data.products || [],
+        products: cleanProducts,
         payment: normalizedPayment
       });
 
@@ -280,7 +291,7 @@ export function PublicCatalog() {
                       {product.name}
                     </h3>
                     <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
-                      {product.description}
+                      {cleanDescription(product.description)}
                     </p>
                     <div className="flex items-baseline gap-2 pt-1">
                       <span className="text-lg font-bold text-gray-900 font-mono">
@@ -361,7 +372,7 @@ export function PublicCatalog() {
 
               <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
                 <span className="text-[11px] font-semibold text-slate-500">{t('description')}</span>
-                <p className="text-xs text-slate-700 leading-relaxed">{selectedProduct.description}</p>
+                <p className="text-xs text-slate-700 leading-relaxed">{cleanDescription(selectedProduct.description)}</p>
               </div>
             </div>
 

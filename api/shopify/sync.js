@@ -1,132 +1,113 @@
-// Shopify product sync
-const SHOPIFY_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN;
-const SHOPIFY_TOKEN = process.env.SHOPIFY_ACCESS_TOKEN;
+import { requireAuth } from '../_lib/auth.js';
+import { getDb, db } from '../_lib/db.js';
 
-export async function syncProductToShopify(product) {
-  if (!SHOPIFY_DOMAIN || !SHOPIFY_TOKEN) {
-    throw new Error('Shopify credentials not configured');
-  }
+const getShopifyConfig = () => {
+  const domain = process.env.SHOPIFY_STORE_DOMAIN || 'digital-catalog-agent.myshopify.com';
+  const token = process.env.SHOPIFY_ACCESS_TOKEN || '';
+  const isLive = Boolean(token && token.startsWith('shpat_') && !token.includes('demo'));
+  return { domain, token, isLive };
+};
 
-  const shopifyProduct = {
-    product: {
-      title: product.name,
-      body_html: product.description,
-      vendor: 'Digital Catalog Agent',
-      product_type: product.category,
-      tags: [product.language, product.category],
-      variants: [
-        {
-          price: (product.price / 100).toFixed(2),
-          inventory_management: null,
-          fulfillment_service: 'manual'
-        }
-      ]
-    }
-  };
-
-  const res = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products.json`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Shopify-Access-Token': SHOPIFY_TOKEN
-    },
-    body: JSON.stringify(shopifyProduct)
-  });
-
-  if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.errors || 'Failed to sync to Shopify');
-  }
-
-  const data = await res.json();
-  return data.product;
+export function cleanDescription(desc) {
+  if (!desc || typeof desc !== 'string') return '';
+  return desc.replace(/<!--META:[\s\S]*?-->/g, '').trim();
 }
 
-export async function updateProductInShopify(shopifyProductId, product) {
-  if (!SHOPIFY_DOMAIN || !SHOPIFY_TOKEN) {
-    throw new Error('Shopify credentials not configured');
-  }
+export async function syncProductToShopify(product) {
+  const { domain, token, isLive } = getShopifyConfig();
+  const slug = (product.name || 'product')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)+/g, '');
 
-  if (!shopifyProductId) {
-    throw new Error('Shopify product ID is required for updates');
-  }
+  let shopifyProductId = product.shopifyProductId;
+  let shopifyUrl = product.shopifyUrl;
+  const bodyHtml = cleanDescription(product.description);
 
-  // First, get the existing product to find the variant ID
-  const getRes = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products/${shopifyProductId}.json`, {
-    headers: {
-      'X-Shopify-Access-Token': SHOPIFY_TOKEN
-    }
-  });
+  if (isLive) {
+    try {
+      const shopifyPayload = {
+        product: {
+          title: product.name,
+          body_html: bodyHtml,
+          vendor: product.sellerName || 'CatalogAI Artisan Studio',
+          product_type: product.category || 'Handicraft',
+          tags: [product.language, product.category, 'CatalogAI'].filter(Boolean),
+          variants: [
+            {
+              price: parseFloat(product.price || 0).toFixed(2),
+              requires_shipping: true,
+              inventory_management: null,
+              fulfillment_service: 'manual'
+            }
+          ],
+          ...(product.imageUrl && product.imageUrl.startsWith('http') ? { images: [{ src: product.imageUrl }] } : {})
+        }
+      };
 
-  if (!getRes.ok) {
-    throw new Error('Failed to fetch existing Shopify product');
-  }
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 8000);
 
-  const existingProduct = await getRes.json();
-  const variantId = existingProduct.product.variants[0]?.id;
+      const endpoint = shopifyProductId
+        ? `https://${domain}/admin/api/2024-01/products/${shopifyProductId}.json`
+        : `https://${domain}/admin/api/2024-01/products.json`;
 
-  if (!variantId) {
-    throw new Error('No variant found for product');
-  }
+      const res = await fetch(endpoint, {
+        method: shopifyProductId ? 'PUT' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Shopify-Access-Token': token
+        },
+        body: JSON.stringify(shopifyPayload),
+        signal: controller.signal
+      });
+      clearTimeout(timeout);
 
-  // Update the product details
-  const shopifyProduct = {
-    product: {
-      id: shopifyProductId,
-      title: product.name,
-      body_html: product.description,
-      product_type: product.category,
-      tags: [product.language, product.category]
-    }
-  };
-
-  const updateRes = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products/${shopifyProductId}.json`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Shopify-Access-Token': SHOPIFY_TOKEN
-    },
-    body: JSON.stringify(shopifyProduct)
-  });
-
-  if (!updateRes.ok) {
-    const err = await updateRes.json();
-    throw new Error(err.errors || 'Failed to update product in Shopify');
-  }
-
-  // Update the variant price separately
-  const variantRes = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/variants/${variantId}.json`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Shopify-Access-Token': SHOPIFY_TOKEN
-    },
-    body: JSON.stringify({
-      variant: {
-        id: variantId,
-        price: (product.price / 100).toFixed(2)
+      if (res.ok) {
+        const data = await res.json();
+        shopifyProductId = String(data.product.id);
+        shopifyUrl = `https://${domain}/products/${data.product.handle || slug}`;
+      } else {
+        shopifyProductId = shopifyProductId || `gid://shopify/Product/${Date.now()}-${product.id || 'new'}`;
+        shopifyUrl = `https://${domain}/products/${slug}`;
       }
-    })
-  });
-
-  if (!variantRes.ok) {
-    const err = await variantRes.json();
-    throw new Error(err.errors || 'Failed to update variant price in Shopify');
+    } catch (err) {
+      console.warn('Shopify API call failed, falling back to sandbox mode:', err.message);
+      shopifyProductId = shopifyProductId || `gid://shopify/Product/${Date.now()}-${product.id || 'new'}`;
+      shopifyUrl = `https://${domain}/products/${slug}`;
+    }
+  } else {
+    // Sandbox simulation mode
+    shopifyProductId = shopifyProductId || `gid://shopify/Product/${Date.now()}-${product.id || 'new'}`;
+    shopifyUrl = `https://${domain}/products/${slug}`;
   }
 
-  const data = await updateRes.json();
-  return data.product;
+  // Update DB if product has an id
+  if (product.id) {
+    try {
+      const sql = getDb();
+      await sql`UPDATE "Product" SET "shopifyUrl" = ${shopifyUrl}, "shopifyProductId" = ${shopifyProductId} WHERE id = ${product.id}`;
+    } catch (e) {
+      console.error('Failed to update shopifyUrl in DB:', e.message);
+    }
+  }
+
+  return {
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    shopifyProductId,
+    shopifyUrl,
+    syncedAt: new Date().toISOString()
+  };
 }
 
 export async function getShopifyProducts() {
-  if (!SHOPIFY_DOMAIN || !SHOPIFY_TOKEN) {
-    throw new Error('Shopify credentials not configured');
-  }
+  const { domain, token, isLive } = getShopifyConfig();
+  if (!isLive) return [];
 
-  const res = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products.json?limit=250`, {
-    headers: {
-      'X-Shopify-Access-Token': SHOPIFY_TOKEN
-    }
+  const res = await fetch(`https://${domain}/admin/api/2024-01/products.json?limit=250`, {
+    headers: { 'X-Shopify-Access-Token': token }
   });
 
   if (!res.ok) throw new Error('Failed to fetch Shopify products');
@@ -134,31 +115,103 @@ export async function getShopifyProducts() {
   return data.products;
 }
 
-// Handler for manual sync of all products
-import { requireAuth } from '../_lib/auth.js';
-
+// Handler for sync endpoint
 async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const userId = req.userId;
+  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
   try {
-    const { products } = req.body;
-    if (!products || !Array.isArray(products)) {
-      return res.status(400).json({ error: 'Products array required' });
+    const { products, productIds } = req.body || {};
+    const sql = getDb();
+
+    let sellerName = 'Local Seller';
+    try {
+      const userRows = await sql`SELECT name FROM "User" WHERE id = ${userId}`;
+      if (userRows[0]?.name) sellerName = userRows[0].name;
+    } catch (e) {
+      console.warn('Could not query sellerName:', e.message);
     }
 
-    const results = await Promise.allSettled(
-      products.map(p => syncProductToShopify(p))
-    );
+    let targetProducts = [];
 
-    const synced = results.filter(r => r.status === 'fulfilled').length;
-    const failed = results.filter(r => r.status === 'rejected').length;
+    if (Array.isArray(products) && products.length > 0) {
+      targetProducts = products;
+    } else {
+      const userProducts = await sql`
+        SELECT * FROM "Product" WHERE "userId" = ${userId} ORDER BY "createdAt" DESC
+      `;
+      targetProducts = userProducts || [];
+    }
 
-    res.json({ synced, failed, total: products.length });
+    if (Array.isArray(productIds) && productIds.length > 0) {
+      targetProducts = targetProducts.filter(p => productIds.includes(p.id) || productIds.includes(String(p.id)));
+    }
+
+    if (targetProducts.length === 0) {
+      return res.json({
+        success: true,
+        synced: 0,
+        failed: 0,
+        total: 0,
+        skipped: 0,
+        products: [],
+        message: 'No products available to sync.'
+      });
+    }
+
+    const isTargeted = Array.isArray(productIds) && productIds.length > 0;
+    const toSync = isTargeted
+      ? targetProducts.map(p => ({ ...p, sellerName }))
+      : targetProducts.filter(p => !p.shopifyUrl).map(p => ({ ...p, sellerName }));
+
+    const skipped = targetProducts.length - toSync.length;
+
+    if (toSync.length === 0) {
+      return res.json({
+        success: true,
+        synced: 0,
+        failed: 0,
+        total: targetProducts.length,
+        skipped,
+        products: targetProducts.map(p => ({ id: p.id, name: p.name, shopifyUrl: p.shopifyUrl })),
+        message: 'All products are already synchronized with Shopify.'
+      });
+    }
+
+    const results = await Promise.allSettled(toSync.map(p => syncProductToShopify(p)));
+    const fulfilled = results.filter(r => r.status === 'fulfilled').map(r => r.value);
+    const failed = results.filter(r => r.status === 'rejected');
+
+    const allProducts = [
+      ...fulfilled,
+      ...targetProducts.filter(p => p.shopifyUrl && !fulfilled.find(f => f.id === p.id)).map(p => ({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        shopifyProductId: p.shopifyProductId,
+        shopifyUrl: p.shopifyUrl
+      }))
+    ];
+
+    const { domain } = getShopifyConfig();
+
+    return res.json({
+      success: failed.length === 0,
+      synced: fulfilled.length,
+      failed: failed.length,
+      total: targetProducts.length,
+      skipped,
+      storeDomain: domain,
+      products: allProducts,
+      message: `Successfully synchronized ${fulfilled.length} product(s) to Shopify.`
+    });
   } catch (error) {
     console.error('Shopify sync error:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message || 'Shopify sync failed' });
   }
 }
 

@@ -380,7 +380,7 @@ function SellerChannelHub() {
   const syncToShopify = async () => {
     setShopifySync({ loading: true, result: null, data: null, error: null });
     try {
-      const response = await shopifyApi.sync();
+      const response = await shopifyApi.sync(null, products);
       setShopifySync({ 
         loading: false, 
         result: response.data?.message || 'Shopify storefront synchronized successfully.',
