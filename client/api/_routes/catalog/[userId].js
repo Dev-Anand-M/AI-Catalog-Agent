@@ -26,15 +26,26 @@ export default async function handler(req, res) {
     const user = userResult[0];
     const payment = paymentResult[0];
 
+    const upiData = payment?.upiData 
+      ? (typeof payment.upiData === 'string' ? JSON.parse(payment.upiData) : payment.upiData) 
+      : [];
+    const bankAccount = payment?.bankAccount 
+      ? (typeof payment.bankAccount === 'string' ? JSON.parse(payment.bankAccount) : payment.bankAccount) 
+      : null;
+
+    const paymentObj = payment ? {
+      upi: Array.isArray(upiData) ? upiData.filter(u => u && u.upiId) : [],
+      bank: bankAccount && (bankAccount.accountNumber || bankAccount.ifsc || bankAccount.accountName || bankAccount.bankName) ? bankAccount : null,
+      qr: payment.qrCodeUrl || null,
+      phone: user.phone || payment.phoneNumber || null
+    } : (user.phone ? { upi: [], bank: null, qr: null, phone: user.phone } : null);
+
     res.json({
+      seller: { id: user.id, name: user.name },
       user: { id: user.id, name: user.name },
       products,
-      paymentSettings: payment ? {
-        upiData: payment.upiData ? JSON.parse(payment.upiData) : [],
-        bankAccount: payment.bankAccount ? JSON.parse(payment.bankAccount) : null,
-        qrCodeUrl: payment.qrCodeUrl,
-        phoneNumber: payment.phoneNumber || null
-      } : null
+      payment: paymentObj,
+      paymentSettings: paymentObj
     });
   } catch (error) {
     console.error('Catalog error:', error.message);

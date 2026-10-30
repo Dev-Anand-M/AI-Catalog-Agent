@@ -34,15 +34,19 @@ router.get('/:userId', async (req, res) => {
       const upiData = paymentSettings.upiData 
         ? (typeof paymentSettings.upiData === 'string' ? JSON.parse(paymentSettings.upiData) : paymentSettings.upiData) 
         : [];
+      const bankAccount = paymentSettings.bankAccount
+        ? (typeof paymentSettings.bankAccount === 'string' ? JSON.parse(paymentSettings.bankAccount) : paymentSettings.bankAccount)
+        : null;
       payment = {
         upi: Array.isArray(upiData) ? upiData.filter(u => u && u.upiId) : [],
-        qr: paymentSettings.qrCodeUrl,
+        bank: bankAccount && (bankAccount.accountNumber || bankAccount.ifsc || bankAccount.accountName || bankAccount.bankName) ? bankAccount : null,
+        qr: paymentSettings.qrCodeUrl || null,
         // The buyer's "Order on WhatsApp" button needs a real destination.
         phone: user.phone || paymentSettings.phoneNumber || null
       };
     } else if (user.phone) {
       // No payment row yet, but the seller may still have a WhatsApp number.
-      payment = { upi: [], qr: null, phone: user.phone };
+      payment = { upi: [], bank: null, qr: null, phone: user.phone };
     }
 
     res.json({

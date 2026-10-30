@@ -8,11 +8,14 @@ import {
   QrCode, 
   X, 
   MessageCircle, 
-  ShoppingBag,
-  Search,
-  CheckCircle2,
-  ExternalLink,
-  CreditCard
+  ShoppingBag, 
+  Search, 
+  CheckCircle2, 
+  ExternalLink, 
+  CreditCard,
+  Building2,
+  Copy,
+  Check
 } from 'lucide-react';
 import { catalogApi } from '../api/client';
 import { Container } from '../components/layout';
@@ -30,6 +33,8 @@ export function PublicCatalog() {
   const [copied, setCopied] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentTab, setPaymentTab] = useState('upi');
+  const [copiedPaymentField, setCopiedPaymentField] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
 
@@ -43,11 +48,27 @@ export function PublicCatalog() {
       const response = await catalogApi.get(userId);
       const data = response.data;
       
+      const rawPayment = data.payment || data.paymentSettings || null;
+      const normalizedPayment = rawPayment ? {
+        upi: rawPayment.upi || rawPayment.upiData || [],
+        bank: rawPayment.bank || rawPayment.bankAccount || null,
+        qr: rawPayment.qr || rawPayment.qrCodeUrl || null,
+        phone: rawPayment.phone || rawPayment.phoneNumber || null
+      } : null;
+
       setCatalog({
         seller: data.seller || data.user || { name: 'Artisan Store' },
         products: data.products || [],
-        payment: data.payment || null
+        payment: normalizedPayment
       });
+
+      if (normalizedPayment?.upi && normalizedPayment.upi.length > 0) {
+        setPaymentTab('upi');
+      } else if (normalizedPayment?.qr) {
+        setPaymentTab('qr');
+      } else if (normalizedPayment?.bank) {
+        setPaymentTab('bank');
+      }
     } catch (err) {
       setError(err.response?.data?.error || t('catalog_not_found'));
     } finally {
@@ -378,54 +399,241 @@ export function PublicCatalog() {
         </div>
       )}
 
-      {/* Payment Information Modal — the panel is free to grow past the viewport;
-          the overlay scrolls, so the whole UPI list stays reachable. */}
+      {/* Payment Information Modal */}
       {showPaymentModal && catalog.payment && (
         <div className="modal-overlay" onClick={() => setShowPaymentModal(false)}>
           <div className="modal-overlay-inner">
-          <div
-            className="modal-panel max-w-md p-5 space-y-4"
-            role="dialog"
-            aria-modal="true"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-emerald-600" />
-                {t('payment_info_modal')}
-              </h3>
-              <button onClick={() => setShowPaymentModal(false)} className="p-1 text-slate-400 hover:text-slate-600">
-                <X className="w-5 h-5" />
+            <div
+              className="modal-panel max-w-md p-5 space-y-4"
+              role="dialog"
+              aria-modal="true"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+                  <CreditCard className="w-5 h-5 text-emerald-600" />
+                  {t('payment_info_modal') || 'Payment Options'}
+                </h3>
+                <button 
+                  onClick={() => setShowPaymentModal(false)} 
+                  className="p-1 text-slate-400 hover:text-slate-600 rounded-md"
+                  aria-label={t('close', 'Close')}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Payment Method Tabs */}
+              <div className="grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-xl text-xs font-semibold">
+                <button
+                  type="button"
+                  onClick={() => setPaymentTab('upi')}
+                  className={`py-2 px-2 rounded-lg flex items-center justify-center gap-1.5 transition-all ${
+                    paymentTab === 'upi'
+                      ? 'bg-white text-emerald-800 shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Smartphone className="w-3.5 h-3.5" />
+                  <span>UPI</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPaymentTab('qr')}
+                  className={`py-2 px-2 rounded-lg flex items-center justify-center gap-1.5 transition-all ${
+                    paymentTab === 'qr'
+                      ? 'bg-white text-emerald-800 shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <QrCode className="w-3.5 h-3.5" />
+                  <span>QR Code</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPaymentTab('bank')}
+                  className={`py-2 px-2 rounded-lg flex items-center justify-center gap-1.5 transition-all ${
+                    paymentTab === 'bank'
+                      ? 'bg-white text-emerald-800 shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Building2 className="w-3.5 h-3.5" />
+                  <span>Bank</span>
+                </button>
+              </div>
+
+              {/* TAB 1: UPI */}
+              {paymentTab === 'upi' && (
+                <div className="space-y-3">
+                  {catalog.payment.upi && catalog.payment.upi.length > 0 ? (
+                    <div className="space-y-2">
+                      {catalog.payment.upi.map((u, i) => (
+                        <div key={i} className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-2 text-xs">
+                          <div className="min-w-0 flex-1">
+                            <span className="font-bold font-mono text-slate-900 block truncate">{u.upiId}</span>
+                            <span className="text-[11px] text-slate-500 block truncate">{u.name || catalog.seller.name || 'Merchant'}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText(u.upiId);
+                                setCopiedPaymentField(`upi-${i}`);
+                                setTimeout(() => setCopiedPaymentField(null), 2000);
+                              }}
+                              className="px-2.5 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-medium rounded-lg text-xs flex items-center gap-1 transition-colors"
+                            >
+                              {copiedPaymentField === `upi-${i}` ? (
+                                <>
+                                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                  <span className="text-emerald-700">Copied</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="w-3.5 h-3.5 text-slate-500" />
+                                  <span>Copy</span>
+                                </>
+                              )}
+                            </button>
+                            <a
+                              href={`upi://pay?pa=${encodeURIComponent(u.upiId)}&pn=${encodeURIComponent(u.name || catalog.seller.name || 'Merchant')}&cu=INR`}
+                              className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-xs transition-colors"
+                            >
+                              Pay
+                            </a>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-6 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-slate-500 text-xs">
+                      No UPI ID configured by merchant.
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* TAB 2: QR Code */}
+              {paymentTab === 'qr' && (
+                <div className="space-y-3">
+                  {(() => {
+                    const qrSrc = catalog.payment.qr || (
+                      catalog.payment.upi && catalog.payment.upi[0]?.upiId
+                        ? `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(`upi://pay?pa=${catalog.payment.upi[0].upiId}&pn=${encodeURIComponent(catalog.payment.upi[0].name || catalog.seller.name || 'Merchant')}&cu=INR`)}`
+                        : null
+                    );
+
+                    if (qrSrc) {
+                      return (
+                        <div className="text-center p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                          <p className="text-xs font-semibold text-slate-700">
+                            {catalog.payment.qr ? (t('scan_pay') || 'Scan QR to Pay via Any UPI App') : 'Scan to Pay via Any UPI App'}
+                          </p>
+                          <div className="w-48 h-48 mx-auto bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs flex items-center justify-center">
+                            <img
+                              src={qrSrc}
+                              alt="UPI Payment QR"
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                          <p className="text-[11px] text-slate-500">
+                            Google Pay • PhonePe • Paytm • BHIM
+                          </p>
+                          {catalog.payment.upi?.[0]?.upiId && (
+                            <p className="text-xs font-mono font-bold text-slate-700">
+                              UPI: {catalog.payment.upi[0].upiId}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div className="text-center py-6 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-slate-500 text-xs">
+                        No QR code or UPI ID available yet.
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* TAB 3: Bank Transfer */}
+              {paymentTab === 'bank' && (
+                <div className="space-y-3">
+                  {catalog.payment.bank && (catalog.payment.bank.accountNumber || catalog.payment.bank.ifsc || catalog.payment.bank.accountName || catalog.payment.bank.bankName) ? (
+                    <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5 text-xs">
+                      {catalog.payment.bank.bankName && (
+                        <div className="flex justify-between items-center pb-2 border-b border-slate-200/80">
+                          <span className="text-slate-500 font-medium">Bank Name</span>
+                          <span className="font-semibold text-slate-900">{catalog.payment.bank.bankName}</span>
+                        </div>
+                      )}
+                      {catalog.payment.bank.accountName && (
+                        <div className="flex justify-between items-center pb-2 border-b border-slate-200/80">
+                          <span className="text-slate-500 font-medium">Account Name</span>
+                          <span className="font-semibold text-slate-900">{catalog.payment.bank.accountName}</span>
+                        </div>
+                      )}
+                      {catalog.payment.bank.accountNumber && (
+                        <div className="flex justify-between items-center pb-2 border-b border-slate-200/80">
+                          <span className="text-slate-500 font-medium">Account Number</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-mono font-bold text-slate-900">{catalog.payment.bank.accountNumber}</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText(catalog.payment.bank.accountNumber);
+                                setCopiedPaymentField('acc');
+                                setTimeout(() => setCopiedPaymentField(null), 2000);
+                              }}
+                              className="p-1 hover:bg-slate-200 rounded text-slate-500 transition-colors"
+                              title="Copy Account Number"
+                            >
+                              {copiedPaymentField === 'acc' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                      {catalog.payment.bank.ifsc && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-500 font-medium">IFSC Code</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-mono font-bold text-slate-900 uppercase">{catalog.payment.bank.ifsc}</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText(catalog.payment.bank.ifsc);
+                                setCopiedPaymentField('ifsc');
+                                setTimeout(() => setCopiedPaymentField(null), 2000);
+                              }}
+                              className="p-1 hover:bg-slate-200 rounded text-slate-500 transition-colors"
+                              title="Copy IFSC Code"
+                            >
+                              {copiedPaymentField === 'ifsc' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-6 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-slate-500 text-xs">
+                      No bank transfer details configured by merchant.
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setShowPaymentModal(false)}
+                className="w-full btn-secondary text-xs"
+              >
+                {t('close', 'Close')}
               </button>
             </div>
-
-            {catalog.payment.qr && (
-              <div className="text-center p-3 bg-slate-50 border border-slate-200 rounded-xl">
-                <p className="text-xs font-semibold text-slate-600 mb-2">{t('scan_pay') || 'Scan QR to Pay via Any UPI App'}</p>
-                <img src={catalog.payment.qr} alt="UPI QR" className="w-44 h-44 mx-auto object-contain bg-white p-2 rounded-lg border border-slate-200" />
-              </div>
-            )}
-
-            {catalog.payment.upi && catalog.payment.upi.length > 0 && (
-              <div className="space-y-2">
-                <span className="text-xs font-semibold text-slate-600">{t('upi')}</span>
-                {catalog.payment.upi.map((u, i) => (
-                  <div key={i} className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between text-xs">
-                    <span className="font-bold font-mono text-slate-900">{u.upiId}</span>
-                    <span className="text-slate-500">{u.name || 'Merchant'}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <button
-              type="button"
-              onClick={() => setShowPaymentModal(false)}
-              className="w-full btn-secondary text-xs"
-            >
-              {t('cancel')}
-            </button>
-          </div>
           </div>
         </div>
       )}
