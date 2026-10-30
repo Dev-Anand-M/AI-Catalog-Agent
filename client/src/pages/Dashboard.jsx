@@ -116,10 +116,29 @@ export function Dashboard() {
   const toggleConfirmStatus = async (product) => {
     const nextState = product.confirmationState === 'seller_confirmed' ? 'needs_review' : 'seller_confirmed';
     try {
-      await productsApi.update(product.id, {
+      const res = await productsApi.update(product.id, {
         confirmationState: nextState
       });
-      setProducts(prev => prev.map(p => p.id === product.id ? { ...p, confirmationState: nextState } : p));
+      const updated = res?.data || {};
+      setProducts(prev => prev.map(p => p.id === product.id ? { 
+        ...p, 
+        confirmationState: nextState,
+        ...(updated.shopifyUrl ? { shopifyUrl: updated.shopifyUrl, shopifyProductId: updated.shopifyProductId } : {})
+      } : p));
+
+      // If changed to confirmed and doesn't have a Shopify link yet, auto-sync it!
+      if (nextState === 'seller_confirmed' && !product.shopifyUrl && !updated.shopifyUrl) {
+        shopifyApi.sync([product.id]).then(syncRes => {
+          const syncedItem = syncRes.data?.products?.find(sp => sp.id === product.id || String(sp.id) === String(product.id));
+          if (syncedItem?.shopifyUrl) {
+            setProducts(prev => prev.map(p => p.id === product.id ? {
+              ...p,
+              shopifyUrl: syncedItem.shopifyUrl,
+              shopifyProductId: syncedItem.shopifyProductId
+            } : p));
+          }
+        }).catch(e => console.warn('Shopify sync on confirmation failed:', e.message));
+      }
     } catch (err) {
       console.error('Failed to update confirmation status:', err);
     }

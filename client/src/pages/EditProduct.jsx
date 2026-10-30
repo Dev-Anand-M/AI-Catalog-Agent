@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { Container, Alert } from '../components/ui';
-import { productsApi, aiApi } from '../api/client';
+import { productsApi, aiApi, shopifyApi } from '../api/client';
 import { getCategoryOptions } from '../lib/categories';
 import { ImageStudioModal } from '../components/ImageStudioModal';
 import { PricingCalculatorModal } from '../components/PricingCalculatorModal';
@@ -159,6 +159,11 @@ export function EditProduct() {
         confirmationState: formData.confirmationState || 'seller_confirmed',
         costBreakdown: formData.costBreakdown
       });
+
+      // Automatically sync to Shopify if product is marked confirmed
+      if ((formData.confirmationState || 'seller_confirmed') === 'seller_confirmed') {
+        shopifyApi.sync([parseInt(id)]).catch(e => console.warn('Shopify sync on save failed:', e.message));
+      }
 
       setSuccess('Product changes updated successfully!');
       setTimeout(() => {

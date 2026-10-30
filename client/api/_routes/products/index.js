@@ -104,10 +104,12 @@ export default async function handler(req, res) {
       const userRows = await sql`SELECT name FROM "User" WHERE id = ${userId}`;
       const sellerName = userRows[0]?.name || 'Local Seller';
 
-      // Auto-sync to Shopify in background (don't block response)
-      syncProductToShopify({ ...newProduct, sellerName }).catch(err =>
-        console.error('Shopify auto-sync failed:', err.message)
-      );
+      // Auto-sync to Shopify in background only if seller_confirmed (don't block response)
+      if (newProduct.confirmationState === 'seller_confirmed') {
+        syncProductToShopify({ ...newProduct, sellerName }).catch(err =>
+          console.error('Shopify auto-sync failed:', err.message)
+        );
+      }
 
       return res.status(201).json(newProduct);
     }

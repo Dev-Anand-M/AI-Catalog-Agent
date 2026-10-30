@@ -1,6 +1,6 @@
 import { getDb } from '../_lib/db.js';
 import { getUserIdFromRequest } from '../_lib/auth.js';
-import { updateShopifyProduct } from '../shopify/sync.js';
+import { syncProductToShopify, updateShopifyProduct } from '../shopify/sync.js';
 import { formatProductRecord } from './index.js';
 
 export default async function handler(req, res) {
@@ -69,16 +69,30 @@ export default async function handler(req, res) {
       
       const updatedProduct = formatProductRecord(result[0]);
 
-      // If product has shopifyUrl, update it in Shopify
-      if (updatedProduct.shopifyUrl) {
+      // If product is confirmed, sync to Shopify (or update existing)
+      if (updatedProduct.confirmationState === 'seller_confirmed') {
         const userRows = await sql`SELECT name FROM "User" WHERE id = ${userId}`;
         const sellerName = userRows[0]?.name || 'Local Seller';
-        
-        try {
-          await updateShopifyProduct({ ...updatedProduct, sellerName });
-          console.log('Shopify product updated successfully:', updatedProduct.id);
-        } catch (err) {
-          console.error('Shopify update failed for product', updatedProduct.id, ':', err.message);
+
+        if (updatedProduct.shopifyUrl) {
+          try {
+            await updateShopifyProduct({ ...updatedProduct, sellerName });
+            console.log('Shopify product updated successfully:', updatedProduct.id);
+          } catch (err) {
+            console.error('Shopify update failed for product', updatedProduct.id, ':', err.message);
+          }
+        } else {
+          // Newly confirmed product: sync to Shopify!
+          try {
+            const synced = await syncProductToShopify({ ...updatedProduct, sellerName });
+            if (synced?.shopifyUrl) {
+              updatedProduct.shopifyUrl = synced.shopifyUrl;
+              updatedProduct.shopifyProductId = synced.shopifyProductId;
+            }
+            console.log('Shopify product auto-synced on confirmation:', updatedProduct.id);
+          } catch (err) {
+            console.error('Shopify sync on confirmation failed for product', updatedProduct.id, ':', err.message);
+          }
         }
       }
 
