@@ -15,7 +15,8 @@ import {
   CreditCard,
   Building2,
   Copy,
-  Check
+  Check,
+  Sparkles
 } from 'lucide-react';
 import { catalogApi } from '../api/client';
 import { Container } from '../components/layout';
@@ -181,8 +182,15 @@ export function PublicCatalog() {
             </div>
             
             <div>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200/80 mb-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> {t('verified_merchant')}
+              <div className="flex flex-wrap items-center justify-center gap-2 mb-2">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200/80">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> {t('verified_merchant')}
+                </span>
+                {(catalog?.seller?.name?.includes('Ramesh') || catalog?.seller?.id === 'demo-artisan-1' || catalog?.seller?.id === 1 || String(catalog?.seller?.id) === '1') && (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-900 border border-amber-300 shadow-2xs">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-600" /> Platform Showcase Storefront
+                  </span>
+                )}
               </div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">{catalog.seller.name || t('seller_name') || 'Artisan Store'}</h1>
               <p className="text-xs sm:text-sm text-gray-500 mt-1 max-w-lg mx-auto">

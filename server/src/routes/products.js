@@ -202,6 +202,26 @@ router.delete('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Product not found' });
     }
 
+    // Core showcase products are protected from deletion to preserve the demo showcase
+    const protectedIds = ['prod-1', 'prod-2', 'prod-3', '1', '2', '3', '42', '43', '44', '45', '46', '47', 42, 43, 44, 45, 46, 47];
+    const protectedNames = [
+      'terracotta chai kulhad',
+      'pure khadi handloom',
+      'sheesham wooden bowl',
+      'jaipur blue pottery',
+      'brass pooja diya',
+      'jute braided market tote'
+    ];
+    const isCoreShowcase = protectedIds.includes(String(req.params.id)) ||
+      protectedIds.includes(String(existing.id)) ||
+      (existing.name && protectedNames.some(pn => existing.name.toLowerCase().includes(pn)));
+
+    if (isCoreShowcase) {
+      return res.status(403).json({
+        error: 'Core showcase products are protected from deletion to preserve the demonstration catalog. You can add new products or click "Restore Showcase Defaults".'
+      });
+    }
+
     await db.deleteProduct(req.params.id, req.userId);
 
     logAudit({

@@ -219,6 +219,10 @@ router.post('/change-password', async (req, res) => {
     const user = await db.findUserById(decoded.userId);
     if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
+    if (user.email === 'demo@store.com' || user.id === 'demo-artisan-1') {
+      return res.status(403).json({ error: 'Password change is disabled for the public demo showcase account.' });
+    }
+
     const { currentPassword, newPassword } = req.body || {};
     if (!currentPassword || !newPassword) {
       return res.status(400).json({ error: 'Enter your current password and the new one' });

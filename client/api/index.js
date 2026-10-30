@@ -8,6 +8,7 @@ import handleAudit from './_routes/audit/index.js';
 import handleAuth from './_routes/auth/index.js';
 import handleCatalog from './_routes/catalog/[userId].js';
 import handleDemo from './_routes/demo/products.js';
+import handleDemoReset from './_routes/demo/reset.js';
 import handlePayment from './_routes/payment/index.js';
 import handleProducts from './_routes/products/index.js';
 import handleProductItem from './_routes/products/[id].js';
@@ -64,6 +65,9 @@ export default async function handler(req, res) {
     // Demo
     if (pathname === '/demo/products') {
       return handleDemo(req, res);
+    }
+    if (pathname === '/demo/reset') {
+      return handleDemoReset(req, res);
     }
 
     // Catalog public

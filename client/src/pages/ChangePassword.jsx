@@ -26,6 +26,7 @@ export function ChangePassword() {
   });
 
   const isFirstTime = !!user?.mustChangePassword;
+  const isDemoUser = user?.email === 'demo@store.com' || user?.id === 'demo-artisan-1';
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -101,6 +102,13 @@ export function ChangePassword() {
             </div>
           ) : (
             <>
+              {isDemoUser && (
+                <Alert
+                  type="warning"
+                  message="Password changes are disabled on this shared demonstration account (demo@store.com) to ensure other evaluators can continue testing."
+                  className="mb-6"
+                />
+              )}
               {error && <Alert type="error" message={error} className="mb-6" />}
 
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -160,7 +168,7 @@ export function ChangePassword() {
 
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || isDemoUser}
                   className="group w-full py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl text-sm shadow-sm transition-all flex items-center justify-center gap-2 min-h-[46px] disabled:opacity-60 mt-2"
                 >
                   {loading ? (

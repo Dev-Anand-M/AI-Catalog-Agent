@@ -100,6 +100,12 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'DELETE') {
+      const protectedIds = ['prod-1', 'prod-2', 'prod-3', '1', '2', '3', 1, 2, 3];
+      if (protectedIds.includes(productId) || protectedIds.includes(id)) {
+        return res.status(403).json({
+          error: 'Core showcase products are protected from deletion to preserve the demonstration catalog. You can add new products or click "Restore Showcase Defaults".'
+        });
+      }
       const result = await sql`
         DELETE FROM "Product" WHERE id = ${productId} AND "userId" = ${userId} RETURNING id
       `;

@@ -24,12 +24,14 @@ import {
   Layers,
   History,
   RefreshCw,
-  Loader2
+  Loader2,
+  RotateCcw,
+  Lock
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { Container, Alert } from '../components/ui';
-import { productsApi, auditApi } from '../api/client';
+import { productsApi, auditApi, demoApi } from '../api/client';
 import { CentralAssistantModal } from '../components/CentralAssistantModal';
 import { useShopifySync } from '../hooks/useShopifySync';
 import { getCategoryLabel, CategoryIcon, getCategoryColor } from '../lib/categories';
@@ -41,7 +43,29 @@ export function Dashboard() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [deleteId, setDeleteId] = useState(null);
+  const [resettingDemo, setResettingDemo] = useState(false);
+
+  const isDemoArtisan = user?.email === 'demo@store.com' || user?.id === 'demo-artisan-1' || String(user?.id) === '1' || user?.name?.includes('Ramesh');
+  const isProtectedProduct = (productOrId) => {
+    if (!productOrId) return false;
+    const id = typeof productOrId === 'object' ? productOrId.id : productOrId;
+    const name = typeof productOrId === 'object' 
+      ? (productOrId.name || '').toLowerCase() 
+      : ((products.find(p => String(p.id) === String(id))?.name || '').toLowerCase());
+    const protectedIds = ['prod-1', 'prod-2', 'prod-3', '1', '2', '3', '42', '43', '44', '45', '46', '47', 42, 43, 44, 45, 46, 47];
+    if (protectedIds.includes(String(id)) || protectedIds.includes(id)) return true;
+    if (name && (
+      name.includes('terracotta chai kulhad') ||
+      name.includes('pure khadi handloom') ||
+      name.includes('sheesham wooden bowl') ||
+      name.includes('jaipur blue pottery') ||
+      name.includes('brass pooja diya') ||
+      name.includes('jute braided market tote')
+    )) return true;
+    return false;
+  };
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
@@ -99,6 +123,10 @@ export function Dashboard() {
   };
 
   const handleDelete = async (id) => {
+    if (isProtectedProduct(id)) {
+      setError('Core showcase products are protected against deletion so other evaluators can experience the full catalog. You can create and delete new test items, or click "Restore Showcase Defaults" to reset.');
+      return;
+    }
     if (!window.confirm(t('confirm_delete') || 'Are you sure you want to delete this product?')) return;
 
     setDeleteId(id);
@@ -107,9 +135,29 @@ export function Dashboard() {
       setProducts(prev => prev.filter(p => p.id !== id));
     } catch (err) {
       console.error('Delete product error:', err);
-      setError(t('error_generic') || 'Could not delete product');
+      setError(err.response?.data?.error || t('error_generic') || 'Could not delete product');
     } finally {
       setDeleteId(null);
+    }
+  };
+
+  const handleResetDemoCatalog = async () => {
+    if (!window.confirm('Restore Ramesh Kumar\'s catalog and payment settings back to the pristine showcase defaults? This will remove newly added test items and reset default products.')) {
+      return;
+    }
+    setResettingDemo(true);
+    setError('');
+    setSuccess('');
+    try {
+      await demoApi.reset();
+      await fetchProducts();
+      setSuccess('Showcase catalog and payment details have been restored to defaults!');
+      setTimeout(() => setSuccess(''), 4000);
+    } catch (err) {
+      console.error('Failed to reset demo catalog:', err);
+      setError('Failed to restore showcase defaults. Please try again.');
+    } finally {
+      setResettingDemo(false);
     }
   };
 
@@ -368,6 +416,41 @@ export function Dashboard() {
               </Link>
             </div>
           </div>
+        )}
+
+        {isDemoArtisan && !isAdmin && (
+          <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 border border-amber-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="p-2.5 rounded-lg bg-amber-500/10 text-amber-800 border border-amber-300/60 shrink-0 mt-0.5 sm:mt-0">
+                <Sparkles className="w-5 h-5 text-amber-700" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm font-bold text-amber-950">Showcase Demonstration Store (Ramesh Kumar)</h2>
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-200 text-amber-900 border border-amber-300/80">LIVE PREVIEW</span>
+                </div>
+                <p className="text-xs text-amber-800/90 mt-1 leading-relaxed max-w-2xl">
+                  This is a public showcase account for evaluators and guests. Core artisanal items are protected from deletion. You can freely test adding new products, voice generation, and dynamic pricing. Click <strong>Restore Showcase Defaults</strong> anytime to reset the store.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+              <button
+                type="button"
+                onClick={handleResetDemoCatalog}
+                disabled={resettingDemo}
+                className="px-3.5 py-2 rounded-lg bg-white hover:bg-amber-100/70 text-xs font-semibold text-amber-900 border border-amber-300 shadow-2xs transition-all flex items-center gap-1.5 min-h-[36px] disabled:opacity-50"
+                title="Restore Ramesh Kumar's default products and payment settings"
+              >
+                <RotateCcw className={`w-3.5 h-3.5 text-amber-700 ${resettingDemo ? 'animate-spin' : ''}`} />
+                {resettingDemo ? 'Restoring...' : 'Restore Showcase Defaults'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {success && (
+          <Alert type="success" message={success} className="mb-6" onClose={() => setSuccess('')} />
         )}
 
         {error && (
@@ -665,10 +748,18 @@ export function Dashboard() {
                         type="button"
                         onClick={() => handleDelete(product.id)}
                         disabled={deleteId === product.id}
-                        className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 border border-gray-200 rounded-md transition-colors disabled:opacity-50 min-h-[36px] min-w-[36px] flex items-center justify-center"
-                        title={t('delete')}
+                        className={`p-1.5 border border-gray-200 rounded-md transition-colors disabled:opacity-50 min-h-[36px] min-w-[36px] flex items-center justify-center ${
+                          isProtectedProduct(product.id)
+                            ? 'text-amber-600 hover:text-amber-700 hover:bg-amber-50'
+                            : 'text-gray-400 hover:text-rose-600 hover:bg-rose-50'
+                        }`}
+                        title={isProtectedProduct(product.id) ? "Core showcase product (protected from deletion)" : t('delete')}
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        {isProtectedProduct(product.id) ? (
+                          <Lock className="w-3.5 h-3.5 text-amber-600" />
+                        ) : (
+                          <Trash2 className="w-3.5 h-3.5" />
+                        )}
                       </button>
                     </div>
                   </div>
@@ -774,9 +865,18 @@ export function Dashboard() {
                             <button
                               type="button"
                               onClick={() => handleDelete(product.id)}
-                              className="p-1 text-gray-400 hover:text-rose-600 rounded-md transition-colors"
+                              className={`p-1 rounded-md transition-colors ${
+                                isProtectedProduct(product.id)
+                                  ? 'text-amber-600 hover:text-amber-700 hover:bg-amber-50'
+                                  : 'text-gray-400 hover:text-rose-600'
+                              }`}
+                              title={isProtectedProduct(product.id) ? "Core showcase product (protected from deletion)" : t('delete')}
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              {isProtectedProduct(product.id) ? (
+                                <Lock className="w-3.5 h-3.5 text-amber-600" />
+                              ) : (
+                                <Trash2 className="w-3.5 h-3.5" />
+                              )}
                             </button>
                           </div>
                           )}

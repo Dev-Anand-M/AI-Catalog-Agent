@@ -406,11 +406,11 @@ export function AddProduct() {
                 {/* Trust Status Selector */}
                 <div className="p-3 bg-gray-50 border border-gray-200/80 rounded-md space-y-2">
                   <span className="text-[11px] font-semibold tracking-normal text-gray-600 block">{t('seller_verification_state')}</span>
-                  <div className="flex gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     <button
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, confirmationState: 'seller_confirmed' }))}
-                      className={`flex-1 py-1.5 px-3 rounded-md text-xs font-medium border transition-all flex items-center justify-center gap-1.5 min-h-[38px] ${
+                      className={`py-1.5 px-2.5 rounded-md text-xs font-medium border transition-all flex items-center justify-center gap-1 min-h-[38px] ${
                         formData.confirmationState === 'seller_confirmed'
                           ? 'bg-primary-600 text-white border-primary-600 shadow-2xs'
                           : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
@@ -420,8 +420,19 @@ export function AddProduct() {
                     </button>
                     <button
                       type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, confirmationState: 'ai_suggested' }))}
+                      className={`py-1.5 px-2.5 rounded-md text-xs font-medium border transition-all flex items-center justify-center gap-1 min-h-[38px] ${
+                        formData.confirmationState === 'ai_suggested'
+                          ? 'bg-primary-600 text-white border-primary-600 shadow-2xs'
+                          : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+                      }`}
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-purple-300" /> {t('ai_suggested_items')}
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => setFormData(prev => ({ ...prev, confirmationState: 'needs_review' }))}
-                      className={`flex-1 py-1.5 px-3 rounded-md text-xs font-medium border transition-all flex items-center justify-center gap-1.5 min-h-[38px] ${
+                      className={`py-1.5 px-2.5 rounded-md text-xs font-medium border transition-all flex items-center justify-center gap-1 min-h-[38px] ${
                         formData.confirmationState === 'needs_review'
                           ? 'bg-primary-600 text-white border-primary-600 shadow-2xs'
                           : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'

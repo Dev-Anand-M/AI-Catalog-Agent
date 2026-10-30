@@ -84,7 +84,8 @@ export const productsApi = {
 
 // Demo API
 export const demoApi = {
-  getProducts: () => api.get('/demo/products')
+  getProducts: () => api.get('/demo/products'),
+  reset: () => api.post('/demo/reset')
 };
 
 // Public Catalog API (shareable links - no auth required)
