@@ -77,25 +77,31 @@ export function PaymentSettings() {
     });
   };
 
-  const handleQrUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPaymentMethods({ ...paymentMethods, qr: reader.result });
-      };
-      reader.readAsDataURL(file);
-    }
+  const isValidUpi = (val) => {
+    if (!val || typeof val !== 'string') return false;
+    return /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(val.trim());
   };
 
   const handleSave = async () => {
     setSaving(true);
     setError('');
+
+    // Ensure all non-empty UPI IDs are in valid format
+    for (let i = 0; i < paymentMethods.upi.length; i++) {
+      const upi = paymentMethods.upi[i];
+      const trimmed = (upi.upiId || '').trim();
+      if (trimmed && !isValidUpi(trimmed)) {
+        setError(`"${trimmed}" is not a valid UPI ID. Format must be username@bank (e.g. 9876543210@paytm or artisan@okhdfcbank).`);
+        setSaving(false);
+        return;
+      }
+    }
+
     try {
       await paymentApi.save({
-        upi: paymentMethods.upi,
+        upi: paymentMethods.upi.filter(u => (u.upiId || '').trim()),
         bank: paymentMethods.bank,
-        qr: paymentMethods.qr,
+        qr: null,
         phoneNumber: phoneNumber
       });
       setSaved(true);
@@ -109,9 +115,8 @@ export function PaymentSettings() {
   };
 
   const tabs = [
-    { id: 'upi', label: t('upi'), icon: Smartphone },
-    { id: 'bank', label: t('bank_account'), icon: Building2 },
-    { id: 'qr', label: t('qr_code'), icon: QrCode },
+    { id: 'upi', label: 'UPI & QR Code', icon: Smartphone },
+    { id: 'bank', label: t('bank_account') || 'Bank Account', icon: Building2 },
   ];
 
   return (
@@ -199,54 +204,79 @@ export function PaymentSettings() {
               })}
             </div>
 
-            {/* UPI Tab */}
+            {/* UPI & QR Code Integrated Tab */}
             {activeTab === 'upi' && (
               <div className="merchant-card p-5 mb-5 space-y-4">
                 <div>
-                  <h3 className="font-semibold text-gray-900 text-sm">{t('upi_id')} ({t('direct_upi_pay')})</h3>
-                  <p className="text-xs text-gray-500 mt-0.5">{t('upi_sub')}</p>
+                  <h3 className="font-semibold text-gray-900 text-sm">{t('upi_id', 'UPI ID & Storefront QR Code')}</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Enter your UPI handle (Google Pay, PhonePe, Paytm, BHIM). A verified QR code is automatically generated for your catalog storefront.
+                  </p>
                 </div>
 
                 <div className="space-y-3">
-                  {paymentMethods.upi.map((upi, index) => (
-                    <div key={upi.id} className="p-3.5 bg-gray-50/70 rounded-md border border-gray-200/80 space-y-2.5">
-                      <div className="flex justify-between items-center">
-                        <span className="text-[11px] font-semibold tracking-normal text-gray-500">{t('upi')} #{index + 1}</span>
-                        {paymentMethods.upi.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeUpi(index)}
-                            className="text-rose-600 hover:text-rose-700 text-xs font-medium flex items-center gap-1 p-1"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                            <span>{t('remove') || 'Remove'}</span>
-                          </button>
-                        )}
-                      </div>
-                      <div className="grid sm:grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-600 mb-1">{t('upi_id') || 'UPI ID / VPA'}</label>
-                          <input
-                            type="text"
-                            value={upi.upiId}
-                            onChange={(e) => handleUpiChange(index, 'upiId', e.target.value)}
-                            placeholder="merchant@okhdfcbank"
-                            className="w-full px-3 py-2 rounded-md border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-600 min-h-[40px]"
-                          />
+                  {paymentMethods.upi.map((upi, index) => {
+                    const trimmed = (upi.upiId || '').trim();
+                    const hasInput = trimmed.length > 0;
+                    const isUpiValid = hasInput && isValidUpi(trimmed);
+
+                    return (
+                      <div key={upi.id} className="p-3.5 bg-gray-50/70 rounded-md border border-gray-200/80 space-y-2.5">
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] font-semibold tracking-normal text-gray-500">UPI Handle #{index + 1}</span>
+                            {hasInput && (
+                              isUpiValid ? (
+                                <span className="text-[10px] text-emerald-700 font-semibold flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                                  <CheckCircle className="w-3 h-3 text-emerald-600" /> Valid UPI
+                                </span>
+                              ) : (
+                                <span className="text-[10px] text-amber-700 font-medium bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                                  Must be username@bank (e.g. 9876543210@paytm)
+                                </span>
+                              )
+                            )}
+                          </div>
+                          {paymentMethods.upi.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeUpi(index)}
+                              className="text-rose-600 hover:text-rose-700 text-xs font-medium flex items-center gap-1 p-1"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span>{t('remove') || 'Remove'}</span>
+                            </button>
+                          )}
                         </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-600 mb-1">{t('upi_name') || 'Payee Name'}</label>
-                          <input
-                            type="text"
-                            value={upi.name}
-                            onChange={(e) => handleUpiChange(index, 'name', e.target.value)}
-                            placeholder="Store or Artisan Name"
-                            className="w-full px-3 py-2 rounded-md border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-600 min-h-[40px]"
-                          />
+                        <div className="grid sm:grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-600 mb-1">{t('upi_id') || 'UPI ID / VPA'}</label>
+                            <input
+                              type="text"
+                              value={upi.upiId}
+                              onChange={(e) => handleUpiChange(index, 'upiId', e.target.value)}
+                              placeholder="e.g. 9876543210@paytm or artisan@okhdfcbank"
+                              className={`w-full px-3 py-2 rounded-md border text-sm text-gray-900 focus:outline-none min-h-[40px] ${
+                                hasInput && !isUpiValid
+                                  ? 'border-amber-300 focus:ring-1 focus:ring-amber-500 bg-amber-50/20'
+                                  : 'border-gray-200 focus:ring-1 focus:ring-primary-500 focus:border-primary-600'
+                              }`}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-600 mb-1">{t('upi_name') || 'Payee Name'}</label>
+                            <input
+                              type="text"
+                              value={upi.name}
+                              onChange={(e) => handleUpiChange(index, 'name', e.target.value)}
+                              placeholder="Store or Artisan Name"
+                              className="w-full px-3 py-2 rounded-md border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-600 min-h-[40px]"
+                            />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
 
                   <button
                     type="button"
@@ -256,6 +286,42 @@ export function PaymentSettings() {
                     <Plus className="w-3.5 h-3.5" />
                     <span>{t('add_upi') || '+ Add Another UPI ID'}</span>
                   </button>
+
+                  {/* Live Auto-Generated QR Code Preview */}
+                  {(() => {
+                    const primaryValidUpi = paymentMethods.upi.find(u => isValidUpi(u.upiId));
+                    if (primaryValidUpi) {
+                      const qrDataUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(`upi://pay?pa=${primaryValidUpi.upiId.trim()}&pn=${encodeURIComponent(primaryValidUpi.name || 'Merchant')}&cu=INR`)}`;
+                      return (
+                        <div className="mt-4 p-4 bg-emerald-50/60 border border-emerald-200/90 rounded-xl flex flex-col sm:flex-row items-center gap-4">
+                          <div className="w-36 h-36 bg-white p-2 rounded-lg border border-emerald-200 shadow-2xs flex-shrink-0 flex items-center justify-center">
+                            <img
+                              src={qrDataUrl}
+                              alt="Live Generated UPI QR Code"
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                          <div className="space-y-1.5 text-center sm:text-left">
+                            <div className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full">
+                              <CheckCircle className="w-3 h-3 text-emerald-600" /> Live Storefront QR Preview
+                            </div>
+                            <h4 className="text-sm font-semibold text-gray-900">
+                              Auto-Generated from <span className="font-mono text-emerald-800">{primaryValidUpi.upiId.trim()}</span>
+                            </h4>
+                            <p className="text-xs text-gray-600 leading-relaxed">
+                              When customers browse your digital catalog, this QR code will be displayed automatically. Any customer can scan this using Google Pay, PhonePe, Paytm, or BHIM.
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return (
+                      <div className="mt-4 p-4 bg-gray-50 border border-dashed border-gray-300 rounded-xl flex items-center justify-center gap-3 text-gray-500 text-xs">
+                        <QrCode className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                        <span>Enter a valid UPI handle above to generate your live storefront QR code.</span>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             )}
@@ -311,49 +377,6 @@ export function PaymentSettings() {
                       />
                     </div>
                   </div>
-                </div>
-              </div>
-            )}
-
-            {/* QR Tab */}
-            {activeTab === 'qr' && (
-              <div className="merchant-card p-5 mb-5">
-                <div className="text-center">
-                  {paymentMethods.qr ? (
-                    <div className="space-y-3">
-                      <div className="p-3 bg-gray-50 border border-gray-200/80 rounded-md inline-block max-w-xs mx-auto">
-                        <img
-                          src={paymentMethods.qr}
-                          alt="Payment QR Code"
-                          className="max-w-[200px] max-h-[200px] mx-auto rounded"
-                        />
-                      </div>
-                      <div>
-                        <button
-                          type="button"
-                          onClick={() => setPaymentMethods({ ...paymentMethods, qr: null })}
-                          className="text-rose-600 hover:text-rose-700 text-xs font-medium inline-flex items-center gap-1 min-h-[36px]"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                          <span>{t('remove') || 'Remove this QR code'}</span>
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <label className="block cursor-pointer">
-                      <div className="py-10 px-6 border border-dashed border-gray-300 rounded-md hover:border-gray-400 hover:bg-gray-50 transition-colors">
-                        <QrCode className="w-10 h-10 mx-auto text-gray-400 mb-2" />
-                        <p className="text-xs font-semibold text-gray-700">{t('upload_qr') || 'Upload Store QR Code (PhonePe, GPay, Paytm)'}</p>
-                        <p className="text-[11px] text-gray-400 mt-0.5">PNG or JPG up to 5MB</p>
-                      </div>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleQrUpload}
-                        className="hidden"
-                      />
-                    </label>
-                  )}
                 </div>
               </div>
             )}

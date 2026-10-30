@@ -424,7 +424,7 @@ export function PublicCatalog() {
               </div>
 
               {/* Payment Method Tabs */}
-              <div className="grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-xl text-xs font-semibold">
+              <div className="grid grid-cols-2 gap-1 bg-slate-100 p-1 rounded-xl text-xs font-semibold">
                 <button
                   type="button"
                   onClick={() => setPaymentTab('upi')}
@@ -435,20 +435,7 @@ export function PublicCatalog() {
                   }`}
                 >
                   <Smartphone className="w-3.5 h-3.5" />
-                  <span>UPI</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setPaymentTab('qr')}
-                  className={`py-2 px-2 rounded-lg flex items-center justify-center gap-1.5 transition-all ${
-                    paymentTab === 'qr'
-                      ? 'bg-white text-emerald-800 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  <QrCode className="w-3.5 h-3.5" />
-                  <span>QR Code</span>
+                  <span>UPI & QR Code</span>
                 </button>
 
                 <button
@@ -461,102 +448,83 @@ export function PublicCatalog() {
                   }`}
                 >
                   <Building2 className="w-3.5 h-3.5" />
-                  <span>Bank</span>
+                  <span>Bank Transfer</span>
                 </button>
               </div>
 
-              {/* TAB 1: UPI */}
+              {/* TAB 1: UPI & QR Code */}
               {paymentTab === 'upi' && (
-                <div className="space-y-3">
+                <div className="space-y-3.5">
                   {catalog.payment.upi && catalog.payment.upi.length > 0 ? (
-                    <div className="space-y-2">
-                      {catalog.payment.upi.map((u, i) => (
-                        <div key={i} className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-2 text-xs">
-                          <div className="min-w-0 flex-1">
-                            <span className="font-bold font-mono text-slate-900 block truncate">{u.upiId}</span>
-                            <span className="text-[11px] text-slate-500 block truncate">{u.name || catalog.seller.name || 'Merchant'}</span>
+                    <>
+                      {/* Auto-Generated QR Code for Primary UPI */}
+                      {(() => {
+                        const primaryUpi = catalog.payment.upi[0];
+                        const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(`upi://pay?pa=${primaryUpi.upiId}&pn=${encodeURIComponent(primaryUpi.name || catalog.seller.name || 'Merchant')}&cu=INR`)}`;
+                        return (
+                          <div className="text-center p-3.5 bg-slate-50 border border-slate-200/90 rounded-xl space-y-2.5">
+                            <div className="w-44 h-44 mx-auto bg-white p-2 rounded-lg border border-slate-200 shadow-2xs flex items-center justify-center">
+                              <img
+                                src={qrSrc}
+                                alt="UPI Payment QR"
+                                className="w-full h-full object-contain"
+                              />
+                            </div>
+                            <div className="space-y-0.5">
+                              <p className="text-xs font-semibold text-slate-800">Scan to Pay via Any UPI App</p>
+                              <p className="text-[11px] text-slate-500">Google Pay • PhonePe • Paytm • BHIM • Banking UPI</p>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-1.5 flex-shrink-0">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                navigator.clipboard.writeText(u.upiId);
-                                setCopiedPaymentField(`upi-${i}`);
-                                setTimeout(() => setCopiedPaymentField(null), 2000);
-                              }}
-                              className="px-2.5 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-medium rounded-lg text-xs flex items-center gap-1 transition-colors"
-                            >
-                              {copiedPaymentField === `upi-${i}` ? (
-                                <>
-                                  <Check className="w-3.5 h-3.5 text-emerald-600" />
-                                  <span className="text-emerald-700">Copied</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Copy className="w-3.5 h-3.5 text-slate-500" />
-                                  <span>Copy</span>
-                                </>
-                              )}
-                            </button>
-                            <a
-                              href={`upi://pay?pa=${encodeURIComponent(u.upiId)}&pn=${encodeURIComponent(u.name || catalog.seller.name || 'Merchant')}&cu=INR`}
-                              className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-xs transition-colors"
-                            >
-                              Pay
-                            </a>
+                        );
+                      })()}
+
+                      {/* UPI Handles list with Copy & Pay in App */}
+                      <div className="space-y-2">
+                        <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">UPI Handles</span>
+                        {catalog.payment.upi.map((u, i) => (
+                          <div key={i} className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-2 text-xs">
+                            <div className="min-w-0 flex-1">
+                              <span className="font-bold font-mono text-slate-900 block truncate">{u.upiId}</span>
+                              <span className="text-[11px] text-slate-500 block truncate">{u.name || catalog.seller.name || 'Merchant'}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 flex-shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(u.upiId);
+                                  setCopiedPaymentField(`upi-${i}`);
+                                  setTimeout(() => setCopiedPaymentField(null), 2000);
+                                }}
+                                className="px-2.5 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-medium rounded-lg text-xs flex items-center gap-1 transition-colors"
+                              >
+                                {copiedPaymentField === `upi-${i}` ? (
+                                  <>
+                                    <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                    <span className="text-emerald-700">Copied</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="w-3.5 h-3.5 text-slate-500" />
+                                    <span>Copy</span>
+                                  </>
+                                )}
+                              </button>
+                              <a
+                                href={`upi://pay?pa=${encodeURIComponent(u.upiId)}&pn=${encodeURIComponent(u.name || catalog.seller.name || 'Merchant')}&cu=INR`}
+                                className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-xs transition-colors"
+                              >
+                                Pay
+                              </a>
+                            </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    </>
                   ) : (
                     <div className="text-center py-6 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-slate-500 text-xs">
                       No UPI ID configured by merchant.
                     </div>
                   )}
-                </div>
-              )}
-
-              {/* TAB 2: QR Code */}
-              {paymentTab === 'qr' && (
-                <div className="space-y-3">
-                  {(() => {
-                    const qrSrc = catalog.payment.qr || (
-                      catalog.payment.upi && catalog.payment.upi[0]?.upiId
-                        ? `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(`upi://pay?pa=${catalog.payment.upi[0].upiId}&pn=${encodeURIComponent(catalog.payment.upi[0].name || catalog.seller.name || 'Merchant')}&cu=INR`)}`
-                        : null
-                    );
-
-                    if (qrSrc) {
-                      return (
-                        <div className="text-center p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
-                          <p className="text-xs font-semibold text-slate-700">
-                            {catalog.payment.qr ? (t('scan_pay') || 'Scan QR to Pay via Any UPI App') : 'Scan to Pay via Any UPI App'}
-                          </p>
-                          <div className="w-48 h-48 mx-auto bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs flex items-center justify-center">
-                            <img
-                              src={qrSrc}
-                              alt="UPI Payment QR"
-                              className="w-full h-full object-contain"
-                            />
-                          </div>
-                          <p className="text-[11px] text-slate-500">
-                            Google Pay • PhonePe • Paytm • BHIM
-                          </p>
-                          {catalog.payment.upi?.[0]?.upiId && (
-                            <p className="text-xs font-mono font-bold text-slate-700">
-                              UPI: {catalog.payment.upi[0].upiId}
-                            </p>
-                          )}
-                        </div>
-                      );
-                    }
-
-                    return (
-                      <div className="text-center py-6 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-slate-500 text-xs">
-                        No QR code or UPI ID available yet.
-                      </div>
-                    );
-                  })()}
                 </div>
               )}
 
