@@ -236,12 +236,41 @@ export default async function handler(req, res) {
       });
     }
 
+    // Helper to resolve confirmation state even if stored inside META comment
+    const getConfirmationState = (p) => {
+      if (p.confirmationState) return p.confirmationState;
+      const match = (p.description || '').match(/<!--META:([\s\S]*?)-->/);
+      if (match) {
+        try {
+          const meta = JSON.parse(match[1]);
+          if (meta.confirmationState) return meta.confirmationState;
+        } catch {}
+      }
+      return 'seller_confirmed';
+    };
+
+    // Filter out unverified/draft items: only confirmed items should sync to Shopify
+    const confirmedProducts = targetProducts.filter(p => getConfirmationState(p) !== 'needs_review');
+    const needsReviewSkipped = targetProducts.length - confirmedProducts.length;
+
+    if (confirmedProducts.length === 0) {
+      return res.json({
+        success: true,
+        synced: 0,
+        failed: 0,
+        total: targetProducts.length,
+        skipped: needsReviewSkipped,
+        products: [],
+        message: 'No confirmed products found. Products in "Needs Review" are skipped from Shopify sync.'
+      });
+    }
+
     // If specific productIds were requested, sync them even if they already have shopifyUrl.
     // If running a bulk sync without productIds, skip already synced ones.
     const isTargeted = Array.isArray(productIds) && productIds.length > 0;
     const toSync = isTargeted
-      ? targetProducts.map(p => ({ ...p, sellerName }))
-      : targetProducts.filter(p => !p.shopifyUrl).map(p => ({ ...p, sellerName }));
+      ? confirmedProducts.map(p => ({ ...p, sellerName }))
+      : confirmedProducts.filter(p => !p.shopifyUrl).map(p => ({ ...p, sellerName }));
 
     const skipped = targetProducts.length - toSync.length;
 
@@ -252,8 +281,8 @@ export default async function handler(req, res) {
         failed: 0,
         total: targetProducts.length,
         skipped,
-        products: targetProducts.map(p => ({ id: p.id, name: p.name, shopifyUrl: p.shopifyUrl })),
-        message: 'All products are already synchronized with Shopify.'
+        products: confirmedProducts.map(p => ({ id: p.id, name: p.name, shopifyUrl: p.shopifyUrl })),
+        message: 'All confirmed products are already synchronized with Shopify.'
       });
     }
 

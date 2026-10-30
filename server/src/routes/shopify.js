@@ -73,11 +73,24 @@ router.post('/sync', requireAuth, async (req, res) => {
       });
     }
 
+    // Filter out unverified/draft items: only confirmed items should sync to Shopify
+    const confirmedProducts = targetProducts
+      .map(formatProductRecord)
+      .filter(p => p.confirmationState !== 'needs_review');
+
+    if (confirmedProducts.length === 0) {
+      return res.json({
+        success: true,
+        message: 'No confirmed products found. Products in "Needs Review" are skipped from Shopify sync.',
+        storeDomain: domain,
+        syncedCount: 0,
+        products: []
+      });
+    }
+
     const syncedResults = [];
 
-    for (const rawProduct of targetProducts) {
-      // Strip the embedded metadata comment before it reaches Shopify.
-      const product = formatProductRecord(rawProduct);
+    for (const product of confirmedProducts) {
       const slug = (product.name || 'product')
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
